@@ -1,0 +1,236 @@
+[match] id=679 name="undefined" code="undefined"
+
+✅ Actualizado C:\Users\Daniel\Downloads\shopify-ia-app\variants-map.json
+Resumen:
+{
+  "Black": {
+    "2XL": {
+      "variant_id": 17008
+    },
+    "3XL": {
+      "variant_id": 17009
+    },
+    "4XL": {
+      "variant_id": 17080
+    },
+    "L": {
+      "variant_id": 17006
+    },
+    "M": {
+      "variant_id": 17005
+    },
+    "S": {
+      "variant_id": 17004
+    },
+    "XL": {
+      "variant_id": 17007
+    }
+  },
+  "Forest Green": {
+    "2XL": {
+      "variant_id": 17015
+    },
+    "3XL": {
+      "variant_id": 17016
+    },
+    "4XL": {
+      "variant_id": 17081
+    },
+    "L": {
+      "variant_id": 17013
+    },
+    "M": {
+      "variant_id": 17012
+    },
+    "S": {
+      "variant_id": 17011
+    },
+    "XL": {
+      "variant_id": 17014
+    }
+  },
+  "Graphite": {
+    "2XL": {
+      "variant_id": 17022
+    },
+    "3XL": {
+      "variant_id": 17023
+    },
+    "4XL": {
+      "variant_id": 17082
+    },
+    "L": {
+      "variant_id": 17020
+    },
+    "M": {
+      "variant_id": 17019
+    },
+    "S": {
+      "variant_id": 17018
+    },
+    "XL": {
+      "variant_id": 17021
+    }
+  },
+  "Navy": {
+    "2XL": {
+      "variant_id": 17029
+    },
+    "3XL": {
+      "variant_id": 17030
+    },
+    "4XL": {
+      "variant_id": 17083
+    },
+    "L": {
+      "variant_id": 17027
+    },
+    "M": {
+      "variant_id": 17026
+    },
+    "S": {
+      "variant_id": 17025
+    },
+    "XL": {
+      "variant_id": 17028
+    }
+  },
+  "Purple": {
+    "2XL": {
+      "variant_id": 17043
+    },
+    "3XL": {
+      "variant_id": 17044
+    },
+    "4XL": {
+      "variant_id": 17085
+    },
+    "L": {
+      "variant_id": 17041
+    },
+    "M": {
+      "variant_id": 17040
+    },
+    "S": {
+      "variant_id": 17039
+    },
+    "XL": {
+      "variant_id": 17042
+    }
+  },
+  "Royal": {
+    "2XL": {
+      "variant_id": 17050
+    },
+    "3XL": {
+      "variant_id": 17051
+    },
+    "4XL": {
+      "variant_id": 17086
+    },
+    "L": {
+      "variant_id": 17048
+    },
+    "M": {
+      "variant_id": 17047
+    },
+    "S": {
+      "variant_id": 17046
+    },
+    "XL": {
+      "variant_id": 17049
+    }
+  },
+  "Safety Orange": {
+    "2XL": {
+      "variant_id": 17078
+    },
+    "3XL": {
+      "variant_id": 17079
+    },
+    "4XL": {
+      "variant_id": 17090
+    },
+    "L": {
+      "variant_id": 17076
+    },
+    "M": {
+      "variant_id": 17075
+    },
+    "S": {
+      "variant_id": 17074
+    },
+    "XL": {
+      "variant_id": 17077
+    }
+  },
+  "Safety Yellow": {
+    "2XL": {
+      "variant_id": 17071
+    },
+    "3XL": {
+      "variant_id": 17072
+    },
+    "4XL": {
+      "variant_id": 17089
+    },
+    "L": {
+      "variant_id": 17069
+    },
+    "M": {
+      "variant_id": 17068
+    },
+    "S": {
+      "variant_id": 17067
+    },
+    "XL": {
+      "variant_id": 17070
+    }
+  },
+  "Silver": {
+    "2XL": {
+      "variant_id": 17064
+    },
+    "3XL": {
+      "variant_id": 17065
+    },
+    "4XL": {
+      "variant_id": 17088
+    },
+    "L": {
+      "variant_id": 17062
+    },
+    "M": {
+      "variant_id": 17061
+    },
+    "S": {
+      "variant_id": 17060
+    },
+    "XL": {
+      "variant_id": 17063
+    }
+  },
+  "White": {
+    "2XL": {
+      "variant_id": 17057
+    },
+    "3XL": {
+      "variant_id": 17058
+    },
+    "4XL": {
+      "variant_id": 17087
+    },
+    "L": {
+      "variant_id": 17055
+    },
+    "M": {
+      "variant_id": 17054
+    },
+    "S": {
+      "variant_id": 17053
+    },
+    "XL": {
+      "variant_id": 17056
+    }
+  }
+}

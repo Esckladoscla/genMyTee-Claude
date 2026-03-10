@@ -1,0 +1,15 @@
+// scripts/test-r2-upload.js
+import 'dotenv/config';
+import { uploadImageBuffer } from '../services/storage.js';
+
+const png1x1 = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HwAFgwJ3b9sJxQAAAABJRU5ErkJggg==',
+  'base64'
+);
+
+const url = await uploadImageBuffer(png1x1, {
+  folder: 'printful',
+  filename: `test-${Date.now()}.png`,
+});
+
+console.log('R2 URL:', url);

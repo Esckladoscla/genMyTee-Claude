@@ -1,0 +1,119 @@
+{% comment %}
+  AI Design Fields snippet used from buy-buttons.
+  IMPORTANT:
+  - data-backend-base-url must be ONLY the backend base URL (no /api path).
+  - JS is loaded globally from theme scripts (ai-design-horizon.js on product pages).
+{% endcomment %}
+
+{% assign custom_product_key = product.metafields.custom.printful_product_key.value | default: product.metafields.custom.printful_product_key | default: '' %}
+{% assign legacy_product_key = product.metafields.printful.product_key.value | default: product.metafields.printful.product_key | default: '' %}
+{% assign default_product_key = custom_product_key | default: legacy_product_key | strip %}
+
+{% assign custom_placement = product.metafields.custom.printful_placement.value | default: product.metafields.custom.printful_placement | default: '' %}
+{% assign legacy_placement = product.metafields.printful.placement.value | default: product.metafields.printful.placement | default: '' %}
+{% assign default_placement = custom_placement | default: legacy_placement | default: 'front' | strip %}
+{% assign custom_mockup_indexes = product.metafields.custom.printful_mockup_indexes.value | default: product.metafields.custom.printful_mockup_indexes | default: '' %}
+{% assign legacy_mockup_indexes = product.metafields.printful.mockup_indexes.value | default: product.metafields.printful.mockup_indexes | default: '' %}
+{% assign default_mockup_indexes = custom_mockup_indexes | default: legacy_mockup_indexes | strip %}
+{% assign custom_mockup_limit = product.metafields.custom.printful_mockup_limit.value | default: product.metafields.custom.printful_mockup_limit | default: '' %}
+{% assign legacy_mockup_limit = product.metafields.printful.mockup_limit.value | default: product.metafields.printful.mockup_limit | default: '' %}
+{% assign default_mockup_limit = custom_mockup_limit | default: legacy_mockup_limit | strip %}
+
+{% assign ai_form_id = product_form_id %}
+{% if ai_form_id == blank %}
+  {% assign ai_form_id = 'BuyButtons-ProductForm-' | append: section.id %}
+{% endif %}
+
+<div
+  class="ai-design-widget"
+  data-ai-design-root
+  data-product-id="{{ product.id }}"
+  data-product-form-id="{{ ai_form_id }}"
+  data-backend-base-url="https://getmytee.onrender.com"
+  data-prompt-min="8"
+  data-prompt-max="280"
+>
+  {% if default_product_key == blank %}
+    <p style="font-size:0.875rem;">
+      AI preview no disponible: configura <code>custom.printful_product_key</code> (o <code>printful.product_key</code>) para este producto.
+    </p>
+  {% endif %}
+
+  <label for="ai_prompt_{{ section.id }}">Describe your design</label>
+  <textarea
+    id="ai_prompt_{{ section.id }}"
+    name="properties[ai_prompt]"
+    rows="4"
+    maxlength="280"
+    required
+    data-ai-prompt
+  ></textarea>
+
+  <input type="hidden" name="properties[ai_image_url]" value="" data-ai-image-url>
+  <input type="hidden" name="properties[ai_mockup_url]" value="" data-ai-mockup-url>
+  <input type="hidden" name="properties[pf_product_key]" value="{{ default_product_key | escape }}" data-ai-product-key>
+  <input type="hidden" name="properties[pf_placement]" value="{{ default_placement | escape }}" data-ai-placement>
+  <input type="hidden" value="{{ default_mockup_indexes | escape }}" data-ai-mockup-indexes>
+  <input type="hidden" value="{{ default_mockup_limit | escape }}" data-ai-mockup-limit>
+
+  <fieldset style="margin-top:8px;">
+    <legend style="font-size:0.85rem;">Adjust print fit</legend>
+
+    <label for="ai_scale_{{ section.id }}" style="display:block;font-size:0.8rem;">Scale</label>
+    <input
+      id="ai_scale_{{ section.id }}"
+      type="range"
+      min="0.75"
+      max="1.35"
+      step="0.01"
+      value="1"
+      data-ai-scale
+      name="properties[ai_layout_scale]"
+    >
+
+    <label for="ai_x_{{ section.id }}" style="display:block;font-size:0.8rem;">Horizontal</label>
+    <input
+      id="ai_x_{{ section.id }}"
+      type="range"
+      min="-100"
+      max="100"
+      step="1"
+      value="0"
+      data-ai-offset-x
+      name="properties[ai_layout_offset_x]"
+    >
+
+    <label for="ai_y_{{ section.id }}" style="display:block;font-size:0.8rem;">Vertical</label>
+    <input
+      id="ai_y_{{ section.id }}"
+      type="range"
+      min="-100"
+      max="100"
+      step="1"
+      value="0"
+      data-ai-offset-y
+      name="properties[ai_layout_offset_y]"
+    >
+  </fieldset>
+
+  <button type="button" class="button" data-ai-generate>Generate preview</button>
+  <button
+    type="button"
+    class="button button-secondary"
+    data-ai-apply-fit
+    disabled
+    style="margin-top:8px;"
+  >
+    Apply fit to mockup
+  </button>
+  <p data-ai-status aria-live="polite"></p>
+
+  <script type="application/json" data-ai-variant-map>
+    {
+    {% for v in product.variants %}
+      "{{ v.id }}": {{ v.title | json }}{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+    }
+  </script>
+</div>
+
