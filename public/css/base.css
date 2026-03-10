@@ -1,0 +1,82 @@
+/* ══════════════════════════════
+   BASE — Design System from reference
+══════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#F7F4F0;
+  --surface:#EFEBE5;
+  --surface2:#E8E2DA;
+  --text:#1C1A18;
+  --muted:#8C8680;
+  --accent:#B5603F;
+  --accent2:#D4896A;
+  --border:#DDD8D1;
+  --white:#FFFFFF;
+  --black:#0A0908;
+  --green:#3D7A5A;
+  --success:#E8F5EE;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit}
+button{font-family:'DM Sans',sans-serif}
+img{display:block;max-width:100%}
+
+/* Typography */
+.heading-serif{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:300;
+  line-height:1.1;
+}
+.heading-serif em{font-style:italic;color:var(--accent)}
+
+/* Buttons */
+.btn-primary{
+  background:var(--text);color:var(--white);border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem 2rem;transition:background 0.25s;
+}
+.btn-primary:hover{background:var(--accent)}
+.btn-outline{
+  background:none;color:var(--text);border:1px solid var(--text);cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem 2rem;transition:all 0.25s;
+}
+.btn-outline:hover{background:var(--text);color:var(--white)}
+.btn-glow{
+  background:var(--accent);color:white;border:none;cursor:pointer;
+  font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:1rem 2.2rem;transition:all 0.3s;
+  box-shadow:0 0 24px rgba(181,96,63,0.4);
+}
+.btn-glow:hover{background:var(--accent2);box-shadow:0 0 40px rgba(181,96,63,0.6);transform:translateY(-1px)}
+
+/* Sections */
+.section{padding:5rem 2.5rem}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem}
+.section-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.1;
+}
+.section-title em{font-style:italic;color:var(--accent)}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.animate-on-scroll{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease}
+.animate-on-scroll.visible{opacity:1;transform:translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .section{padding:3rem 1.5rem}
+}

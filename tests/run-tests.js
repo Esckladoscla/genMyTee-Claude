@@ -5,6 +5,9 @@ const files = [
   "./smoke-imports.test.js",
   "./variants.test.js",
   "./webhooks-route.test.js",
+  "./orders-route.test.js",
+  "./catalog-route.test.js",
+  "./checkout-route.test.js",
 ];
 
 for (const file of files) {

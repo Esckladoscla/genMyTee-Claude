@@ -1,0 +1,3751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>genMyTee — Moda Atemporal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F4F0;--surface:#EFEBE5;--surface2:#E8E2DA;
+  --text:#1C1A18;--muted:#8C8680;--accent:#B5603F;--accent2:#D4896A;
+  --border:#DDD8D1;--white:#FFFFFF;--black:#0A0908;
+  --green:#3D7A5A;--success:#E8F5EE;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font-family:'DM Sans',sans-serif}
+img{display:block;max-width:100%}
+
+/* ══════════════════════════════
+   ANNOUNCEMENT BAR
+══════════════════════════════ */
+.announce-bar{
+  background:var(--text);color:var(--white);
+  height:36px;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.announce-track{
+  display:flex;gap:0;
+  animation:announceSlide 12s infinite;
+}
+.announce-item{
+  min-width:100vw;text-align:center;
+  font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:1rem;
+}
+.announce-item a{color:var(--accent2);border-bottom:1px solid var(--accent2);}
+.announce-close{
+  position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1rem;
+}
+@keyframes announceSlide{
+  0%,28%{transform:translateX(0)}
+  33%,61%{transform:translateX(-100vw)}
+  66%,94%{transform:translateX(-200vw)}
+  99%,100%{transform:translateX(0)}
+}
+
+/* ══════════════════════════════
+   NAV
+══════════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:90;
+  background:rgba(247,244,240,0.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:64px;
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.7rem;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;
+}
+.nav-center{
+  display:flex;gap:2rem;list-style:none;
+}
+.nav-center>li{position:relative;}
+.nav-center>li>a{
+  font-size:0.72rem;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--muted);padding:0.5rem 0;display:block;
+  transition:color 0.2s;border-bottom:1px solid transparent;
+}
+.nav-center>li>a:hover,.nav-center>li.active>a{color:var(--text);border-bottom-color:var(--text);}
+
+/* MEGA MENU */
+.mega-menu{
+  position:absolute;top:calc(100% + 1px);left:50%;transform:translateX(-50%);
+  background:var(--white);border:1px solid var(--border);
+  box-shadow:0 8px 40px rgba(0,0,0,0.08);
+  min-width:560px;padding:2rem;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;
+  opacity:0;pointer-events:none;transform:translateX(-50%) translateY(8px);
+  transition:opacity 0.25s,transform 0.25s;
+}
+.nav-center>li:hover .mega-menu{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.mega-col h4{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;}
+.mega-col ul{list-style:none;}
+.mega-col ul li a{font-size:0.82rem;color:var(--text);display:block;padding:0.25rem 0;transition:color 0.15s;}
+.mega-col ul li a:hover{color:var(--accent);}
+
+.nav-actions{display:flex;align-items:center;gap:0.4rem;}
+.nav-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text);padding:0.5rem;border-radius:2px;
+  transition:color 0.2s;position:relative;
+}
+.nav-btn:hover{color:var(--accent);}
+.nav-badge{
+  position:absolute;top:2px;right:2px;
+  background:var(--accent);color:white;
+  width:14px;height:14px;border-radius:50%;
+  font-size:0.55rem;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.nav-cta{
+  background:var(--text);color:var(--white);border:none;cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.55rem 1.2rem;transition:background 0.2s;margin-left:0.4rem;
+}
+.nav-cta:hover{background:var(--accent);}
+.hamburger{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:pointer;padding:4px;}
+.hamburger span{display:block;width:20px;height:1.5px;background:var(--text);transition:all 0.3s;}
+
+/* ══════════════════════════════
+   SEARCH OVERLAY
+══════════════════════════════ */
+.search-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(247,244,240,0.97);backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:6rem;
+  opacity:0;pointer-events:none;transform:translateY(-10px);
+  transition:all 0.3s;
+}
+.search-overlay.open{opacity:1;pointer-events:all;transform:translateY(0);}
+.search-box{
+  display:flex;align-items:center;gap:1rem;
+  width:min(700px,90vw);
+  border-bottom:2px solid var(--text);padding-bottom:0.8rem;
+}
+.search-box svg{color:var(--muted);flex-shrink:0;}
+.search-input{
+  flex:1;border:none;background:none;outline:none;
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;font-weight:300;color:var(--text);
+}
+.search-input::placeholder{color:var(--border);}
+.search-close{background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s;}
+.search-close:hover{color:var(--text);}
+.search-results{
+  width:min(700px,90vw);margin-top:2rem;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;
+}
+.search-hint{
+  color:var(--muted);font-size:0.8rem;margin-top:1rem;
+  width:min(700px,90vw);
+}
+
+/* ══════════════════════════════
+   MOBILE MENU
+══════════════════════════════ */
+.mobile-menu{
+  position:fixed;inset:0;z-index:180;
+  background:var(--bg);
+  transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.25,0,0,1);
+  padding:5rem 2rem 2rem;overflow-y:auto;
+}
+.mobile-menu.open{transform:translateX(0);}
+.mobile-menu-close{
+  position:absolute;top:1.5rem;right:1.5rem;
+  background:none;border:none;cursor:pointer;color:var(--text);
+}
+.mobile-nav-list{list-style:none;display:flex;flex-direction:column;gap:0;}
+.mobile-nav-list>li>a{
+  display:block;
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;font-weight:300;
+  padding:0.7rem 0;border-bottom:1px solid var(--border);
+  color:var(--text);transition:color 0.2s;
+}
+.mobile-nav-list>li>a:hover{color:var(--accent);}
+
+/* ══════════════════════════════
+   HERO CAROUSEL
+══════════════════════════════ */
+.hero{position:relative;overflow:hidden;height:calc(100vh - 100px);min-height:520px;}
+.hero-slides{display:flex;height:100%;transition:transform 0.7s cubic-bezier(0.77,0,0.18,1);}
+.hero-slide{
+  min-width:100%;height:100%;display:grid;
+  grid-template-columns:1fr 1fr;
+  flex-shrink:0;
+}
+.hero-content{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5rem 4rem 5rem 3rem;
+}
+.slide-eyebrow{
+  font-size:0.67rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1.4rem;
+  animation:fadeUp 0.8s ease both;
+}
+.slide-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.8rem,4.5vw,5rem);font-weight:300;line-height:1.05;
+}
+.slide-title em{font-style:italic;color:var(--accent);}
+.slide-desc{
+  margin-top:1.5rem;font-size:0.88rem;line-height:1.75;
+  color:var(--muted);max-width:360px;
+}
+.slide-cta{margin-top:2.5rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{
+  background:var(--text);color:var(--white);border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem 2rem;transition:background 0.25s;
+}
+.btn-primary:hover{background:var(--accent);}
+.btn-outline{
+  background:none;color:var(--text);border:1px solid var(--text);cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem 2rem;transition:all 0.25s;
+}
+.btn-outline:hover{background:var(--text);color:var(--white);}
+.btn-ghost{
+  background:none;color:var(--muted);border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.9rem 0;border-bottom:1px solid currentColor;transition:color 0.2s;
+}
+.btn-ghost:hover{color:var(--text);}
+.hero-visual{
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-visual-inner{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.5s ease;font-size:10rem;
+}
+.hero-slide:hover .hero-visual-inner{transform:scale(1.03);}
+.hero-badge-wrap{
+  position:absolute;bottom:2rem;left:2rem;
+  display:flex;flex-direction:column;gap:0.7rem;
+}
+.hero-badge{
+  background:var(--white);padding:1rem 1.3rem;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  display:flex;flex-direction:column;
+}
+.hero-badge-label{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+.hero-badge-value{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;margin-top:0.15rem;}
+
+.hero-nav{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:0.5rem;
+}
+.hero-dot{
+  width:28px;height:2px;background:rgba(28,26,24,0.2);
+  border:none;cursor:pointer;transition:background 0.3s;padding:0;
+}
+.hero-dot.active{background:var(--text);}
+.hero-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:var(--white);border:1px solid var(--border);
+  width:44px;height:44px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;z-index:2;
+}
+.hero-arrow:hover{background:var(--text);color:var(--white);border-color:var(--text);}
+.hero-arrow.prev{left:1.5rem;}
+.hero-arrow.next{right:1.5rem;}
+
+/* ══════════════════════════════
+   MARQUEE
+══════════════════════════════ */
+.marquee-bar{
+  overflow:hidden;border-top:1px solid var(--border);
+  padding:0.85rem 0;background:var(--text);
+}
+.marquee-track{
+  display:flex;gap:3rem;width:max-content;
+  animation:marquee 25s linear infinite;
+  font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,255,255,0.45);
+}
+.marquee-track strong{color:var(--white);}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ══════════════════════════════
+   TRUST BADGES
+══════════════════════════════ */
+.trust-row{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--border);
+}
+.trust-item{
+  display:flex;align-items:center;gap:1rem;
+  padding:1.5rem 2rem;border-right:1px solid var(--border);
+}
+.trust-item:last-child{border-right:none;}
+.trust-icon{
+  width:40px;height:40px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;
+}
+.trust-text strong{display:block;font-size:0.78rem;font-weight:500;margin-bottom:0.15rem;}
+.trust-text span{font-size:0.7rem;color:var(--muted);}
+
+/* ══════════════════════════════
+   FLASH SALE
+══════════════════════════════ */
+.flash-sale{
+  background:var(--accent);color:var(--white);
+  padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;
+  gap:2rem;flex-wrap:wrap;
+}
+.flash-left{display:flex;align-items:center;gap:2rem;}
+.flash-badge{
+  background:var(--white);color:var(--accent);
+  font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.4rem 0.8rem;font-weight:500;
+}
+.flash-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.5rem;font-weight:400;
+}
+.flash-title em{font-style:italic;}
+.countdown{display:flex;gap:1rem;align-items:center;}
+.countdown-unit{text-align:center;}
+.countdown-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.2rem;font-weight:600;line-height:1;display:block;
+}
+.countdown-label{font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;opacity:0.7;}
+.countdown-sep{font-size:1.8rem;opacity:0.4;margin-bottom:0.8rem;}
+.flash-btn{
+  background:var(--white);color:var(--accent);border:none;cursor:pointer;
+  font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.85rem 1.8rem;transition:all 0.2s;flex-shrink:0;
+}
+.flash-btn:hover{background:var(--text);color:var(--white);}
+
+/* ══════════════════════════════
+   SECTIONS
+══════════════════════════════ */
+.section{padding:5rem 2.5rem;}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem;}
+.section-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.1;
+}
+.section-title em{font-style:italic;color:var(--accent);}
+.section-link{
+  font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--border);
+  padding-bottom:2px;transition:color 0.2s,border-color 0.2s;
+}
+.section-link:hover{color:var(--accent);border-color:var(--accent);}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:0;margin-bottom:2.5rem;border-bottom:1px solid var(--border);}
+.filter-tab{
+  background:none;border:none;cursor:pointer;
+  font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--muted);padding:0.7rem 1.2rem;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color 0.2s,border-color 0.2s;
+}
+.filter-tab.active{color:var(--text);border-bottom-color:var(--text);}
+.filter-tab:hover:not(.active){color:var(--text);}
+
+/* SORT */
+.filter-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.results-count{font-size:0.78rem;color:var(--muted);}
+.sort-select{
+  background:none;border:1px solid var(--border);
+  font-family:'DM Sans',sans-serif;font-size:0.72rem;
+  padding:0.45rem 0.8rem;color:var(--text);cursor:pointer;outline:none;
+}
+
+/* ══════════════════════════════
+   PRODUCT GRID
+══════════════════════════════ */
+.product-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;
+}
+.product-card{cursor:pointer;position:relative;}
+.product-image{
+  position:relative;aspect-ratio:3/4;overflow:hidden;
+  background:var(--surface);
+}
+.product-img-inner{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 0.5s cubic-bezier(0.25,0,0,1);
+}
+.product-card:hover .product-img-inner{transform:scale(1.05);}
+.prod-emoji{font-size:4rem;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.1));position:relative;z-index:1;}
+.product-tag{
+  position:absolute;top:0.8rem;left:0.8rem;z-index:3;
+  background:var(--accent);color:white;
+  font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.28rem 0.65rem;
+}
+.product-tag.new{background:var(--text);}
+.product-tag.sale{background:var(--accent);}
+.product-tag.hot{background:#C0392B;}
+.product-wish-btn{
+  position:absolute;top:0.8rem;right:0.8rem;z-index:3;
+  background:var(--white);border:none;cursor:pointer;
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.25s,background 0.2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.product-card:hover .product-wish-btn,.product-wish-btn.active{opacity:1;}
+.product-wish-btn.active svg{fill:var(--accent);stroke:var(--accent);}
+.product-wish-btn:hover{background:var(--accent);color:white;}
+.product-wish-btn:hover svg{stroke:white;}
+.product-colors{
+  position:absolute;bottom:0.8rem;left:0.8rem;z-index:3;
+  display:flex;gap:4px;
+  opacity:0;transition:opacity 0.25s;
+}
+.product-card:hover .product-colors{opacity:1;}
+.color-swatch{width:14px;height:14px;border-radius:50%;border:2px solid white;cursor:pointer;}
+.product-add-btn{
+  position:absolute;bottom:0;left:0;right:0;z-index:3;
+  background:rgba(28,26,24,0.9);color:var(--white);border:none;cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.75rem;
+  transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.25,0,0,1),background 0.2s;
+}
+.product-card:hover .product-add-btn{transform:translateY(0);}
+.product-add-btn:hover{background:var(--accent);}
+.product-info{padding:0.9rem 0 0.5rem;}
+.product-cat{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem;}
+.product-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:400;line-height:1.3;margin-bottom:0.4rem;}
+.product-stars{display:flex;align-items:center;gap:0.3rem;margin-bottom:0.4rem;}
+.stars{color:var(--accent);font-size:0.7rem;letter-spacing:1px;}
+.review-count{font-size:0.65rem;color:var(--muted);}
+.product-price-row{display:flex;gap:0.6rem;align-items:baseline;}
+.price-now{font-size:0.9rem;font-weight:500;}
+.price-was{font-size:0.78rem;color:var(--muted);text-decoration:line-through;}
+.price-save{font-size:0.68rem;color:var(--accent);}
+
+/* LOAD MORE */
+.load-more-wrap{text-align:center;margin-top:3rem;}
+
+/* ══════════════════════════════
+   FEATURE BANNER
+══════════════════════════════ */
+.feature-banner{
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:400px;margin:0;
+}
+.fb-visual{
+  display:flex;align-items:center;justify-content:center;
+  font-size:8rem;position:relative;overflow:hidden;
+}
+.fb-text{
+  padding:4rem;display:flex;flex-direction:column;justify-content:center;
+}
+.fb-eyebrow{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:1.2rem;}
+.fb-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,3vw,3.2rem);font-weight:300;line-height:1.1;margin-bottom:1.5rem;
+}
+.fb-title em{font-style:italic;}
+.fb-desc{font-size:0.85rem;line-height:1.75;color:var(--muted);margin-bottom:2rem;max-width:380px;}
+.fb-stats{display:flex;gap:2rem;margin-bottom:2.5rem;}
+.fb-stat strong{display:block;font-family:'Cormorant Garamond',serif;font-size:1.8rem;}
+.fb-stat span{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+
+/* ══════════════════════════════
+   CATEGORIES GRID
+══════════════════════════════ */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.cat-card{
+  position:relative;overflow:hidden;aspect-ratio:1;cursor:pointer;
+  background:var(--surface);
+}
+.cat-bg-inner{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:7rem;transition:transform 0.5s cubic-bezier(0.25,0,0,1);
+}
+.cat-card:hover .cat-bg-inner{transform:scale(1.08);}
+.cat-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%);
+}
+.cat-info{position:absolute;bottom:1.5rem;left:1.5rem;}
+.cat-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem;font-weight:400;color:white;line-height:1.2;
+}
+.cat-count{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-top:0.2rem;}
+.cat-arrow{
+  position:absolute;bottom:1.5rem;right:1.5rem;
+  background:var(--white);border:none;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;opacity:0;transition:opacity 0.25s,background 0.2s;
+}
+.cat-card:hover .cat-arrow{opacity:1;}
+.cat-arrow:hover{background:var(--accent);}
+.cat-arrow:hover svg{stroke:white;}
+
+/* ══════════════════════════════
+   TESTIMONIALS
+══════════════════════════════ */
+.testimonials{background:var(--surface);padding:5rem 2.5rem;}
+.testimonial-slider{position:relative;overflow:hidden;}
+.testimonial-track{display:flex;transition:transform 0.6s cubic-bezier(0.25,0,0,1);}
+.testimonial-card{
+  min-width:calc(33.333% - 1rem);margin-right:1.5rem;
+  background:var(--white);padding:2.5rem;flex-shrink:0;
+}
+.testi-stars{color:var(--accent);font-size:0.85rem;margin-bottom:1rem;letter-spacing:2px;}
+.testi-quote{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.05rem;font-weight:300;line-height:1.6;
+  color:var(--text);margin-bottom:1.5rem;font-style:italic;
+}
+.testi-author{display:flex;align-items:center;gap:0.8rem;}
+.testi-avatar{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;background:var(--surface);flex-shrink:0;
+}
+.testi-name{font-size:0.82rem;font-weight:500;}
+.testi-location{font-size:0.7rem;color:var(--muted);}
+.testi-verified{
+  font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--green);display:flex;align-items:center;gap:0.3rem;
+  margin-top:0.2rem;
+}
+.slider-controls{display:flex;gap:0.5rem;margin-top:2rem;}
+.slider-btn{
+  background:none;border:1px solid var(--border);
+  width:40px;height:40px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.slider-btn:hover{background:var(--text);border-color:var(--text);color:white;}
+
+/* ══════════════════════════════
+   INSTAGRAM
+══════════════════════════════ */
+.insta-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:0;
+}
+.insta-post{
+  aspect-ratio:1;overflow:hidden;cursor:pointer;
+  position:relative;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;
+}
+.insta-post-inner{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.4s ease;font-size:3rem;
+}
+.insta-post:hover .insta-post-inner{transform:scale(1.1);}
+.insta-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.3rem;
+  transition:background 0.3s;
+}
+.insta-post:hover .insta-overlay{background:rgba(0,0,0,0.4);}
+.insta-stat{
+  color:white;font-size:0.75rem;
+  opacity:0;transition:opacity 0.3s;
+  display:flex;align-items:center;gap:0.3rem;
+}
+.insta-post:hover .insta-stat{opacity:1;}
+.insta-handle{
+  text-align:center;padding:1.5rem;
+  font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;
+  color:var(--muted);
+}
+.insta-handle a{color:var(--accent);}
+
+/* ══════════════════════════════
+   FAQ
+══════════════════════════════ */
+.faq-section{padding:5rem 2.5rem;background:var(--bg);}
+.faq-grid{display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;}
+.faq-sidebar p{font-size:0.85rem;line-height:1.7;color:var(--muted);margin-top:1rem;}
+.faq-list{display:flex;flex-direction:column;gap:0;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-question{
+  width:100%;background:none;border:none;cursor:pointer;text-align:left;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.3rem 0;font-size:0.9rem;font-weight:400;color:var(--text);
+  transition:color 0.2s;
+}
+.faq-question:hover{color:var(--accent);}
+.faq-icon{
+  width:20px;height:20px;flex-shrink:0;
+  border:1px solid var(--border);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;font-size:0.8rem;color:var(--muted);
+}
+.faq-item.open .faq-icon{background:var(--text);color:white;border-color:var(--text);transform:rotate(45deg);}
+.faq-answer{
+  overflow:hidden;max-height:0;transition:max-height 0.35s ease,padding 0.35s;
+}
+.faq-answer p{font-size:0.85rem;line-height:1.75;color:var(--muted);padding-bottom:1.3rem;}
+
+/* ══════════════════════════════
+   NEWSLETTER
+══════════════════════════════ */
+.newsletter{
+  background:var(--text);color:var(--white);
+  padding:5rem 2.5rem;text-align:center;
+}
+.nl-eyebrow{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent2);margin-bottom:1.2rem;}
+.nl-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,4vw,3.5rem);font-weight:300;line-height:1.1;margin-bottom:1rem;
+}
+.nl-title em{font-style:italic;}
+.nl-desc{font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:2.5rem;}
+.nl-form{
+  display:flex;gap:0;max-width:480px;margin:0 auto;
+}
+.nl-input{
+  flex:1;border:1px solid rgba(255,255,255,0.15);border-right:none;
+  background:rgba(255,255,255,0.05);color:var(--white);outline:none;
+  font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:0.9rem 1.2rem;
+  transition:border-color 0.2s;
+}
+.nl-input::placeholder{color:rgba(255,255,255,0.3);}
+.nl-input:focus{border-color:rgba(255,255,255,0.4);}
+.nl-btn{
+  background:var(--accent);color:white;border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem 1.5rem;transition:background 0.2s;flex-shrink:0;
+}
+.nl-btn:hover{background:var(--accent2);}
+.nl-note{font-size:0.65rem;color:rgba(255,255,255,0.25);margin-top:1rem;}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+footer{border-top:1px solid var(--border);padding:4rem 2.5rem 2rem;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:3rem;}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1rem;}
+.footer-about{font-size:0.8rem;line-height:1.7;color:var(--muted);max-width:260px;margin-bottom:1.5rem;}
+.footer-social{display:flex;gap:0.6rem;}
+.social-btn{
+  width:34px;height:34px;border:1px solid var(--border);
+  background:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:all 0.2s;
+}
+.social-btn:hover{background:var(--text);color:white;border-color:var(--text);}
+.footer-col h4{font-size:0.67rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:1.2rem;}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:0.6rem;}
+.footer-col a{font-size:0.8rem;color:var(--muted);transition:color 0.2s;}
+.footer-col a:hover{color:var(--accent);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+  padding-top:2rem;border-top:1px solid var(--border);
+  font-size:0.7rem;color:var(--muted);
+}
+.footer-payments{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.pay-chip{background:var(--surface);padding:0.28rem 0.6rem;font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--border);}
+
+/* ══════════════════════════════
+   CART DRAWER
+══════════════════════════════ */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:150;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.overlay.open{opacity:1;pointer-events:all;}
+.cart-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(420px,95vw);
+  background:var(--white);z-index:160;
+  transform:translateX(105%);transition:transform 0.35s cubic-bezier(0.25,0,0,1);
+  display:flex;flex-direction:column;
+}
+.cart-drawer.open{transform:translateX(0);}
+.drawer-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1.5rem 1.8rem;border-bottom:1px solid var(--border);
+}
+.drawer-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;}
+.drawer-close{background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s;padding:4px;}
+.drawer-close:hover{color:var(--text);}
+.cart-items-list{flex:1;overflow-y:auto;padding:1.2rem 1.8rem;}
+.cart-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--border);}
+.cart-item-img{
+  width:68px;height:68px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+}
+.cart-item-details{flex:1;min-width:0;}
+.cart-item-name{font-family:'Cormorant Garamond',serif;font-size:0.95rem;margin-bottom:0.2rem;}
+.cart-item-meta{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;}
+.cart-item-controls{display:flex;align-items:center;gap:0.8rem;}
+.qty-btn{
+  background:var(--surface);border:none;cursor:pointer;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;line-height:1;transition:background 0.2s;
+}
+.qty-btn:hover{background:var(--border);}
+.qty-num{font-size:0.82rem;min-width:20px;text-align:center;}
+.cart-item-price{font-size:0.88rem;font-weight:500;flex-shrink:0;}
+.cart-item-remove{
+  background:none;border:none;cursor:pointer;
+  font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);text-decoration:underline;transition:color 0.2s;padding:0;
+}
+.cart-item-remove:hover{color:var(--accent);}
+.cart-empty-msg{
+  text-align:center;padding:4rem 1rem;color:var(--muted);
+}
+.cart-empty-msg span{font-size:3rem;display:block;margin-bottom:1rem;}
+.cart-empty-msg p{font-family:'Cormorant Garamond',serif;font-size:1.2rem;}
+.cart-footer{padding:1.5rem 1.8rem;border-top:1px solid var(--border);}
+.discount-row{display:flex;gap:0;margin-bottom:1.2rem;}
+.discount-input{
+  flex:1;border:1px solid var(--border);border-right:none;
+  font-family:'DM Sans',sans-serif;font-size:0.78rem;
+  padding:0.6rem 0.8rem;outline:none;background:none;
+  transition:border-color 0.2s;color:var(--text);
+}
+.discount-input::placeholder{color:var(--muted);}
+.discount-input:focus{border-color:var(--text);}
+.discount-apply{
+  background:var(--surface);border:1px solid var(--border);cursor:pointer;
+  font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.6rem 0.8rem;transition:all 0.2s;
+}
+.discount-apply:hover{background:var(--text);color:white;border-color:var(--text);}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem;}
+.cart-subtotal-label{font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.cart-subtotal-value{font-size:0.95rem;font-weight:500;}
+.cart-shipping-note{font-size:0.68rem;color:var(--green);margin-bottom:1rem;text-align:center;}
+.checkout-btn{
+  width:100%;background:var(--text);color:var(--white);border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:1rem;transition:background 0.2s;
+}
+.checkout-btn:hover{background:var(--accent);}
+.cart-perks{display:flex;justify-content:center;gap:1.5rem;margin-top:0.8rem;}
+.cart-perk{font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:0.3rem;}
+
+/* ══════════════════════════════
+   WISHLIST DRAWER
+══════════════════════════════ */
+.wish-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(420px,95vw);
+  background:var(--white);z-index:160;
+  transform:translateX(105%);transition:transform 0.35s cubic-bezier(0.25,0,0,1);
+  display:flex;flex-direction:column;
+}
+.wish-drawer.open{transform:translateX(0);}
+.wish-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  padding:1.5rem;overflow-y:auto;
+}
+.wish-card{
+  position:relative;cursor:pointer;
+}
+.wish-card-img{
+  aspect-ratio:1;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  margin-bottom:0.6rem;
+}
+.wish-card-name{font-size:0.82rem;margin-bottom:0.2rem;}
+.wish-card-price{font-size:0.78rem;color:var(--muted);}
+.wish-remove-btn{
+  position:absolute;top:0.5rem;right:0.5rem;
+  background:white;border:none;cursor:pointer;
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;color:var(--muted);transition:all 0.2s;
+}
+.wish-remove-btn:hover{background:var(--accent);color:white;}
+
+/* ══════════════════════════════
+   PRODUCT MODAL
+══════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(28,26,24,0.6);z-index:300;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.product-modal{
+  background:var(--white);
+  max-width:900px;width:100%;max-height:90vh;overflow-y:auto;
+  transform:scale(0.95);transition:transform 0.3s;
+  display:grid;grid-template-columns:1fr 1fr;
+  position:relative;
+}
+.modal-overlay.open .product-modal{transform:scale(1);}
+.modal-close{
+  position:absolute;top:1rem;right:1rem;z-index:2;
+  background:var(--white);border:1px solid var(--border);cursor:pointer;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:all 0.2s;border-radius:50%;
+}
+.modal-close:hover{background:var(--text);color:white;border-color:var(--text);}
+.modal-images{
+  position:sticky;top:0;height:fit-content;
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  padding:3rem;font-size:9rem;min-height:420px;
+}
+.modal-info{padding:2.5rem;}
+.modal-cat{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;}
+.modal-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;line-height:1.2;margin-bottom:0.5rem;}
+.modal-rating{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;}
+.modal-rating .stars{font-size:0.8rem;}
+.modal-price-row{display:flex;gap:0.8rem;align-items:baseline;margin-bottom:1.5rem;}
+.modal-price{font-size:1.4rem;font-weight:500;}
+.modal-price-old{font-size:1rem;color:var(--muted);text-decoration:line-through;}
+.modal-price-save{font-size:0.8rem;color:var(--accent);}
+.modal-divider{border:none;border-top:1px solid var(--border);margin:1.2rem 0;}
+.modal-label{font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem;display:flex;justify-content:space-between;}
+.size-options{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.size-btn{
+  border:1px solid var(--border);background:none;cursor:pointer;
+  font-size:0.75rem;padding:0.4rem 0.8rem;transition:all 0.2s;
+}
+.size-btn:hover,.size-btn.active{background:var(--text);color:white;border-color:var(--text);}
+.size-btn.disabled{opacity:0.3;cursor:not-allowed;text-decoration:line-through;}
+.color-options{display:flex;gap:0.5rem;margin-bottom:1.5rem;}
+.color-option{
+  width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:border-color 0.2s;
+}
+.color-option.active{border-color:var(--text);}
+.modal-qty-row{display:flex;gap:1rem;align-items:center;margin-bottom:1.2rem;}
+.modal-qty{display:flex;align-items:center;border:1px solid var(--border);}
+.modal-qty-btn{
+  background:none;border:none;cursor:pointer;
+  width:36px;height:36px;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s;
+}
+.modal-qty-btn:hover{background:var(--surface);}
+.modal-qty-num{min-width:36px;text-align:center;font-size:0.9rem;}
+.modal-add-btn{
+  flex:1;background:var(--text);color:white;border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem;transition:background 0.2s;
+}
+.modal-add-btn:hover{background:var(--accent);}
+.modal-wish-btn{
+  background:none;border:1px solid var(--border);cursor:pointer;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.modal-wish-btn:hover,.modal-wish-btn.active{background:var(--accent);border-color:var(--accent);}
+.modal-wish-btn:hover svg,.modal-wish-btn.active svg{stroke:white;fill:white;}
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin:1.5rem 0 1rem;}
+.modal-tab{
+  background:none;border:none;cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.6rem 1rem;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;
+}
+.modal-tab.active{color:var(--text);border-bottom-color:var(--text);}
+.modal-tab-content{display:none;font-size:0.82rem;line-height:1.75;color:var(--muted);}
+.modal-tab-content.active{display:block;}
+.modal-tab-content ul{padding-left:1.2rem;margin-top:0.5rem;}
+.modal-tab-content ul li{margin-bottom:0.3rem;}
+.modal-review-item{padding:0.8rem 0;border-bottom:1px solid var(--border);}
+.modal-review-item:last-child{border:none;}
+.review-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;}
+.review-author{font-size:0.78rem;font-weight:500;}
+.review-date{font-size:0.65rem;color:var(--muted);}
+.review-text{font-size:0.8rem;color:var(--muted);}
+.modal-guarantee{
+  background:var(--success);padding:0.8rem 1rem;margin-top:1rem;
+  display:flex;align-items:center;gap:0.6rem;
+  font-size:0.72rem;color:var(--green);
+}
+
+/* ══════════════════════════════
+   SCROLL TO TOP + TOAST + COOKIE
+══════════════════════════════ */
+.scroll-top{
+  position:fixed;bottom:2rem;right:2rem;z-index:100;
+  background:var(--text);color:white;border:none;cursor:pointer;
+  width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;opacity:0;transform:translateY(10px);
+}
+.scroll-top.visible{opacity:1;transform:translateY(0);}
+.scroll-top:hover{background:var(--accent);}
+
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:white;
+  padding:0.75rem 1.5rem;font-size:0.78rem;z-index:500;
+  transition:transform 0.3s ease;pointer-events:none;
+  display:flex;align-items:center;gap:0.6rem;white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{background:var(--green);}
+.toast.error{background:#C0392B;}
+
+.cookie-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:400;
+  background:var(--white);border-top:1px solid var(--border);
+  padding:1.2rem 2.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.06);
+  transform:translateY(0);transition:transform 0.4s;
+}
+.cookie-banner.hidden{transform:translateY(110%);}
+.cookie-text{font-size:0.78rem;color:var(--muted);flex:1;min-width:240px;}
+.cookie-text a{color:var(--accent);}
+.cookie-actions{display:flex;gap:0.8rem;flex-shrink:0;}
+.cookie-accept{
+  background:var(--text);color:white;border:none;cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.6rem 1.2rem;transition:background 0.2s;
+}
+.cookie-accept:hover{background:var(--accent);}
+.cookie-decline{
+  background:none;border:1px solid var(--border);cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.6rem 1.2rem;color:var(--muted);transition:all 0.2s;
+}
+.cookie-decline:hover{border-color:var(--text);color:var(--text);}
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media(max-width:1024px){
+  .product-grid{grid-template-columns:repeat(3,1fr);}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .hero-slide{grid-template-columns:1fr;}
+  .hero-visual{display:none;}
+  .feature-banner{grid-template-columns:1fr;}
+  .fb-visual{display:none;}
+  .insta-grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(max-width:768px){
+  .nav-center,.announce-bar .nav-actions>.nav-btn:not(.cart-nav){display:none;}
+  .hamburger{display:flex;}
+  .product-grid{grid-template-columns:repeat(2,1fr);}
+  .trust-row{grid-template-columns:repeat(2,1fr);}
+  .trust-item{border-right:none;border-bottom:1px solid var(--border);}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .faq-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .flash-sale{flex-direction:column;text-align:center;}
+  .flash-left{flex-direction:column;align-items:center;}
+  .product-modal{grid-template-columns:1fr;}
+  .modal-images{position:relative;min-height:260px;font-size:6rem;}
+  .testimonial-card{min-width:calc(100% - 1rem);}
+  .insta-grid{grid-template-columns:repeat(3,1fr);}
+  .nl-form{flex-direction:column;}
+  .nl-input{border-right:1px solid rgba(255,255,255,0.15);}
+  .section{padding:3.5rem 1.5rem;}
+  .nav-top{padding:0 1.5rem;}
+}
+@media(max-width:480px){
+  .product-grid{grid-template-columns:repeat(2,1fr);gap:1rem;}
+  .cat-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr;}
+  .hero-content{padding:3rem 1.5rem;}
+}
+
+/* ══════════════════════════════
+   ANIMATIONS
+══════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes popIn{from{opacity:0;transform:translate(-50%,-48%) scale(0.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.animate-on-scroll{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.animate-on-scroll.visible{opacity:1;transform:translateY(0);}
+
+/* ══════════════════════════════
+   WELCOME POPUP
+══════════════════════════════ */
+.popup-overlay{
+  position:fixed;inset:0;background:rgba(28,26,24,0.65);z-index:1000;
+  opacity:0;pointer-events:none;transition:opacity 0.4s;
+  display:flex;align-items:center;justify-content:center;
+}
+.popup-overlay.open{opacity:1;pointer-events:all;}
+.welcome-popup{
+  background:var(--white);
+  max-width:760px;width:calc(100vw - 2rem);
+  display:grid;grid-template-columns:1fr 1fr;
+  position:relative;
+  animation:popIn 0.45s cubic-bezier(0.25,0,0,1) both;
+  max-height:90vh;overflow:hidden;
+}
+.popup-visual{
+  background:linear-gradient(135deg,#1C1A18,#3D2B1A,#B5603F);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:3rem 2rem;text-align:center;color:white;
+}
+.popup-visual-emoji{font-size:5rem;margin-bottom:1rem;}
+.popup-visual-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.2rem;font-weight:300;line-height:1.1;margin-bottom:0.5rem;
+}
+.popup-visual-title em{font-style:italic;color:var(--accent2);}
+.popup-visual-sub{font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0.6;}
+.popup-content{padding:2.5rem;}
+.popup-close{
+  position:absolute;top:0.8rem;right:0.8rem;z-index:2;
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:1.2rem;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  transition:color 0.2s;
+}
+.popup-close:hover{color:var(--text);}
+.popup-eyebrow{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;}
+.popup-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;line-height:1.2;margin-bottom:0.6rem;}
+.popup-desc{font-size:0.8rem;line-height:1.65;color:var(--muted);margin-bottom:1.5rem;}
+.popup-discount-chip{
+  background:var(--surface);border:2px dashed var(--accent);
+  padding:0.7rem 1rem;text-align:center;margin-bottom:1.3rem;
+}
+.popup-discount-code{
+  font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;
+  letter-spacing:0.15em;color:var(--accent);display:block;
+}
+.popup-discount-note{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:0.2rem;}
+.popup-form{display:flex;flex-direction:column;gap:0.7rem;}
+.popup-input{
+  border:1px solid var(--border);background:none;outline:none;
+  font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  padding:0.8rem 1rem;color:var(--text);transition:border-color 0.2s;
+}
+.popup-input:focus{border-color:var(--accent);}
+.popup-input::placeholder{color:var(--muted);}
+.popup-submit{
+  background:var(--text);color:white;border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.9rem;transition:background 0.2s;
+}
+.popup-submit:hover{background:var(--accent);}
+.popup-skip{
+  background:none;border:none;cursor:pointer;
+  font-size:0.68rem;color:var(--muted);text-decoration:underline;
+  margin-top:0.4rem;text-align:center;transition:color 0.2s;
+}
+.popup-skip:hover{color:var(--text);}
+@media(max-width:600px){
+  .welcome-popup{grid-template-columns:1fr;}
+  .popup-visual{display:none;}
+}
+
+/* ══════════════════════════════
+   GENDER SELECTOR
+══════════════════════════════ */
+.gender-selector{
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:280px;
+}
+.gender-card{
+  position:relative;overflow:hidden;cursor:pointer;
+  display:flex;align-items:flex-end;padding:2.5rem;
+  transition:flex 0.4s ease;
+}
+.gender-card:hover{flex:1.1;}
+.gender-bg{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:7rem;transition:transform 0.5s cubic-bezier(0.25,0,0,1);
+}
+.gender-card:hover .gender-bg{transform:scale(1.06);}
+.gender-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%);}
+.gender-label{position:relative;z-index:1;}
+.gender-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;font-weight:300;color:white;line-height:1;
+}
+.gender-sub{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:0.3rem;}
+.gender-cta{
+  display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.8rem;
+  background:white;color:var(--text);
+  font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.5rem 1rem;
+  opacity:0;transform:translateY(8px);
+  transition:opacity 0.3s,transform 0.3s;
+}
+.gender-card:hover .gender-cta{opacity:1;transform:translateY(0);}
+
+/* ══════════════════════════════
+   SOCIAL PROOF TICKER
+══════════════════════════════ */
+.social-proof-bar{
+  background:var(--success);border-top:1px solid #C3E6D0;border-bottom:1px solid #C3E6D0;
+  padding:0.6rem 1.5rem;display:flex;align-items:center;justify-content:center;
+  gap:2rem;flex-wrap:wrap;
+}
+.sp-item{display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;color:var(--green);}
+.sp-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.sp-num{font-weight:600;font-size:0.85rem;}
+
+/* ══════════════════════════════
+   SCARCITY & LIVE INDICATORS (product cards)
+══════════════════════════════ */
+.stock-indicator{
+  display:flex;align-items:center;gap:0.4rem;margin-top:0.3rem;
+  font-size:0.65rem;
+}
+.stock-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.stock-dot.low{background:#E74C3C;animation:pulse 1.5s infinite;}
+.stock-dot.ok{background:var(--green);}
+.stock-text.low{color:#E74C3C;font-weight:500;}
+.stock-text.ok{color:var(--green);}
+.viewers-badge{
+  position:absolute;bottom:3.5rem;left:0.8rem;z-index:3;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);
+  font-size:0.6rem;letter-spacing:0.05em;
+  padding:0.28rem 0.6rem;
+  display:flex;align-items:center;gap:0.3rem;
+  opacity:0;transition:opacity 0.25s;
+}
+.product-card:hover .viewers-badge{opacity:1;}
+.viewers-dot{width:5px;height:5px;border-radius:50%;background:#E74C3C;animation:pulse 1.5s infinite;}
+
+/* ══════════════════════════════
+   CROSS-SELL IN MODAL
+══════════════════════════════ */
+.cross-sell{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);}
+.cross-sell-title{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;}
+.cross-sell-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;}
+.cs-card{cursor:pointer;transition:opacity 0.2s;}
+.cs-card:hover{opacity:0.8;}
+.cs-img{
+  aspect-ratio:1;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;margin-bottom:0.4rem;
+}
+.cs-name{font-size:0.72rem;line-height:1.3;margin-bottom:0.2rem;}
+.cs-price{font-size:0.7rem;color:var(--muted);}
+.cs-add{
+  width:100%;background:var(--surface);border:none;cursor:pointer;
+  font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;
+  padding:0.35rem;margin-top:0.3rem;transition:background 0.2s;
+}
+.cs-add:hover{background:var(--text);color:white;}
+
+/* ══════════════════════════════
+   CART UPSELL
+══════════════════════════════ */
+.cart-upsell{
+  border-top:1px solid var(--border);
+  padding:1.2rem 1.8rem;
+}
+.cart-upsell-title{
+  font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:0.8rem;
+}
+.upsell-scroll{display:flex;gap:0.7rem;overflow-x:auto;padding-bottom:0.3rem;scrollbar-width:none;}
+.upsell-scroll::-webkit-scrollbar{display:none;}
+.upsell-card{
+  flex-shrink:0;width:100px;cursor:pointer;
+}
+.upsell-img{
+  width:100px;height:100px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;margin-bottom:0.4rem;
+}
+.upsell-name{font-size:0.65rem;line-height:1.3;margin-bottom:0.15rem;}
+.upsell-price{font-size:0.65rem;color:var(--muted);}
+.upsell-add{
+  width:100%;background:var(--text);color:white;border:none;cursor:pointer;
+  font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;
+  padding:0.3rem;margin-top:0.3rem;transition:background 0.2s;
+}
+.upsell-add:hover{background:var(--accent);}
+
+/* ══════════════════════════════
+   RECENTLY VIEWED
+══════════════════════════════ */
+.recently-viewed{padding:3rem 2.5rem;border-top:1px solid var(--border);}
+
+/* ══════════════════════════════
+   CUSTOM PRODUCT CREATOR
+══════════════════════════════ */
+.creator-section{
+  background:var(--black);color:var(--white);
+  padding:6rem 0;overflow:hidden;position:relative;
+}
+.creator-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(181,96,63,0.18) 0%,transparent 70%);
+  pointer-events:none;
+}
+.creator-inner{
+  max-width:1200px;margin:0 auto;padding:0 2.5rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;
+}
+.creator-label{
+  font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--accent2);margin-bottom:1.2rem;
+  display:flex;align-items:center;gap:0.6rem;
+}
+.creator-label::before{content:'';width:24px;height:1px;background:var(--accent2);}
+.creator-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.5rem,4.5vw,4.2rem);font-weight:300;line-height:1.05;
+  margin-bottom:1rem;
+}
+.creator-title em{font-style:italic;color:var(--accent2);}
+.creator-subtitle{
+  font-size:0.88rem;line-height:1.75;
+  color:rgba(255,255,255,0.5);margin-bottom:2.5rem;max-width:420px;
+}
+.creator-steps{display:flex;flex-direction:column;gap:1rem;margin-bottom:2.5rem;}
+.creator-step{display:flex;align-items:flex-start;gap:1rem;}
+.step-num{
+  width:28px;height:28px;border:1px solid rgba(181,96,63,0.4);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:0.72rem;color:var(--accent2);flex-shrink:0;margin-top:2px;
+}
+.step-text strong{display:block;font-size:0.82rem;margin-bottom:0.1rem;}
+.step-text span{font-size:0.75rem;color:rgba(255,255,255,0.45);}
+.creator-cta-row{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+.btn-glow{
+  background:var(--accent);color:white;border:none;cursor:pointer;
+  font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:1rem 2.2rem;transition:all 0.3s;
+  box-shadow:0 0 24px rgba(181,96,63,0.4);
+}
+.btn-glow:hover{background:var(--accent2);box-shadow:0 0 40px rgba(181,96,63,0.6);transform:translateY(-1px);}
+.creator-note{font-size:0.68rem;color:rgba(255,255,255,0.3);}
+.creator-note span{color:var(--accent2);}
+
+/* ══════════════════════════════
+   STEP GUIDE SYSTEM
+══════════════════════════════ */
+/* Progress stepper */
+.step-progress{
+  display:flex;align-items:center;gap:0;
+  margin-bottom:1.8rem;position:relative;
+}
+.step-item{
+  display:flex;flex-direction:column;align-items:center;
+  flex:1;position:relative;cursor:default;
+}
+.step-item::before{
+  content:'';position:absolute;top:14px;left:calc(-50% + 14px);right:calc(50% + 14px);
+  height:2px;background:rgba(255,255,255,0.08);
+  transition:background 0.4s;
+}
+.step-item:first-child::before{display:none;}
+.step-item.done::before{background:var(--accent);}
+.step-circle{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;color:rgba(255,255,255,0.25);
+  transition:all 0.35s;position:relative;z-index:1;
+  background:var(--black);
+}
+.step-item.active .step-circle{
+  border-color:var(--accent2);color:var(--accent2);
+  box-shadow:0 0 0 4px rgba(212,137,106,0.15);
+}
+.step-item.done .step-circle{
+  background:var(--accent);border-color:var(--accent);color:white;font-size:0.65rem;
+}
+.step-label{
+  font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;
+  color:rgba(255,255,255,0.2);margin-top:0.4rem;text-align:center;
+  transition:color 0.3s;line-height:1.3;
+}
+.step-item.active .step-label{color:var(--accent2);}
+.step-item.done .step-label{color:rgba(255,255,255,0.4);}
+
+/* Contextual tips */
+.ctx-tip{
+  display:flex;align-items:flex-start;gap:0.6rem;
+  background:rgba(212,137,106,0.08);border:1px solid rgba(212,137,106,0.2);
+  border-left:3px solid var(--accent2);
+  padding:0.7rem 0.9rem;margin-bottom:1rem;
+  animation:fadeUp 0.35s ease both;
+}
+.ctx-tip-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.ctx-tip-text{font-size:0.72rem;line-height:1.55;color:rgba(255,255,255,0.6);}
+.ctx-tip-text strong{color:rgba(255,255,255,0.85);display:block;margin-bottom:0.15rem;font-size:0.75rem;}
+.ctx-tip-dismiss{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,0.2);font-size:0.8rem;flex-shrink:0;
+  margin-left:auto;padding:0 0 0 0.4rem;transition:color 0.2s;
+}
+.ctx-tip-dismiss:hover{color:rgba(255,255,255,0.5);}
+
+/* How-to mini accordion above panel */
+.howto-bar{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  margin-bottom:1.5rem;
+}
+.howto-toggle{
+  width:100%;background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.9rem 1rem;color:rgba(255,255,255,0.5);
+  transition:color 0.2s;
+}
+.howto-toggle:hover{color:rgba(255,255,255,0.8);}
+.howto-toggle-left{display:flex;align-items:center;gap:0.6rem;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;}
+.howto-toggle-icon{
+  font-size:0.8rem;transition:transform 0.3s;
+}
+.howto-bar.open .howto-toggle-icon{transform:rotate(180deg);}
+.howto-content{
+  max-height:0;overflow:hidden;transition:max-height 0.35s ease;
+}
+.howto-bar.open .howto-content{max-height:400px;}
+.howto-steps{
+  display:flex;flex-direction:column;gap:0;
+  padding:0 1rem 1rem;
+}
+.howto-step{
+  display:flex;gap:0.9rem;align-items:flex-start;
+  padding:0.7rem 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.howto-step:last-child{border:none;}
+.howto-step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(181,96,63,0.2);border:1px solid rgba(181,96,63,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;color:var(--accent2);flex-shrink:0;margin-top:1px;
+}
+.howto-step-body strong{
+  display:block;font-size:0.75rem;color:rgba(255,255,255,0.75);margin-bottom:0.15rem;
+}
+.howto-step-body span{font-size:0.68rem;color:rgba(255,255,255,0.35);line-height:1.5;}
+
+/* Step complete celebration */
+@keyframes stepPop{
+  0%{transform:scale(1)} 40%{transform:scale(1.25)} 70%{transform:scale(0.9)} 100%{transform:scale(1)}
+}
+.step-item.just-done .step-circle{animation:stepPop 0.5s ease both;}
+
+/* Pulsing attention ring on first actionable element */
+@keyframes attentionPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(212,137,106,0.4)}
+  50%{box-shadow:0 0 0 6px rgba(212,137,106,0)}
+}
+.needs-attention{animation:attentionPulse 2s ease 0.5s 3;}
+
+.creator-panel{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  padding:2rem;position:relative;
+}
+.panel-tabs{display:flex;gap:0;margin-bottom:1.8rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.panel-tab{
+  background:none;border:none;cursor:pointer;
+  font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);padding:0.6rem 1rem;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;
+}
+.panel-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+
+/* GARMENT PREVIEW */
+.garment-preview{
+  position:relative;aspect-ratio:3/4;max-height:320px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.5rem;
+}
+.garment-bg{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:9rem;filter:drop-shadow(0 16px 40px rgba(0,0,0,0.5));
+  transition:all 0.35s;
+}
+.garment-canvas{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+}
+.garment-design{
+  width:120px;height:120px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;
+  background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.15);
+  transition:all 0.4s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  overflow:hidden;position:relative;
+}
+.garment-design.has-design{
+  background:rgba(255,255,255,0.95);
+  border:none;box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+.garment-design img{width:100%;height:100%;object-fit:cover;}
+.garment-design-placeholder{
+  display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+  color:rgba(255,255,255,0.35);font-size:0.65rem;letter-spacing:0.1em;
+  text-transform:uppercase;text-align:center;
+}
+.garment-design-placeholder span{font-size:1.5rem;}
+
+/* COLOR SELECTOR */
+.garment-color-row{display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.g-color{
+  width:26px;height:26px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all 0.2s;
+}
+.g-color.active{border-color:var(--accent2);transform:scale(1.15);}
+.g-color:hover{transform:scale(1.1);}
+
+/* GARMENT TYPE */
+.garment-type-row{display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.g-type{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  cursor:pointer;padding:0.4rem 0.8rem;
+  font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);
+  transition:all 0.2s;
+}
+.g-type.active{background:var(--accent);border-color:var(--accent);color:white;}
+.g-type:hover:not(.active){background:rgba(255,255,255,0.08);color:white;}
+
+/* PROMPT INPUT */
+.prompt-area{margin-bottom:1.2rem;}
+.prompt-label{
+  font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);margin-bottom:0.5rem;display:flex;justify-content:space-between;
+}
+.prompt-input{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);outline:none;
+  font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--white);
+  padding:0.8rem 1rem;resize:none;height:80px;
+  transition:border-color 0.2s;line-height:1.5;
+}
+.prompt-input:focus{border-color:rgba(181,96,63,0.6);}
+.prompt-input::placeholder{color:rgba(255,255,255,0.2);}
+.prompt-suggestions{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.prompt-chip{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer;padding:0.28rem 0.6rem;
+  font-size:0.62rem;color:rgba(255,255,255,0.4);transition:all 0.2s;
+}
+.prompt-chip:hover{background:rgba(181,96,63,0.2);border-color:rgba(181,96,63,0.4);color:var(--accent2);}
+
+/* UPLOAD ZONE */
+.upload-toggle{
+  display:flex;gap:0;margin-bottom:1.2rem;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.upload-toggle-btn{
+  flex:1;background:none;border:none;cursor:pointer;
+  font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);padding:0.55rem 0.5rem;
+  transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;
+}
+.upload-toggle-btn.active{
+  background:rgba(255,255,255,0.08);color:var(--accent2);
+}
+.upload-toggle-btn:hover:not(.active){color:rgba(255,255,255,0.6);}
+.upload-zone{
+  border:2px dashed rgba(255,255,255,0.12);
+  padding:1.5rem 1rem;text-align:center;cursor:pointer;
+  transition:all 0.25s;margin-bottom:1rem;position:relative;
+  background:rgba(255,255,255,0.02);
+}
+.upload-zone:hover,.upload-zone.dragover{
+  border-color:rgba(181,96,63,0.6);background:rgba(181,96,63,0.06);
+}
+.upload-zone input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.upload-icon{font-size:1.8rem;margin-bottom:0.5rem;display:block;}
+.upload-text{font-size:0.72rem;color:rgba(255,255,255,0.35);line-height:1.5;}
+.upload-text strong{color:rgba(255,255,255,0.6);display:block;margin-bottom:0.2rem;}
+.upload-hint{font-size:0.6rem;color:rgba(255,255,255,0.2);margin-top:0.3rem;}
+.uploaded-preview{
+  position:relative;margin-bottom:1rem;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  padding:0.8rem;display:none;
+}
+.uploaded-preview.show{display:flex;gap:0.8rem;align-items:center;}
+.uploaded-thumb{
+  width:60px;height:60px;object-fit:cover;flex-shrink:0;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.uploaded-meta{flex:1;min-width:0;}
+.uploaded-name{font-size:0.72rem;color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.uploaded-size{font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:0.2rem;}
+.uploaded-remove{
+  background:none;border:1px solid rgba(255,255,255,0.1);cursor:pointer;
+  color:rgba(255,255,255,0.3);font-size:0.75rem;padding:0.25rem 0.5rem;
+  transition:all 0.2s;flex-shrink:0;
+}
+.uploaded-remove:hover{border-color:rgba(200,50,50,0.5);color:#E74C3C;}
+
+/* MODIFY MODE TOGGLE */
+.modify-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.7rem 0.9rem;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  margin-bottom:1rem;cursor:pointer;
+}
+.modify-toggle-label{font-size:0.72rem;color:rgba(255,255,255,0.5);}
+.modify-toggle-label strong{display:block;color:rgba(255,255,255,0.75);font-size:0.78rem;margin-bottom:0.1rem;}
+.toggle-switch{
+  width:36px;height:20px;background:rgba(255,255,255,0.1);
+  border-radius:10px;position:relative;transition:background 0.2s;flex-shrink:0;
+}
+.toggle-switch.on{background:var(--accent);}
+.toggle-knob{
+  position:absolute;top:3px;left:3px;
+  width:14px;height:14px;background:white;border-radius:50%;
+  transition:transform 0.2s;
+}
+.toggle-switch.on .toggle-knob{transform:translateX(16px);}
+.modify-prompt-area{
+  overflow:hidden;max-height:0;
+  transition:max-height 0.3s ease,opacity 0.3s;
+  opacity:0;
+}
+.modify-prompt-area.open{max-height:200px;opacity:1;}
+
+.generate-btn{
+  width:100%;background:var(--accent);color:white;border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.9rem;display:flex;align-items:center;justify-content:center;gap:0.7rem;
+  transition:all 0.3s;
+  box-shadow:0 4px 16px rgba(181,96,63,0.3);
+}
+.generate-btn:hover{background:var(--accent2);box-shadow:0 4px 24px rgba(181,96,63,0.5);}
+.generate-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.generate-btn .spinner{
+  width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);
+  border-top-color:white;border-radius:50%;
+  animation:spin 0.8s linear infinite;display:none;
+}
+.generate-btn.loading .spinner{display:block;}
+.generate-btn.loading .btn-text{display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes floatGarment{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
+/* SIZE + ADD TO CART */
+.panel-size-row{display:flex;gap:0.4rem;margin:1rem 0 0.8rem;}
+.p-size{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  cursor:pointer;padding:0.35rem 0.7rem;
+  font-size:0.7rem;color:rgba(255,255,255,0.5);transition:all 0.2s;
+}
+.p-size.active{background:var(--white);color:var(--text);border-color:var(--white);}
+.p-size:hover:not(.active){background:rgba(255,255,255,0.1);color:white;}
+
+.panel-add-row{display:flex;gap:0.8rem;align-items:stretch;}
+.panel-qty{display:flex;border:1px solid rgba(255,255,255,0.15);}
+.panel-qty-btn{
+  background:none;border:none;cursor:pointer;
+  width:36px;display:flex;align-items:center;justify-content:center;
+  color:white;font-size:1.1rem;transition:background 0.2s;
+}
+.panel-qty-btn:hover{background:rgba(255,255,255,0.08);}
+.panel-qty-num{min-width:32px;text-align:center;font-size:0.88rem;display:flex;align-items:center;justify-content:center;color:white;}
+.panel-add{
+  flex:1;background:var(--white);color:var(--text);border:none;cursor:pointer;
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.7rem 1rem;transition:all 0.25s;
+}
+.panel-add:hover{background:var(--accent);color:white;}
+.panel-add:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* PRICE TAG */
+.creator-price-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin:1rem 0 0.5rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);
+}
+.creator-price{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:white;}
+.creator-price-base{font-size:0.72rem;color:rgba(255,255,255,0.3);}
+
+/* STYLE PRESETS */
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.2rem;}
+.style-preset{
+  aspect-ratio:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0.3rem;transition:all 0.2s;padding:0.5rem;
+}
+.style-preset:hover,.style-preset.active{background:rgba(181,96,63,0.15);border-color:rgba(181,96,63,0.4);}
+.style-preset span:first-child{font-size:1.5rem;}
+.style-preset-name{font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);text-align:center;}
+.style-preset.active .style-preset-name{color:var(--accent2);}
+
+/* INSPIRATION GALLERY */
+.inspo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1.2rem;}
+.inspo-item{
+  aspect-ratio:1;cursor:pointer;overflow:hidden;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+  transition:all 0.25s;position:relative;
+}
+.inspo-item:hover{border-color:rgba(181,96,63,0.5);transform:scale(0.97);}
+.inspo-item.selected{border-color:var(--accent2);border-width:2px;}
+.inspo-label{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,0.6);font-size:0.55rem;letter-spacing:0.08em;
+  text-transform:uppercase;color:rgba(255,255,255,0.7);text-align:center;
+  padding:0.25rem;
+}
+
+@media(max-width:900px){
+  .creator-inner{grid-template-columns:1fr;gap:3rem;}
+}
+@media(max-width:600px){
+  .style-grid{grid-template-columns:repeat(3,1fr);}
+  .inspo-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+.rv-grid{display:flex;gap:1.2rem;overflow-x:auto;padding-bottom:0.5rem;scrollbar-width:none;}
+.rv-grid::-webkit-scrollbar{display:none;}
+.rv-card{flex-shrink:0;width:160px;cursor:pointer;}
+.rv-img{
+  width:160px;height:200px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  margin-bottom:0.6rem;transition:opacity 0.2s;
+}
+.rv-card:hover .rv-img{opacity:0.85;}
+.rv-name{font-size:0.78rem;margin-bottom:0.2rem;}
+.rv-price{font-size:0.72rem;color:var(--muted);}
+
+/* ══════════════════════════════
+   PROGRESS BAR (shipping)
+══════════════════════════════ */
+.shipping-progress{
+  margin-bottom:1rem;
+}
+.sp-bar-label{
+  display:flex;justify-content:space-between;
+  font-size:0.68rem;margin-bottom:0.4rem;
+}
+.sp-bar-track{height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.sp-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width 0.4s ease;}
+
+/* ══════════════════════════════
+   FLOATING NOTIFICATION
+══════════════════════════════ */
+.sale-notif{
+  position:fixed;bottom:5rem;left:1.5rem;z-index:90;
+  background:var(--white);border:1px solid var(--border);
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+  padding:0.9rem 1rem;max-width:240px;
+  display:flex;gap:0.8rem;align-items:center;
+  transform:translateX(-120%);transition:transform 0.4s cubic-bezier(0.25,0,0,1);
+}
+.sale-notif.show{transform:translateX(0);}
+.sale-notif-emoji{font-size:1.5rem;flex-shrink:0;}
+.sale-notif-text{font-size:0.72rem;line-height:1.45;}
+.sale-notif-text strong{display:block;font-weight:500;margin-bottom:0.1rem;}
+.sale-notif-text span{color:var(--muted);}
+.sale-notif-close{
+  position:absolute;top:0.3rem;right:0.4rem;
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:0.8rem;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     WELCOME POPUP
+═══════════════════════════════════════ -->
+<div class="popup-overlay" id="welcomePopup">
+  <div class="welcome-popup">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <div class="popup-visual">
+      <div class="popup-visual-emoji">✦</div>
+      <div class="popup-visual-title">Bienvenido/a<br>a <em>genMyTee</em></div>
+      <div class="popup-visual-sub">Moda atemporal desde 2018</div>
+    </div>
+    <div class="popup-content">
+      <p class="popup-eyebrow">Oferta exclusiva para nuevos clientes</p>
+      <h3 class="popup-title">10% de descuento<br>en tu primera compra</h3>
+      <p class="popup-desc">Únete a nuestra comunidad y accede a descuentos exclusivos, lanzamientos anticipados y contenido editorial solo para suscriptores.</p>
+      <div class="popup-discount-chip">
+        <span class="popup-discount-code">BIENVENIDA</span>
+        <span class="popup-discount-note">Copia el código · Úsalo en el carrito</span>
+      </div>
+      <div class="popup-form">
+        <input class="popup-input" id="popupEmail" type="email" placeholder="tu@email.com"/>
+        <button class="popup-submit" onclick="submitPopup()">Activar mi descuento →</button>
+        <button class="popup-skip" onclick="closePopup()">No gracias, pagar precio completo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING SALE NOTIFICATION -->
+<div class="sale-notif" id="saleNotif">
+  <span class="sale-notif-emoji">🛍️</span>
+  <div class="sale-notif-text">
+    <strong id="saleNotifName">Laura de Madrid</strong>
+    <span id="saleNotifAction">acaba de comprar Camisa Lino Esencial</span>
+  </div>
+  <button class="sale-notif-close" onclick="hideSaleNotif()">✕</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     COOKIE BANNER
+═══════════════════════════════════════ -->
+<div class="cookie-banner" id="cookieBanner">
+  <p class="cookie-text">Usamos cookies para mejorar tu experiencia de compra y mostrarte contenido relevante. <a href="#">Más información</a>.</p>
+  <div class="cookie-actions">
+    <button class="cookie-decline" onclick="dismissCookie()">Solo esenciales</button>
+    <button class="cookie-accept" onclick="dismissCookie()">Aceptar todas</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     OVERLAYS
+═══════════════════════════════════════ -->
+<div class="overlay" id="mainOverlay" onclick="closeAll()"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- ═══════════════════════════════════════
+     ANNOUNCEMENT BAR
+═══════════════════════════════════════ -->
+<div class="announce-bar" id="announceBar">
+  <div class="announce-track">
+    <div class="announce-item"><span>🎨 ¡Nuevo! Prendas únicas con tu diseño · <a href="#creador">Crear la mía →</a></span></div>
+    <div class="announce-item"><span>🎁 Envío gratis en pedidos +€60 · <a href="#">Ver condiciones</a></span></div>
+    <div class="announce-item"><span>✨ Nueva colección Primavera 2026 ya disponible</span></div>
+  </div>
+  <button class="announce-close" onclick="document.getElementById('announceBar').style.display='none'">×</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════ -->
+<nav>
+  <div class="nav-top">
+    <button class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="#" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li class="active">
+        <a href="#">Novedades</a>
+        <div class="mega-menu">
+          <div class="mega-col">
+            <h4>Mujer</h4>
+            <ul>
+              <li><a href="#">Camisas & Blusas</a></li>
+              <li><a href="#">Vestidos</a></li>
+              <li><a href="#">Pantalones</a></li>
+              <li><a href="#">Faldas</a></li>
+            </ul>
+          </div>
+          <div class="mega-col">
+            <h4>Hombre</h4>
+            <ul>
+              <li><a href="#">Camisas</a></li>
+              <li><a href="#">Chaquetas</a></li>
+              <li><a href="#">Pantalones</a></li>
+              <li><a href="#">Polos</a></li>
+            </ul>
+          </div>
+          <div class="mega-col">
+            <h4>Accesorios</h4>
+            <ul>
+              <li><a href="#">Bolsos</a></li>
+              <li><a href="#">Cinturones</a></li>
+              <li><a href="#">Pañuelos</a></li>
+              <li><a href="#">Joyería</a></li>
+            </ul>
+          </div>
+          <div class="mega-col">
+            <h4>Calzado</h4>
+            <ul>
+              <li><a href="#">Sneakers</a></li>
+              <li><a href="#">Sandalias</a></li>
+              <li><a href="#">Mocasines</a></li>
+              <li><a href="#">Botas</a></li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <li><a href="#">Mujer</a></li>
+      <li><a href="#">Hombre</a></li>
+      <li><a href="#">Accesorios</a></li>
+      <li><a href="#">Marcas</a></li>
+      <li><a href="#" style="color:var(--accent)">Rebajas</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="openSearch()" title="Buscar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="nav-btn" onclick="openWishlist()" title="Favoritos">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        <span class="nav-badge" id="wishBadge" style="display:none">0</span>
+      </button>
+      <button class="nav-btn" onclick="openCart()" title="Carrito">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-badge" id="cartBadge" style="display:none">0</span>
+      </button>
+      <button class="nav-cta" onclick="showToast('¡Inicia sesión para acceder a tu cuenta!','')">Mi Cuenta</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <ul class="mobile-nav-list">
+    <li><a href="#">Novedades</a></li>
+    <li><a href="#">Mujer</a></li>
+    <li><a href="#">Hombre</a></li>
+    <li><a href="#">Accesorios</a></li>
+    <li><a href="#">Marcas</a></li>
+    <li><a href="#" style="color:var(--accent)">Rebajas</a></li>
+  </ul>
+</div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-input" id="searchInput" placeholder="Buscar productos..." oninput="handleSearch(this.value)" autocomplete="off"/>
+    <button class="search-close" onclick="closeSearch()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+  <p class="search-hint" id="searchHint">Prueba: "camisa", "bolso", "zapatillas"…</p>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HERO CAROUSEL
+═══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-slides" id="heroSlides">
+    <!-- Slide 1 -->
+    <div class="hero-slide">
+      <div class="hero-content">
+        <p class="slide-eyebrow">Nueva Colección · Primavera 2026</p>
+        <h1 class="slide-title">Lo que vistes<br>dice quién<br><em>eres tú</em></h1>
+        <p class="slide-desc">Piezas cuidadosamente seleccionadas para quienes aprecian el detalle, la calidad y el diseño intemporal.</p>
+        <div class="slide-cta">
+          <button class="btn-primary" onclick="document.getElementById('productos').scrollIntoView({behavior:'smooth'})">Ver Colección</button>
+          <button class="btn-ghost">Nuestra Historia</button>
+        </div>
+      </div>
+      <div class="hero-visual" style="background:linear-gradient(135deg,#E8DECC,#C9B99E,#A8906F)">
+        <div class="hero-visual-inner">🌿</div>
+        <div class="hero-badge-wrap">
+          <div class="hero-badge">
+            <span class="hero-badge-label">Envío gratis</span>
+            <span class="hero-badge-value">+€60 · 48h</span>
+          </div>
+          <div class="hero-badge">
+            <span class="hero-badge-label">Colección</span>
+            <span class="hero-badge-value">SS '26</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slide 2 -->
+    <div class="hero-slide">
+      <div class="hero-content">
+        <p class="slide-eyebrow">Accesorios · Artesanía Premium</p>
+        <h1 class="slide-title">El detalle<br><em>perfecto</em><br>lo cambia todo</h1>
+        <p class="slide-desc">Bolsos, cinturones y complementos elaborados a mano con cuero seleccionado en talleres europeos.</p>
+        <div class="slide-cta">
+          <button class="btn-primary">Ver Accesorios</button>
+          <button class="btn-outline">Colección Completa</button>
+        </div>
+      </div>
+      <div class="hero-visual" style="background:linear-gradient(135deg,#3D2B1A,#6B4226,#B5603F)">
+        <div class="hero-visual-inner">👜</div>
+        <div class="hero-badge-wrap">
+          <div class="hero-badge">
+            <span class="hero-badge-label">Hecho a mano</span>
+            <span class="hero-badge-value">Artesanía</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slide 3 -->
+    <div class="hero-slide">
+      <div class="hero-content">
+        <p class="slide-eyebrow">Rebajas · Hasta agotar stock</p>
+        <h1 class="slide-title">Hasta<br><em>40% dto.</em><br>en outlet</h1>
+        <p class="slide-desc">Piezas de temporadas pasadas con descuentos exclusivos. Calidad genMyTee al precio más especial.</p>
+        <div class="slide-cta">
+          <button class="btn-primary" style="background:var(--accent)">Ver Rebajas</button>
+          <button class="btn-ghost">Ver condiciones</button>
+        </div>
+      </div>
+      <div class="hero-visual" style="background:linear-gradient(135deg,#2C3E2D,#4A6741,#7A9E76)">
+        <div class="hero-visual-inner">🍃</div>
+        <div class="hero-badge-wrap">
+          <div class="hero-badge">
+            <span class="hero-badge-label">Descuento máximo</span>
+            <span class="hero-badge-value" style="color:var(--accent)">−40%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 — PRODUCTO ESTRELLA -->
+    <div class="hero-slide">
+      <div class="hero-content">
+        <p class="slide-eyebrow" style="display:flex;align-items:center;gap:0.5rem">
+          <span style="background:var(--accent);color:white;font-size:0.55rem;padding:0.2rem 0.5rem;letter-spacing:0.12em">NUEVO</span>
+          Prendas exclusivas · Solo en genMyTee
+        </p>
+        <h1 class="slide-title">Tu imaginación,<br><em>hecha</em><br>prenda</h1>
+        <p class="slide-desc">Describe el diseño que llevas en la cabeza. Nosotros lo convertimos en una prenda única en el mundo, solo para ti.</p>
+        <div class="slide-cta">
+          <button class="btn-primary" onclick="document.getElementById('creador').scrollIntoView({behavior:'smooth'})">
+            Crear la mía →
+          </button>
+          <button class="btn-ghost" onclick="document.getElementById('creador').scrollIntoView({behavior:'smooth'})">
+            Ver cómo funciona
+          </button>
+        </div>
+        <div style="margin-top:1.5rem;display:flex;gap:1.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:0.35rem"><span style="color:var(--accent)">✓</span>Único en el mundo</span>
+          <span style="font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:0.35rem"><span style="color:var(--accent)">✓</span>Desde €39</span>
+          <span style="font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:0.35rem"><span style="color:var(--accent)">✓</span>Entrega en 5–7 días</span>
+        </div>
+      </div>
+      <div class="hero-visual" style="background:linear-gradient(135deg,#0A0908,#1C1A18,#3D2B1A);position:relative;overflow:hidden;">
+        <!-- Glow effect -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 55% 45%,rgba(181,96,63,0.25) 0%,transparent 70%);pointer-events:none;"></div>
+        <!-- Floating garment mockup -->
+        <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:1rem;">
+          <div style="position:relative;width:200px;height:220px;display:flex;align-items:center;justify-content:center;">
+            <!-- T-shirt -->
+            <div style="font-size:10rem;filter:drop-shadow(0 20px 40px rgba(181,96,63,0.4));animation:floatGarment 4s ease-in-out infinite;">👕</div>
+            <!-- Design badge on shirt -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-30%,-30%);background:white;border-radius:6px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,0.5);font-size:1.6rem;line-height:1;">✨</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.3rem;">Tu diseño aquí</div>
+            <div style="font-size:0.75rem;color:var(--accent2);font-family:'Cormorant Garamond',serif;font-style:italic;">"única en el mundo"</div>
+          </div>
+        </div>
+        <div class="hero-badge-wrap">
+          <div class="hero-badge" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(8px);">
+            <span class="hero-badge-label" style="color:rgba(255,255,255,0.5);">Precio desde</span>
+            <span class="hero-badge-value" style="color:white">€39 · 5–7 días</span>
+          </div>
+          <div class="hero-badge" style="background:var(--accent);border:none;">
+            <span class="hero-badge-label" style="color:rgba(255,255,255,0.7);">Producto estrella</span>
+            <span class="hero-badge-value" style="color:white">Exclusivo genMyTee</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="hero-arrow prev" onclick="moveSlide(-1)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="hero-arrow next" onclick="moveSlide(1)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+  <div class="hero-nav">
+    <button class="hero-dot active" onclick="goSlide(0)"></button>
+    <button class="hero-dot" onclick="goSlide(1)"></button>
+    <button class="hero-dot" onclick="goSlide(2)"></button>
+    <button class="hero-dot" onclick="goSlide(3)"></button>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <strong>Envío gratis +€60</strong><span>·</span>
+    <strong>Devoluciones 30 días</strong><span>·</span>
+    <strong>Pago 100% seguro</strong><span>·</span>
+    <strong>Nuevas llegadas</strong><span>·</span>
+    <strong>Materiales sostenibles</strong><span>·</span>
+    <strong>Hecho en Europa</strong><span>·</span>
+    <strong>Envío gratis +€60</strong><span>·</span>
+    <strong>Devoluciones 30 días</strong><span>·</span>
+    <strong>Pago 100% seguro</strong><span>·</span>
+    <strong>Nuevas llegadas</strong><span>·</span>
+    <strong>Materiales sostenibles</strong><span>·</span>
+    <strong>Hecho en Europa</strong><span>·</span>
+  </div>
+</div>
+
+<!-- GENDER SELECTOR -->
+<div class="gender-selector">
+  <div class="gender-card" onclick="filterProducts('vestidos',null);document.getElementById('productos').scrollIntoView({behavior:'smooth'})" style="background:linear-gradient(135deg,#C9B99E,#8B6F5E)">
+    <div class="gender-bg">👗</div>
+    <div class="gender-overlay"></div>
+    <div class="gender-label">
+      <div class="gender-name">Mujer</div>
+      <div class="gender-sub">Nueva colección</div>
+      <div class="gender-cta">Explorar <span>→</span></div>
+    </div>
+  </div>
+  <div class="gender-card" onclick="filterProducts('camisas',null);document.getElementById('productos').scrollIntoView({behavior:'smooth'})" style="background:linear-gradient(135deg,#3D2B1A,#6B4226)">
+    <div class="gender-bg">🧥</div>
+    <div class="gender-overlay"></div>
+    <div class="gender-label">
+      <div class="gender-name">Hombre</div>
+      <div class="gender-sub">Nueva colección</div>
+      <div class="gender-cta">Explorar <span>→</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SOCIAL PROOF BAR -->
+<div class="social-proof-bar" id="socialProofBar">
+  <div class="sp-item"><span class="sp-dot"></span><span class="sp-num" id="spViewers">24</span><span>personas viendo ahora</span></div>
+  <div class="sp-item">🛍️ <span class="sp-num" id="spSales">2.847</span><span>clientes satisfechos</span></div>
+  <div class="sp-item">⭐ <span class="sp-num">4.9/5</span><span>valoración media</span></div>
+  <div class="sp-item">📦 <span class="sp-num" id="spOrders">18</span><span>pedidos en las últimas 24h</span></div>
+</div>
+
+<!-- TRUST BADGES -->
+<div class="trust-row animate-on-scroll">
+  <div class="trust-item">
+    <div class="trust-icon">🚚</div>
+    <div class="trust-text"><strong>Envío gratis</strong><span>En pedidos superiores a €60</span></div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">🔄</div>
+    <div class="trust-text"><strong>Devolución fácil</strong><span>30 días sin preguntas</span></div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">🔒</div>
+    <div class="trust-text"><strong>Pago seguro</strong><span>Encriptación SSL · PCI compliant</span></div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">🌿</div>
+    <div class="trust-text"><strong>Sostenible</strong><span>Packaging 100% reciclado</span></div>
+  </div>
+</div>
+
+<!-- FLASH SALE -->
+<div class="flash-sale animate-on-scroll">
+  <div class="flash-left">
+    <span class="flash-badge">⚡ Flash Sale</span>
+    <span class="flash-title">Hasta <em>40% descuento</em> · Oferta limitada</span>
+  </div>
+  <div class="countdown" id="countdown">
+    <div class="countdown-unit"><span class="countdown-num" id="cdH">05</span><span class="countdown-label">Horas</span></div>
+    <span class="countdown-sep">:</span>
+    <div class="countdown-unit"><span class="countdown-num" id="cdM">34</span><span class="countdown-label">Min</span></div>
+    <span class="countdown-sep">:</span>
+    <div class="countdown-unit"><span class="countdown-num" id="cdS">21</span><span class="countdown-label">Seg</span></div>
+  </div>
+  <button class="flash-btn" onclick="showToast('Cargando ofertas...','')">Ver Todas las Ofertas</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PRODUCTOS
+═══════════════════════════════════════ -->
+<section class="section" id="productos">
+  <div class="section-header animate-on-scroll">
+    <h2 class="section-title">Nuevas<br><em>Llegadas</em></h2>
+    <a href="#" class="section-link">Ver todo el catálogo</a>
+  </div>
+  <!-- FILTER TABS -->
+  <div class="filter-tabs animate-on-scroll">
+    <button class="filter-tab active" onclick="filterProducts('all',this)">Todo</button>
+    <button class="filter-tab" onclick="filterProducts('camisas',this)">Camisas</button>
+    <button class="filter-tab" onclick="filterProducts('pantalones',this)">Pantalones</button>
+    <button class="filter-tab" onclick="filterProducts('vestidos',this)">Vestidos</button>
+    <button class="filter-tab" onclick="filterProducts('bolsos',this)">Bolsos</button>
+    <button class="filter-tab" onclick="filterProducts('calzado',this)">Calzado</button>
+    <button class="filter-tab" onclick="filterProducts('accesorios',this)">Accesorios</button>
+  </div>
+  <div class="filter-row">
+    <span class="results-count" id="resultsCount">12 productos</span>
+    <select class="sort-select" onchange="sortProducts(this.value)">
+      <option value="new">Más recientes</option>
+      <option value="price-asc">Precio: menor a mayor</option>
+      <option value="price-desc">Precio: mayor a menor</option>
+      <option value="popular">Más populares</option>
+    </select>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+  <div class="load-more-wrap animate-on-scroll">
+    <button class="btn-outline" onclick="loadMore()">Cargar más productos</button>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" style="padding-top:0">
+  <div class="section-header animate-on-scroll">
+    <h2 class="section-title">Explorar por<br><em>Categoría</em></h2>
+    <a href="#" class="section-link">Ver todas</a>
+  </div>
+  <div class="cat-grid animate-on-scroll">
+    <div class="cat-card" onclick="filterProducts('camisas',null);document.getElementById('productos').scrollIntoView({behavior:'smooth'})">
+      <div class="cat-bg-inner" style="background:linear-gradient(135deg,#C9B99E,#8B6F5E)">👔</div>
+      <div class="cat-overlay"></div>
+      <div class="cat-info"><div class="cat-name">Ropa</div><div class="cat-count">124 artículos</div></div>
+      <button class="cat-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="cat-card" onclick="filterProducts('bolsos',null);document.getElementById('productos').scrollIntoView({behavior:'smooth'})">
+      <div class="cat-bg-inner" style="background:linear-gradient(135deg,#B5AFA3,#6B7B6F)">👜</div>
+      <div class="cat-overlay"></div>
+      <div class="cat-info"><div class="cat-name">Bolsos</div><div class="cat-count">68 artículos</div></div>
+      <button class="cat-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="cat-card" onclick="filterProducts('calzado',null);document.getElementById('productos').scrollIntoView({behavior:'smooth'})">
+      <div class="cat-bg-inner" style="background:linear-gradient(135deg,#A0876C,#5C4033)">👟</div>
+      <div class="cat-overlay"></div>
+      <div class="cat-info"><div class="cat-name">Calzado</div><div class="cat-count">45 artículos</div></div>
+      <button class="cat-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND STORY -->
+<div class="feature-banner animate-on-scroll">
+  <div class="fb-visual" style="background:linear-gradient(135deg,#1C1A18,#3D2B1A)">
+    <div style="font-size:8rem">✦</div>
+  </div>
+  <div class="fb-text">
+    <p class="fb-eyebrow">Nuestra Historia</p>
+    <h2 class="fb-title">Moda con<br><em>propósito</em></h2>
+    <p class="fb-desc">genMyTee nació de la convicción de que la moda puede ser bella y responsable al mismo tiempo. Seleccionamos cada pieza con atención al origen, el proceso y el impacto. Trabajamos con talleres europeos de pequeño formato que comparten nuestros valores de artesanía y sostenibilidad.</p>
+    <div class="fb-stats">
+      <div class="fb-stat"><strong>2018</strong><span>Fundada</span></div>
+      <div class="fb-stat"><strong>+50</strong><span>Marcas</span></div>
+      <div class="fb-stat"><strong>98%</strong><span>Satisfacción</span></div>
+    </div>
+    <button class="btn-primary">Conocer genMyTee</button>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-header animate-on-scroll">
+    <h2 class="section-title">Lo que dicen<br><em>nuestros clientes</em></h2>
+    <div class="slider-controls">
+      <button class="slider-btn" onclick="moveTestimonial(-1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="slider-btn" onclick="moveTestimonial(1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="testimonial-slider">
+    <div class="testimonial-track" id="testiTrack">
+      <div class="testimonial-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"La calidad de la camisa de lino superó todas mis expectativas. El tejido es suave, la caída es perfecta y el packaging fue una experiencia en sí mismo. Sin duda repetiré."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Laura M.</div>
+            <div class="testi-location">Madrid</div>
+            <div class="testi-verified">✓ Compra verificada</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Llevo años buscando piezas que duren y este bolso es exactamente lo que quería. El cuero tiene una textura increíble y los detalles están cuidados al milímetro."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👨</div>
+          <div>
+            <div class="testi-name">Carlos R.</div>
+            <div class="testi-location">Barcelona</div>
+            <div class="testi-verified">✓ Compra verificada</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"El proceso de devolución fue rapidísimo y sin complicaciones. Increíble la atención al cliente. Definitivamente mi nueva tienda favorita para moda de calidad."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Sofía A.</div>
+            <div class="testi-location">Valencia</div>
+            <div class="testi-verified">✓ Compra verificada</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-stars">★★★★☆</div>
+        <p class="testi-quote">"El pantalón wide leg que pedí es exactamente como en las fotos. Muy bien confeccionado. El envío llegó antes de lo esperado, muy satisfecha con la compra."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Ana P.</div>
+            <div class="testi-location">Bilbao</div>
+            <div class="testi-verified">✓ Compra verificada</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Mi regalo de cumpleaños favorito de los últimos años. Pedí el vestido midi de seda y es simplemente perfecto. Cada vez que lo llevo recibo halagos. ¡Gracias genMyTee!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Elena B.</div>
+            <div class="testi-location">Sevilla</div>
+            <div class="testi-verified">✓ Compra verificada</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTAGRAM FEED -->
+<section class="section" style="padding-bottom:0">
+  <div class="section-header animate-on-scroll">
+    <h2 class="section-title">Síguenos<br><em>en Instagram</em></h2>
+    <a href="#" class="section-link">@genmytee</a>
+  </div>
+</section>
+<div class="insta-grid animate-on-scroll">
+  <div class="insta-post" style="background:linear-gradient(135deg,#E8DECC,#C9B99E)"><div class="insta-post-inner">👔</div><div class="insta-overlay"><div class="insta-stat">♥ 234</div><div class="insta-stat">💬 12</div></div></div>
+  <div class="insta-post" style="background:linear-gradient(135deg,#D5CCBE,#A8906F)"><div class="insta-post-inner">🌿</div><div class="insta-overlay"><div class="insta-stat">♥ 512</div><div class="insta-stat">💬 28</div></div></div>
+  <div class="insta-post" style="background:linear-gradient(135deg,#C4B9A8,#8B6F5E)"><div class="insta-post-inner">👜</div><div class="insta-overlay"><div class="insta-stat">♥ 389</div><div class="insta-stat">💬 19</div></div></div>
+  <div class="insta-post" style="background:linear-gradient(135deg,#3D2B1A,#6B4226)"><div class="insta-post-inner">✦</div><div class="insta-overlay"><div class="insta-stat">♥ 702</div><div class="insta-stat">💬 45</div></div></div>
+  <div class="insta-post" style="background:linear-gradient(135deg,#DDD5C8,#B5AFA3)"><div class="insta-post-inner">👗</div><div class="insta-overlay"><div class="insta-stat">♥ 298</div><div class="insta-stat">💬 17</div></div></div>
+  <div class="insta-post" style="background:linear-gradient(135deg,#2C3E2D,#4A6741)"><div class="insta-post-inner">🍃</div><div class="insta-overlay"><div class="insta-stat">♥ 456</div><div class="insta-stat">💬 31</div></div></div>
+</div>
+<p class="insta-handle">Etiquétanos en tus fotos con <a href="#">#genMyTeeStyle</a> para aparecer aquí ✨</p>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-grid animate-on-scroll">
+    <div class="faq-sidebar">
+      <h2 class="section-title">Preguntas<br><em>frecuentes</em></h2>
+      <p>¿No encuentras lo que buscas? Contacta con nuestro equipo de atención al cliente, disponible de lunes a sábado.</p>
+      <br>
+      <button class="btn-primary" onclick="showToast('Abriendo chat de soporte...','')">Contactar</button>
+    </div>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CUSTOM PRODUCT CREATOR — PRODUCTO ESTRELLA
+═══════════════════════════════════════ -->
+<section class="creator-section" id="creador">
+  <div class="creator-inner">
+
+    <!-- LEFT: PITCH -->
+    <div>
+      <div class="creator-label">Producto Estrella · Exclusivo genMyTee</div>
+      <h2 class="creator-title">Tu imaginación,<br><em>hecha prenda</em></h2>
+      <p class="creator-subtitle">Diseña una prenda única que no existe en ningún otro sitio del mundo. Tú describes, nosotros la creamos y te la enviamos en 5–7 días.</p>
+
+      <div class="creator-steps">
+        <div class="creator-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Elige tu prenda y color</strong>
+            <span>Camiseta, sudadera, hoodie o polo · Varios colores disponibles</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Describe tu diseño con palabras</strong>
+            <span>"Un lobo en la niebla, estilo grabado en madera" · Sin límites creativos</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Previsualiza y ajusta al instante</strong>
+            <span>Ve cómo queda antes de comprar · Cambia hasta que sea perfecta</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <strong>La recibiste · La llevas · Eres único</strong>
+            <span>Impresión premium DTG · Colores que duran · Packaging exclusivo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="creator-cta-row">
+        <button class="btn-glow" onclick="document.getElementById('creador').scrollIntoView({behavior:'smooth'});document.getElementById('promptInput').focus()">
+          Crear mi prenda →
+        </button>
+        <span class="creator-note">Desde <span>€39</span> · Único en el mundo</span>
+      </div>
+
+      <div style="margin-top:2.5rem;display:flex;gap:2rem;flex-wrap:wrap;">
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:0.4rem;">
+          <span style="color:var(--accent2)">✓</span> Impresión DTG premium
+        </div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:0.4rem;">
+          <span style="color:var(--accent2)">✓</span> 100% algodón orgánico
+        </div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:0.4rem;">
+          <span style="color:var(--accent2)">✓</span> Envío en 5–7 días
+        </div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:0.4rem;">
+          <span style="color:var(--accent2)">✓</span> Devolución garantizada
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONFIGURATOR -->
+    <div class="creator-panel">
+
+      <!-- HOW-TO ACCORDION -->
+      <div class="howto-bar" id="howtoBbar">
+        <button class="howto-toggle" onclick="toggleHowto()">
+          <span class="howto-toggle-left">💡 ¿Cómo funciona? · 4 pasos muy sencillos</span>
+          <span class="howto-toggle-icon">▾</span>
+        </button>
+        <div class="howto-content">
+          <div class="howto-steps">
+            <div class="howto-step">
+              <div class="howto-step-num">1</div>
+              <div class="howto-step-body">
+                <strong>Elige tu prenda y color</strong>
+                <span>Camiseta, sudadera, hoodie o polo. Escoge el color de la tela sobre la que irá tu diseño.</span>
+              </div>
+            </div>
+            <div class="howto-step">
+              <div class="howto-step-num">2</div>
+              <div class="howto-step-body">
+                <strong>Diseña o sube tu imagen</strong>
+                <span>Escribe en palabras lo que imaginas y nosotros lo generamos, o sube tu propio logo o ilustración. Puedes transformarla con IA si quieres.</span>
+              </div>
+            </div>
+            <div class="howto-step">
+              <div class="howto-step-num">3</div>
+              <div class="howto-step-body">
+                <strong>Pulsa "Generar" y ve la previsualización</strong>
+                <span>Verás exactamente cómo quedará el diseño sobre la prenda antes de comprar. Puedes regenerar todas las veces que quieras.</span>
+              </div>
+            </div>
+            <div class="howto-step">
+              <div class="howto-step-num">4</div>
+              <div class="howto-step-body">
+                <strong>Elige talla y añade al carrito</strong>
+                <span>Una vez satisfecho con el diseño, selecciona tu talla y añade al carrito. Recibirás tu prenda en 5–7 días laborables.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP PROGRESS -->
+      <div class="step-progress" id="stepProgress">
+        <div class="step-item active" id="step-1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Prenda<br>& color</span>
+        </div>
+        <div class="step-item" id="step-2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Tu<br>diseño</span>
+        </div>
+        <div class="step-item" id="step-3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Vista<br>previa</span>
+        </div>
+        <div class="step-item" id="step-4">
+          <div class="step-circle">4</div>
+          <span class="step-label">Talla<br>& carrito</span>
+        </div>
+      </div>
+
+      <!-- CONTEXTUAL TIP (dynamic) -->
+      <div id="ctxTip"></div>
+
+      <!-- PANEL TABS -->
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchPanelTab('diseñar',this)">✏️ Diseñar</button>
+        <button class="panel-tab" onclick="switchPanelTab('estilos',this)">🎨 Estilos</button>
+        <button class="panel-tab" onclick="switchPanelTab('inspiracion',this)">✨ Inspiración</button>
+      </div>
+
+      <!-- TAB: DISEÑAR -->
+      <div id="panelTab-diseñar">
+
+        <!-- GARMENT TYPE -->
+        <div style="margin-bottom:1rem;">
+          <div class="prompt-label"><span>Tipo de prenda</span></div>
+          <div class="garment-type-row">
+            <button class="g-type active" onclick="selectGarmentType('camiseta',this)">Camiseta</button>
+            <button class="g-type" onclick="selectGarmentType('sudadera',this)">Sudadera</button>
+            <button class="g-type" onclick="selectGarmentType('hoodie',this)">Hoodie</button>
+            <button class="g-type" onclick="selectGarmentType('polo',this)">Polo</button>
+          </div>
+        </div>
+
+        <!-- COLOR -->
+        <div style="margin-bottom:1.2rem;">
+          <div class="prompt-label"><span>Color</span><span id="colorName">Blanco</span></div>
+          <div class="garment-color-row">
+            <div class="g-color active" style="background:#FFFFFF;box-shadow:0 0 0 1px rgba(255,255,255,0.3)" onclick="selectGarmentColor('#FFFFFF','Blanco',this)"></div>
+            <div class="g-color" style="background:#1C1A18" onclick="selectGarmentColor('#1C1A18','Negro',this)"></div>
+            <div class="g-color" style="background:#B5AFA3" onclick="selectGarmentColor('#B5AFA3','Gris',this)"></div>
+            <div class="g-color" style="background:#B5603F" onclick="selectGarmentColor('#B5603F','Terracota',this)"></div>
+            <div class="g-color" style="background:#3D7A5A" onclick="selectGarmentColor('#3D7A5A','Verde',this)"></div>
+            <div class="g-color" style="background:#2C3E60" onclick="selectGarmentColor('#2C3E60','Azul marino',this)"></div>
+          </div>
+        </div>
+
+        <!-- GARMENT PREVIEW -->
+        <div class="garment-preview">
+          <div class="garment-bg" id="garmentEmoji">👕</div>
+          <div class="garment-canvas">
+            <div class="garment-design" id="garmentDesign">
+              <div class="garment-design-placeholder" id="designPlaceholder">
+                <span>✦</span>
+                <span>Tu diseño<br>aquí</span>
+              </div>
+              <img id="generatedImg" style="display:none;width:100%;height:100%;object-fit:cover;" alt="Diseño generado"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOURCE TOGGLE: DESCRIBE vs SUBIR -->
+        <div class="upload-toggle">
+          <button class="upload-toggle-btn active" id="modeDescBtn" onclick="switchDesignMode('describe')">
+            ✏️ Describir con texto
+          </button>
+          <button class="upload-toggle-btn" id="modeUploadBtn" onclick="switchDesignMode('upload')">
+            📁 Subir mi imagen
+          </button>
+        </div>
+
+        <!-- MODE: DESCRIBIR -->
+        <div id="modeDescribe">
+          <!-- PROMPT -->
+          <div class="prompt-area">
+            <div class="prompt-label">
+              <span>Describe tu diseño</span>
+              <span id="charCount">0/200</span>
+            </div>
+            <textarea class="prompt-input" id="promptInput"
+              placeholder="Ej: Un zorro geométrico mirando la luna llena, colores tierra, estilo minimalista nórdico..."
+              maxlength="200"
+              oninput="updateCharCount(this);if(currentGuideStep===2&&this.value.length>5)advanceStep(3)"></textarea>
+          </div>
+          <!-- PROMPT CHIPS -->
+          <div class="prompt-suggestions">
+            <button class="prompt-chip" onclick="applyChip('Montañas nevadas al amanecer, estilo grabado vintage')">🏔️ Montañas vintage</button>
+            <button class="prompt-chip" onclick="applyChip('Tigre en blanco y negro, trazo de pincel japonés')">🐯 Tigre japonés</button>
+            <button class="prompt-chip" onclick="applyChip('Flores silvestres botánicas, ilustración acuarela')">🌸 Flores botánicas</button>
+            <button class="prompt-chip" onclick="applyChip('Constelaciones y luna, estilo grabado celestial')">🌙 Constelaciones</button>
+            <button class="prompt-chip" onclick="applyChip('Ola oceánica, estilo ukiyo-e japonés moderno')">🌊 Ola japonesa</button>
+            <button class="prompt-chip" onclick="applyChip('Lobo geométrico en triángulos, estilo low poly')">🐺 Lobo geométrico</button>
+          </div>
+        </div>
+
+        <!-- MODE: SUBIR IMAGEN -->
+        <div id="modeUpload" style="display:none">
+
+          <!-- DROP ZONE -->
+          <div class="upload-zone" id="uploadZone"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handleDrop(event)">
+            <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(this)"/>
+            <span class="upload-icon">🖼️</span>
+            <div class="upload-text">
+              <strong>Arrastra tu imagen aquí</strong>
+              o haz clic para seleccionarla
+            </div>
+            <div class="upload-hint">JPG, PNG, WEBP · Máx. 10MB · Recomendado: fondo transparente (PNG)</div>
+          </div>
+
+          <!-- PREVIEW DE IMAGEN SUBIDA -->
+          <div class="uploaded-preview" id="uploadedPreview">
+            <img id="uploadedThumb" class="uploaded-thumb" src="" alt="Vista previa"/>
+            <div class="uploaded-meta">
+              <div class="uploaded-name" id="uploadedName">—</div>
+              <div class="uploaded-size" id="uploadedSize">—</div>
+              <div style="font-size:0.62rem;color:var(--accent2);margin-top:0.3rem">✓ Lista para estampar</div>
+            </div>
+            <button class="uploaded-remove" onclick="removeUpload()" title="Eliminar">✕</button>
+          </div>
+
+          <!-- TOGGLE: MODIFICAR O NO -->
+          <div class="modify-toggle" onclick="toggleModify()" id="modifyToggle" style="display:none">
+            <div class="modify-toggle-label">
+              <strong>Modificar con IA</strong>
+              Transforma el estilo de tu imagen con una descripción
+            </div>
+            <div class="toggle-switch" id="modifySwitch">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+
+          <!-- PROMPT DE MODIFICACIÓN (se despliega si el toggle está ON) -->
+          <div class="modify-prompt-area" id="modifyPromptArea">
+            <div class="prompt-area" style="margin-bottom:0.8rem">
+              <div class="prompt-label">
+                <span>¿Cómo quieres transformarla?</span>
+                <span id="modifyCharCount">0/150</span>
+              </div>
+              <textarea class="prompt-input" id="modifyPromptInput"
+                placeholder="Ej: Conviértela en acuarela, fondo blanco · Estilo grabado en madera · Quitar fondo y añadir efecto neón..."
+                maxlength="150" style="height:65px"
+                oninput="document.getElementById('modifyCharCount').textContent=this.value.length+'/150'"></textarea>
+            </div>
+            <div class="prompt-suggestions" style="margin-bottom:0.8rem">
+              <button class="prompt-chip" onclick="applyModifyChip('Convertir a acuarela artística, colores suaves')">🎨 Acuarela</button>
+              <button class="prompt-chip" onclick="applyModifyChip('Estilo grabado en madera vintage, líneas finas')">🪵 Grabado</button>
+              <button class="prompt-chip" onclick="applyModifyChip('Blanco y negro, alto contraste, estilo tatuaje')">⬛ B&W tatuaje</button>
+              <button class="prompt-chip" onclick="applyModifyChip('Pop art colores vivos, estilo Andy Warhol')">⚡ Pop art</button>
+              <button class="prompt-chip" onclick="applyModifyChip('Quitar fondo, mantener solo el sujeto principal')">✂️ Sin fondo</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- GENERATE -->
+        <button class="generate-btn" id="generateBtn" onclick="generateDesign()">
+          <span class="btn-text" id="generateBtnText">✦ Generar mi diseño único</span>
+          <span class="spinner"></span>
+        </button>
+
+      </div>
+
+      <!-- TAB: ESTILOS -->
+      <div id="panelTab-estilos" style="display:none">
+        <div class="prompt-label" style="margin-bottom:1rem"><span>Elige un estilo artístico</span></div>
+        <div class="style-grid">
+          <div class="style-preset" onclick="applyStyle('Ilustración acuarela suave y artística',this)">
+            <span>🎨</span><span class="style-preset-name">Acuarela</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Grabado en madera vintage, líneas finas detalladas',this)">
+            <span>🪵</span><span class="style-preset-name">Grabado</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Minimalista línea negra, trazo limpio y moderno',this)">
+            <span>⬛</span><span class="style-preset-name">Minimalista</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Arte abstracto geométrico, formas y colores planos',this)">
+            <span>🔷</span><span class="style-preset-name">Geométrico</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Ilustración botánica científica vintage detallada',this)">
+            <span>🌿</span><span class="style-preset-name">Botánico</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Tipografía artística con lettering a mano',this)">
+            <span>✍️</span><span class="style-preset-name">Lettering</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Ukiyo-e japonés moderno, bloques de color',this)">
+            <span>🏯</span><span class="style-preset-name">Japonés</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Sticker pop art años 90 colores neón',this)">
+            <span>⚡</span><span class="style-preset-name">Pop Art</span>
+          </div>
+          <div class="style-preset" onclick="applyStyle('Fotografía artística en blanco y negro alto contraste',this)">
+            <span>📷</span><span class="style-preset-name">B&W</span>
+          </div>
+        </div>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.3);line-height:1.6">
+          Selecciona un estilo para añadirlo a tu descripción. Luego ve a <strong style="color:rgba(255,255,255,0.5)">Diseñar</strong> y personaliza el motivo.
+        </p>
+      </div>
+
+      <!-- TAB: INSPIRACIÓN -->
+      <div id="panelTab-inspiracion" style="display:none">
+        <div class="prompt-label" style="margin-bottom:1rem"><span>Diseños populares · Toca para usar como base</span></div>
+        <div class="inspo-grid">
+          <div class="inspo-item" onclick="applyInspo('Lobo aullando, luna llena, bosque de pinos, grabado vintage')">🐺<div class="inspo-label">El lobo</div></div>
+          <div class="inspo-item" onclick="applyInspo('Montaña triangular minimal con sol naciente y líneas paralelas')">🏔️<div class="inspo-label">La montaña</div></div>
+          <div class="inspo-item" onclick="applyInspo('Cráneo rodeado de flores silvestres, estilo Day of the Dead mexicano')">💀<div class="inspo-label">El cráneo</div></div>
+          <div class="inspo-item" onclick="applyInspo('Mapa estelar constelaciones Osa Mayor, líneas doradas sobre negro')">⭐<div class="inspo-label">Constelaciones</div></div>
+          <div class="inspo-item" onclick="applyInspo('Ola grande de Kanagawa reinterpretada en estilo moderno minimalista')">🌊<div class="inspo-label">La ola</div></div>
+          <div class="inspo-item" onclick="applyInspo('Zorro geométrico en triángulos degradado naranja a morado')">🦊<div class="inspo-label">El zorro</div></div>
+          <div class="inspo-item" onclick="applyInspo('Rosa botánica detallada ilustración científica vintage en rosa palo')">🌹<div class="inspo-label">La rosa</div></div>
+          <div class="inspo-item" onclick="applyInspo('Astronauta flotando entre plantas tropicales, estilo surrealista')">🧑‍🚀<div class="inspo-label">Astronauta</div></div>
+          <div class="inspo-item" onclick="applyInspo('Pez koi y flor de loto, tinta negra estilo tatuaje tradicional japonés')">🐟<div class="inspo-label">Koi japonés</div></div>
+        </div>
+      </div>
+
+      <!-- SIZE + QTY + ADD -->
+      <div class="prompt-label" style="margin-top:1.2rem;opacity:0.5" id="step4Label">
+        <span>Paso 4 · Elige tu talla y añade al carrito</span>
+      </div>
+      <div class="panel-size-row">
+        <button class="p-size" onclick="selectPanelSize('XS',this)">XS</button>
+        <button class="p-size active" onclick="selectPanelSize('S',this)">S</button>
+        <button class="p-size" onclick="selectPanelSize('M',this)">M</button>
+        <button class="p-size" onclick="selectPanelSize('L',this)">L</button>
+        <button class="p-size" onclick="selectPanelSize('XL',this)">XL</button>
+        <button class="p-size" onclick="selectPanelSize('XXL',this)">XXL</button>
+      </div>
+
+      <div class="creator-price-row">
+        <span class="creator-price-base">Prenda única personalizada</span>
+        <span class="creator-price" id="creatorPrice">€39.00</span>
+      </div>
+
+      <div class="panel-add-row">
+        <div class="panel-qty">
+          <button class="panel-qty-btn" onclick="changePanelQty(-1)">−</button>
+          <span class="panel-qty-num" id="panelQtyNum">1</span>
+          <button class="panel-qty-btn" onclick="changePanelQty(1)">+</button>
+        </div>
+        <button class="panel-add" id="panelAddBtn" onclick="addCustomToCart()" disabled>
+          Añadir al carrito
+        </button>
+      </div>
+      <p style="font-size:0.62rem;color:rgba(255,255,255,0.2);margin-top:0.6rem;text-align:center">
+        Diseño generado con inteligencia artificial · Impresión artesanal DTG
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter animate-on-scroll">
+  <p class="nl-eyebrow">Únete a la comunidad genMyTee</p>
+  <h2 class="nl-title">Primero en saber,<br><em>primero en elegir</em></h2>
+  <p class="nl-desc">Accede a lanzamientos exclusivos, descuentos anticipados y contenido editorial solo para suscriptores.</p>
+  <div class="nl-form">
+    <input class="nl-input" id="nlEmail" type="email" placeholder="tu@email.com"/>
+    <button class="nl-btn" onclick="subscribeNewsletter()">Suscribirme</button>
+  </div>
+  <p class="nl-note">Sin spam. Puedes darte de baja cuando quieras. Cumplimos el RGPD.</p>
+</section>
+
+<!-- RECENTLY VIEWED -->
+<section class="recently-viewed" id="recentlyViewedSection" style="display:none">
+  <div class="section-header">
+    <h2 class="section-title">Vistos<br><em>recientemente</em></h2>
+  </div>
+  <div class="rv-grid" id="rvGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">genMyTee</div>
+      <p class="footer-about">Moda consciente y atemporal desde 2018. Piezas seleccionadas con atención al detalle, artesanía europea y respeto por el planeta.</p>
+      <div class="footer-social">
+        <button class="social-btn" title="Instagram" onclick="showToast('Instagram de genMyTee','')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+        </button>
+        <button class="social-btn" title="Pinterest" onclick="showToast('Pinterest de genMyTee','')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.03-2.83.19-.77 1.28-5.43 1.28-5.43s-.33-.65-.33-1.62c0-1.52.88-2.66 1.98-2.66.93 0 1.38.7 1.38 1.54 0 .94-.6 2.34-.91 3.64-.26 1.09.54 1.97 1.6 1.97 1.93 0 3.41-2.03 3.41-4.97 0-2.6-1.87-4.42-4.54-4.42-3.09 0-4.91 2.32-4.91 4.72 0 .93.36 1.93.81 2.48.09.11.1.2.07.31-.08.34-.27 1.09-.31 1.24-.05.2-.17.24-.38.15-1.42-.66-2.31-2.75-2.31-4.43 0-3.6 2.62-6.91 7.56-6.91 3.97 0 7.06 2.83 7.06 6.6 0 3.94-2.48 7.1-5.93 7.1-1.16 0-2.25-.6-2.62-1.31l-.71 2.66c-.26.98-.95 2.21-1.41 2.96A10 10 0 0012 22a10 10 0 0010-10A10 10 0 0012 2z"/></svg>
+        </button>
+        <button class="social-btn" title="TikTok" onclick="showToast('TikTok de genMyTee','')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12a4 4 0 104 4V4a5 5 0 005 5"/></svg>
+        </button>
+        <button class="social-btn" title="WhatsApp" onclick="showToast('WhatsApp: +34 600 000 000','')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Tienda</h4>
+      <ul>
+        <li><a href="#">Novedades</a></li>
+        <li><a href="#">Más vendidos</a></li>
+        <li><a href="#">Rebajas</a></li>
+        <li><a href="#">Gift cards</a></li>
+        <li><a href="#">Marcas</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Ayuda</h4>
+      <ul>
+        <li><a href="#">Mi cuenta</a></li>
+        <li><a href="#">Seguir pedido</a></li>
+        <li><a href="#">Devoluciones</a></li>
+        <li><a href="#">Guía de tallas</a></li>
+        <li><a href="#">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <ul>
+        <li><a href="#">Nuestra historia</a></li>
+        <li><a href="#">Sostenibilidad</a></li>
+        <li><a href="#">Prensa</a></li>
+        <li><a href="#">Trabaja con nosotros</a></li>
+        <li><a href="#">Afiliados</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 genMyTee S.L. · <a href="#" style="color:inherit">Privacidad</a> · <a href="#" style="color:inherit">Cookies</a> · <a href="#" style="color:inherit">Términos</a></span>
+    <div class="footer-payments">
+      <span class="pay-chip">Visa</span>
+      <span class="pay-chip">Mastercard</span>
+      <span class="pay-chip">Amex</span>
+      <span class="pay-chip">PayPal</span>
+      <span class="pay-chip">Bizum</span>
+      <span class="pay-chip">ApplePay</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Tu Carrito <span id="cartItemCount" style="font-size:0.9rem;color:var(--muted);font-family:'DM Sans'"></span></span>
+    <button class="drawer-close" onclick="closeCart()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items-list" id="cartItemsList"></div>
+  <div class="cart-upsell" id="cartUpsell" style="display:none"></div>
+  <div class="cart-footer">
+    <div class="shipping-progress">
+      <div class="sp-bar-label">
+        <span style="font-size:0.68rem;color:var(--muted)">🚚 Progreso envío gratis</span>
+        <span style="font-size:0.68rem;font-weight:500" id="spBarPct">€60 para envío gratis</span>
+      </div>
+      <div class="sp-bar-track"><div class="sp-bar-fill" id="spBarFill" style="width:0%"></div></div>
+    </div>
+    <div class="discount-row">
+      <input class="discount-input" id="discountCode" placeholder="Código de descuento"/>
+      <button class="discount-apply" onclick="applyDiscount()">Aplicar</button>
+    </div>
+    <div class="cart-subtotal">
+      <span class="cart-subtotal-label">Subtotal</span>
+      <span class="cart-subtotal-value" id="cartSubtotal">€0.00</span>
+    </div>
+    <div id="discountLine" style="display:none;justify-content:space-between;margin-bottom:0.4rem;font-size:0.8rem;">
+      <span style="color:var(--green)">Descuento (genMyTee10)</span>
+      <span style="color:var(--green)" id="discountAmount">−€0.00</span>
+    </div>
+    <p class="cart-shipping-note" id="shippingNote">🚚 Añade €<span id="toFreeShip">60</span> más para envío gratis</p>
+    <button class="checkout-btn" onclick="handleCheckout()">Finalizar Compra →</button>
+    <div class="cart-perks">
+      <span class="cart-perk">🔒 Pago seguro</span>
+      <span class="cart-perk">🔄 Devolución fácil</span>
+      <span class="cart-perk">🚚 Envío 48h</span>
+    </div>
+  </div>
+</div>
+
+<!-- WISHLIST DRAWER -->
+<div class="wish-drawer" id="wishDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Mis Favoritos</span>
+    <button class="drawer-close" onclick="closeWishlist()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="wish-grid" id="wishGrid"></div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal" onclick="closeModal(event)">
+  <div class="product-modal" id="modalContent">
+    <button class="modal-close" onclick="closeModalDirect()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-images" id="modalImg"></div>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   DATA
+══════════════════════════════ */
+const products = [
+  {id:1,name:'Camisa Lino Esencial',cat:'camisas',catLabel:'Camisas',price:89,old:null,emoji:'👔',bg:'#E8DDD0',tag:'new',tagLabel:'Nuevo',stars:5,reviews:42,colors:['#C9B99E','#3D2B1A','#FFFFFF'],sizes:['XS','S','M','L','XL'],desc:'Confeccionada en lino 100% de primera calidad, esta camisa combina ligereza y durabilidad. Perfecta para cualquier ocasión.',details:['Lino 100% certificado OEKO-TEX','Confección europea','Lavado a máquina 30°','Regular fit']},
+  {id:2,name:'Pantalón Wide Leg',cat:'pantalones',catLabel:'Pantalones',price:129,old:159,emoji:'👖',bg:'#D5CCBE',tag:'sale',tagLabel:'-19%',stars:5,reviews:31,colors:['#1C1A18','#8B6F5E','#C9B99E'],sizes:['34','36','38','40','42'],desc:'Silueta wide leg de máxima tendencia con tejido fluido de alta calidad. Cintura elástica para mayor comodidad.',details:['Viscosa 70% / Poliéster 30%','Cintura elástica','Largo: 105cm para talla 38','Forro interior']},
+  {id:3,name:'Bolso Cuero Tote',cat:'bolsos',catLabel:'Bolsos',price:199,old:null,emoji:'👜',bg:'#C4B9A8',tag:'new',tagLabel:'Nuevo',stars:5,reviews:18,colors:['#8B6F5E','#1C1A18','#C9B99E'],sizes:['Único'],desc:'Tote bag fabricado a mano en cuero italiano de primera selección. Espacioso, duradero y atemporal.',details:['Cuero natural italiano','Forro interior en algodón','Cierre magnético','Dimensiones: 40×35×12cm']},
+  {id:4,name:'Zapatillas Minimal',cat:'calzado',catLabel:'Calzado',price:149,old:179,emoji:'👟',bg:'#DDD5C8',tag:'sale',tagLabel:'-17%',stars:4,reviews:55,colors:['#FFFFFF','#1C1A18','#C9B99E'],sizes:['36','37','38','39','40','41','42'],desc:'Zapatillas de diseño minimal con suela de goma antideslizante y parte superior en canvas premium.',details:['Canvas 100% algodón','Suela vulcanizada','Plantilla extraíble','Cierre con cordones encerados']},
+  {id:5,name:'Chaqueta Oversize',cat:'camisas',catLabel:'Chaquetas',price:219,old:null,emoji:'🧥',bg:'#C9BFB2',tag:'hot',tagLabel:'Bestseller',stars:5,reviews:73,colors:['#8B6F5E','#3D2B1A','#6B7B6F'],sizes:['XS','S','M','L','XL'],desc:'Chaqueta oversize con hombros caídos y bolsillos interiores. El básico atemporal de cualquier armario.',details:['Lana 80% / Cachemira 20%','Forro de seda','Botones de cuerno natural','Dry clean only']},
+  {id:6,name:'Vestido Midi Seda',cat:'vestidos',catLabel:'Vestidos',price:175,old:220,emoji:'👗',bg:'#D8D0C4',tag:'sale',tagLabel:'-20%',stars:5,reviews:29,colors:['#C9B99E','#3D2B1A','#6B4226'],sizes:['XS','S','M','L'],desc:'Vestido midi en seda natural con escote V y caída impecable. Perfecto para eventos especiales.',details:['Seda natural 100%','Forro interior incluido','Cremallera lateral invisible','Lavado en seco']},
+  {id:7,name:'Gorra Estructurada',cat:'accesorios',catLabel:'Accesorios',price:55,old:null,emoji:'🧢',bg:'#E0D8CC',tag:'new',tagLabel:'Nuevo',stars:4,reviews:14,colors:['#1C1A18','#C9B99E','#8B6F5E'],sizes:['S/M','L/XL'],desc:'Gorra de baseball estructurada en canvas con bordado exclusivo genMyTee. Regulable en la parte trasera.',details:['Canvas 100% algodón','Visera curva','Cierre de hebilla ajustable','Talla única ajustable']},
+  {id:8,name:'Cinturón Trenzado',cat:'accesorios',catLabel:'Accesorios',price:79,old:null,emoji:'⌚',bg:'#CCC4B8',tag:'hot',tagLabel:'Bestseller',stars:5,reviews:38,colors:['#8B6F5E','#1C1A18'],sizes:['70','75','80','85','90'],desc:'Cinturón artesanal de cuero trenzado a mano. Cada pieza es única gracias al proceso manual de fabricación.',details:['Cuero vacuno italiano','Trenzado a mano','Hebilla de latón','Ancho: 2.5cm']},
+  {id:9,name:'Falda Plisada',cat:'vestidos',catLabel:'Faldas',price:95,old:null,emoji:'🌸',bg:'#E8DECC',tag:'new',tagLabel:'Nuevo',stars:5,reviews:22,colors:['#C9B99E','#8B6F5E','#3D2B1A'],sizes:['XS','S','M','L'],desc:'Falda midi plisada con movimiento fluido. Cintura elástica y tejido satinado de gran calidad.',details:['Poliéster satinado 100%','Cintura elástica','Largo midi: 75cm','Lavado a máquina 30°']},
+  {id:10,name:'Mocasines Cuero',cat:'calzado',catLabel:'Calzado',price:165,old:null,emoji:'👞',bg:'#D5CCBE',tag:'new',tagLabel:'Nuevo',stars:5,reviews:17,colors:['#8B6F5E','#1C1A18','#C9B99E'],sizes:['36','37','38','39','40','41','42'],desc:'Mocasines clásicos en cuero pulido con suela de goma flexible. El calzado elegante definitivo.',details:['Cuero pulido italiano','Suela de goma flexible','Forro de cuero interior','Fabricación artesanal']},
+  {id:11,name:'Pañuelo Seda',cat:'accesorios',catLabel:'Accesorios',price:65,old:85,emoji:'🎀',bg:'#CCC4B8',tag:'sale',tagLabel:'-24%',stars:4,reviews:9,colors:['#C9B99E','#6B4226','#6B7B6F'],sizes:['Único'],desc:'Pañuelo de seda con estampado exclusivo diseñado para genMyTee. Versátil: llevar al cuello, bolso o cabello.',details:['Seda 100%','Estampado exclusivo genMyTee','90×90cm','Lavado en seco']},
+  {id:12,name:'Jersey Cashmere',cat:'camisas',catLabel:'Jersey',price:249,old:null,emoji:'🧶',bg:'#E0D8CC',tag:'hot',tagLabel:'Premium',stars:5,reviews:44,colors:['#C9B99E','#1C1A18','#8B6F5E'],sizes:['XS','S','M','L','XL'],desc:'Jersey de cachemira puro de grado A. Suavidad excepcional, calor sin peso. Una inversión para toda la vida.',details:['Cachemira 100% grado A','Cuello redondo','Regular fit','Lavado a mano o en seco']},
+];
+
+const faqs = [
+  {q:'¿Cuánto tarda el envío?',a:'Los envíos estándar tardan entre 24 y 48 horas laborables en toda la Península Ibérica. Para Baleares y Canarias, entre 3 y 5 días. Recibirás un email de seguimiento en cuanto salga tu pedido.'},
+  {q:'¿Los envíos son gratuitos?',a:'Sí, para pedidos superiores a €60 el envío es completamente gratuito. Para pedidos inferiores, el coste de envío es de €4.90 para Península y €8.90 para Islas y Canarias.'},
+  {q:'¿Cómo funciona la política de devoluciones?',a:'Tienes 30 días naturales desde la recepción para devolver cualquier artículo. Solo tiene que estar sin usar, con las etiquetas originales y en su embalaje original. Las devoluciones son gratuitas para pedidos nacionales.'},
+  {q:'¿Cómo sé qué talla pedir?',a:'En cada ficha de producto encontrarás un enlace a nuestra guía de tallas con medidas detalladas. Si tienes dudas entre dos tallas, te recomendamos elegir la talla mayor. También puedes contactar con nuestro equipo de atención al cliente.'},
+  {q:'¿Puedo cambiar o cancelar mi pedido?',a:'Si tu pedido aún no ha sido preparado, podemos modificarlo o cancelarlo sin problema. Contáctanos lo antes posible por email o WhatsApp. Una vez que el pedido haya salido de nuestro almacén, deberás realizar una devolución.'},
+  {q:'¿Qué métodos de pago aceptáis?',a:'Aceptamos Visa, Mastercard, American Express, PayPal, Apple Pay, Google Pay y Bizum. Todos los pagos están protegidos con encriptación SSL y son 100% seguros.'},
+];
+
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+let cart = [];
+let wishlist = [];
+let currentFilter = 'all';
+let currentSort = 'new';
+let discountApplied = false;
+let modalProduct = null;
+let selectedSize = '';
+let selectedColor = 0;
+let modalQty = 1;
+let heroIndex = 0;
+let testiIndex = 0;
+let cartOpen = false;
+let wishOpen = false;
+
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function dismissCookie() {
+  document.getElementById('cookieBanner').classList.add('hidden');
+}
+
+/* ══════════════════════════════
+   HERO CAROUSEL
+══════════════════════════════ */
+let heroAuto;
+function goSlide(i) {
+  heroIndex = i;
+  document.getElementById('heroSlides').style.transform = `translateX(-${i*100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d,j) => d.classList.toggle('active', j===i));
+}
+function moveSlide(dir) {
+  const len = 4;
+  heroIndex = (heroIndex + dir + len) % len;
+  goSlide(heroIndex);
+  resetHeroAuto();
+}
+function resetHeroAuto() {
+  clearInterval(heroAuto);
+  heroAuto = setInterval(() => moveSlide(1), 5000);
+}
+resetHeroAuto();
+
+/* ══════════════════════════════
+   COUNTDOWN
+══════════════════════════════ */
+let cdSecs = 5*3600 + 34*60 + 21;
+setInterval(() => {
+  if(cdSecs <= 0) return;
+  cdSecs--;
+  const h = Math.floor(cdSecs/3600);
+  const m = Math.floor((cdSecs%3600)/60);
+  const s = cdSecs%60;
+  document.getElementById('cdH').textContent = String(h).padStart(2,'0');
+  document.getElementById('cdM').textContent = String(m).padStart(2,'0');
+  document.getElementById('cdS').textContent = String(s).padStart(2,'0');
+}, 1000);
+
+/* ══════════════════════════════
+   PRODUCTS
+══════════════════════════════ */
+const stockData = {1:8,2:3,3:12,4:2,5:5,6:1,7:15,8:7,9:4,10:9,11:2,12:6};
+const viewerData = {1:7,2:12,3:5,4:14,5:9,6:18,7:3,8:11,9:6,10:4,11:8,12:10};
+
+function getFilteredProducts() {
+  let list = currentFilter === 'all' ? [...products] : products.filter(p => p.cat === currentFilter);
+  if(currentSort === 'price-asc') list.sort((a,b) => a.price - b.price);
+  else if(currentSort === 'price-desc') list.sort((a,b) => b.price - a.price);
+  else if(currentSort === 'popular') list.sort((a,b) => b.reviews - a.reviews);
+  return list;
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  const list = getFilteredProducts();
+  document.getElementById('resultsCount').textContent = `${list.length} producto${list.length!==1?'s':''}`;
+
+  grid.innerHTML = list.map((p,i) => {
+    const stock = stockData[p.id] || 10;
+    const viewers = viewerData[p.id] || 5;
+    const isLow = stock <= 4;
+    return `
+    <div class="product-card" style="animation:fadeUp 0.5s ${i*0.06}s ease both">
+      <div class="product-image" onclick="openModal(${p.id})">
+        <div class="product-img-inner" style="background:${p.bg}">
+          <span class="prod-emoji">${p.emoji}</span>
+        </div>
+        ${p.tag ? `<span class="product-tag ${p.tag}">${p.tagLabel}</span>` : ''}
+        <button class="product-wish-btn ${wishlist.find(w=>w.id===p.id)?'active':''}" onclick="event.stopPropagation();toggleWish(${p.id})" title="Favorito">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="${wishlist.find(w=>w.id===p.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </button>
+        <div class="product-colors">
+          ${p.colors.map(c => `<span class="color-swatch" style="background:${c}"></span>`).join('')}
+        </div>
+        <div class="viewers-badge"><span class="viewers-dot"></span>${viewers} personas lo están viendo</div>
+        <button class="product-add-btn" onclick="event.stopPropagation();quickAdd(${p.id})">+ Añadir al carrito</button>
+      </div>
+      <div class="product-info">
+        <div class="product-cat">${p.catLabel}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-stars">
+          <span class="stars">${'★'.repeat(p.stars)}${'☆'.repeat(5-p.stars)}</span>
+          <span class="review-count">(${p.reviews})</span>
+        </div>
+        <div class="product-price-row">
+          <span class="price-now">€${p.price.toFixed(2)}</span>
+          ${p.old ? `<span class="price-was">€${p.old.toFixed(2)}</span><span class="price-save">−${Math.round((1-p.price/p.old)*100)}%</span>` : ''}
+        </div>
+        <div class="stock-indicator">
+          <span class="stock-dot ${isLow?'low':'ok'}"></span>
+          <span class="stock-text ${isLow?'low':'ok'}">${isLow ? `¡Solo quedan ${stock}!` : 'En stock'}</span>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function filterProducts(cat, btn) {
+  currentFilter = cat;
+  if(btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderProducts();
+}
+
+function sortProducts(val) {
+  currentSort = val;
+  renderProducts();
+}
+
+function loadMore() {
+  showToast('Cargando más productos...','');
+  setTimeout(() => showToast('¡Todos los productos cargados!','success'), 1200);
+}
+
+function quickAdd(id) {
+  const p = products.find(x => x.id===id);
+  addToCart(p, p.sizes[0] || 'Único', 0, 1);
+}
+
+/* ══════════════════════════════
+   CART
+══════════════════════════════ */
+function addToCart(p, size, colorIdx, qty) {
+  const key = `${p.id}-${size}`;
+  const existing = cart.find(i => i.key === key);
+  if(existing) existing.qty += qty;
+  else cart.push({...p, size, colorIdx, qty, key});
+  updateCartUI();
+  showToast(`✓ ${p.name} añadido al carrito`, 'success');
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s,i) => s+i.qty, 0);
+  const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
+  const discSubtotal = subtotal * (discountApplied ? 0.9 : 1);
+
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = total;
+  badge.style.display = total>0 ? 'flex' : 'none';
+
+  document.getElementById('cartItemCount').textContent = total > 0 ? `(${total})` : '';
+  document.getElementById('cartSubtotal').textContent = `€${discSubtotal.toFixed(2)}`;
+
+  // Shipping progress bar
+  const toFree = Math.max(0, 60 - subtotal);
+  const pct = Math.min(100, (subtotal/60)*100);
+  const noteEl = document.getElementById('shippingNote');
+  const toFreeEl = document.getElementById('toFreeShip');
+  const barFill = document.getElementById('spBarFill');
+  const barPct = document.getElementById('spBarPct');
+  if(barFill) barFill.style.width = pct + '%';
+  if(barPct) barPct.textContent = subtotal >= 60 ? '✅ ¡Envío gratis!' : `€${toFree.toFixed(2)} para envío gratis`;
+
+  if(subtotal >= 60) { if(noteEl) { noteEl.style.display='none'; } }
+  else { if(noteEl) { noteEl.style.display='block'; } if(toFreeEl) toFreeEl.textContent = toFree.toFixed(2); }
+
+  const listEl = document.getElementById('cartItemsList');
+  if(cart.length === 0) {
+    listEl.innerHTML = `<div class="cart-empty-msg"><span>🛍️</span><p>Tu carrito está vacío</p><br><small style="color:var(--muted);font-size:0.78rem">Descubre nuestra colección y añade tus piezas favoritas</small></div>`;
+  } else {
+    listEl.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-img" style="background:${item.bg}">${item.emoji}</div>
+        <div class="cart-item-details">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-meta">${item.size} · Color ${item.colorIdx+1}</div>
+          <div class="cart-item-controls">
+            <button class="qty-btn" onclick="changeQty('${item.key}',-1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${item.key}',1)">+</button>
+            <button class="cart-item-remove" onclick="removeFromCart('${item.key}')">Eliminar</button>
+          </div>
+        </div>
+        <span class="cart-item-price">€${(item.price*item.qty).toFixed(2)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Upsell
+  renderCartUpsell();
+}
+
+function renderCartUpsell() {
+  const upsellEl = document.getElementById('cartUpsell');
+  if(!upsellEl) return;
+  const cartIds = cart.map(i => i.id);
+  const suggestions = products.filter(p => !cartIds.includes(p.id)).slice(0,5);
+  if(suggestions.length === 0) { upsellEl.style.display='none'; return; }
+  upsellEl.style.display = 'block';
+  upsellEl.innerHTML = `
+    <div class="cart-upsell-title">También te puede gustar</div>
+    <div class="upsell-scroll">
+      ${suggestions.map(p => `
+        <div class="upsell-card">
+          <div class="upsell-img" onclick="closeCart();openModal(${p.id})" style="background:${p.bg}">${p.emoji}</div>
+          <div class="upsell-name">${p.name}</div>
+          <div class="upsell-price">€${p.price.toFixed(2)}</div>
+          <button class="upsell-add" onclick="quickAdd(${p.id})">+ Añadir</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function changeQty(key, dir) {
+  const item = cart.find(i => i.key===key);
+  if(!item) return;
+  item.qty += dir;
+  if(item.qty <= 0) cart = cart.filter(i => i.key!==key);
+  updateCartUI();
+}
+
+function removeFromCart(key) {
+  cart = cart.filter(i => i.key!==key);
+  updateCartUI();
+  showToast('Producto eliminado del carrito','');
+}
+
+function applyDiscount() {
+  const code = document.getElementById('discountCode').value.trim().toUpperCase();
+  if(code === 'GENMYTEE10' || code === 'BIENVENIDA') {
+    discountApplied = true;
+    document.getElementById('discountLine').style.display = 'flex';
+    const disc = cart.reduce((s,i) => s+i.price*i.qty,0) * 0.1;
+    document.getElementById('discountAmount').textContent = `−€${disc.toFixed(2)}`;
+    updateCartUI();
+    showToast('🎉 ¡Código aplicado! −10% en tu pedido','success');
+  } else if(code === '') {
+    showToast('Introduce un código de descuento','');
+  } else {
+    showToast('Código no válido o expirado','error');
+  }
+}
+
+function handleCheckout() {
+  if(cart.length===0) { showToast('Tu carrito está vacío',''); return; }
+  const total = cart.reduce((s,i) => s+i.price*i.qty,0) * (discountApplied?0.9:1);
+  showToast(`Procesando pago de €${total.toFixed(2)}...`,'');
+  setTimeout(() => {
+    cart = []; discountApplied = false;
+    document.getElementById('discountCode').value = '';
+    document.getElementById('discountLine').style.display = 'none';
+    updateCartUI(); closeCart();
+    showToast('🎉 ¡Pedido realizado con éxito! Recibirás un email de confirmación.','success');
+  }, 1800);
+}
+
+function openCart() {
+  cartOpen = true;
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('mainOverlay').classList.add('open');
+  if(wishOpen) closeWishlist();
+}
+function closeCart() {
+  cartOpen = false;
+  document.getElementById('cartDrawer').classList.remove('open');
+  if(!wishOpen) document.getElementById('mainOverlay').classList.remove('open');
+}
+
+/* ══════════════════════════════
+   WISHLIST
+══════════════════════════════ */
+function toggleWish(id) {
+  const p = products.find(x => x.id===id);
+  const inWish = wishlist.find(w => w.id===id);
+  if(inWish) {
+    wishlist = wishlist.filter(w => w.id!==id);
+    showToast('Eliminado de favoritos','');
+  } else {
+    wishlist.push(p);
+    showToast(`♥ ${p.name} añadido a favoritos`,'success');
+  }
+  const badge = document.getElementById('wishBadge');
+  badge.textContent = wishlist.length;
+  badge.style.display = wishlist.length > 0 ? 'flex' : 'none';
+  renderProducts();
+  renderWishlist();
+}
+
+function renderWishlist() {
+  const grid = document.getElementById('wishGrid');
+  if(wishlist.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">♡</div><p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem">Aún no tienes favoritos</p></div>`;
+    return;
+  }
+  grid.innerHTML = wishlist.map(p => `
+    <div class="wish-card">
+      <div class="wish-card-img" style="background:${p.bg}">${p.emoji}</div>
+      <div class="wish-card-name">${p.name}</div>
+      <div class="wish-card-price">€${p.price.toFixed(2)}</div>
+      <button class="wish-remove-btn" onclick="toggleWish(${p.id})" title="Eliminar">×</button>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;padding:0.5rem;font-size:0.62rem" onclick="quickAdd(${p.id})">Añadir</button>
+    </div>
+  `).join('');
+}
+
+function openWishlist() {
+  wishOpen = true;
+  renderWishlist();
+  document.getElementById('wishDrawer').classList.add('open');
+  document.getElementById('mainOverlay').classList.add('open');
+  if(cartOpen) closeCart();
+}
+function closeWishlist() {
+  wishOpen = false;
+  document.getElementById('wishDrawer').classList.remove('open');
+  if(!cartOpen) document.getElementById('mainOverlay').classList.remove('open');
+}
+
+function closeAll() {
+  closeCart();
+  closeWishlist();
+}
+
+/* ══════════════════════════════
+   SEARCH
+══════════════════════════════ */
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchHint').style.display = 'block';
+}
+function handleSearch(val) {
+  const results = document.getElementById('searchResults');
+  const hint = document.getElementById('searchHint');
+  if(!val.trim()) { results.innerHTML = ''; hint.style.display='block'; return; }
+  hint.style.display = 'none';
+  const matches = products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.catLabel.toLowerCase().includes(val.toLowerCase()));
+  if(matches.length === 0) { results.innerHTML = `<p style="color:var(--muted);font-size:0.85rem;grid-column:1/-1">No se encontraron resultados para "<strong>${val}</strong>"</p>`; return; }
+  results.innerHTML = matches.slice(0,4).map(p => `
+    <div onclick="closeSearch();openModal(${p.id})" style="cursor:pointer">
+      <div style="aspect-ratio:1;background:${p.bg};display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:0.5rem">${p.emoji}</div>
+      <div style="font-size:0.78rem;font-weight:500">${p.name}</div>
+      <div style="font-size:0.75rem;color:var(--muted)">€${p.price.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeSearch(); closeModalDirect(); } });
+
+/* ══════════════════════════════
+   PRODUCT MODAL
+══════════════════════════════ */
+function openModal(id) {
+  modalProduct = products.find(p => p.id===id);
+  selectedSize = modalProduct.sizes[0];
+  selectedColor = 0;
+  modalQty = 1;
+  addToRecentlyViewed(id);
+  renderModal();
+  document.getElementById('productModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModal() {
+  const p = modalProduct;
+  document.getElementById('modalImg').innerHTML = `<div style="font-size:9rem">${p.emoji}</div>`;
+  document.getElementById('modalInfo').innerHTML = `
+    <div class="modal-cat">${p.catLabel}</div>
+    <h2 class="modal-name">${p.name}</h2>
+    <div class="modal-rating">
+      <span class="stars">${'★'.repeat(p.stars)}${'☆'.repeat(5-p.stars)}</span>
+      <span style="font-size:0.75rem;color:var(--muted)">${p.reviews} reseñas</span>
+    </div>
+    <div class="modal-price-row">
+      <span class="modal-price">€${p.price.toFixed(2)}</span>
+      ${p.old ? `<span class="modal-price-old">€${p.old.toFixed(2)}</span><span class="modal-price-save">−${Math.round((1-p.price/p.old)*100)}%</span>` : ''}
+    </div>
+    <hr class="modal-divider"/>
+    <div class="modal-label">
+      <span>Color</span>
+      <span style="color:var(--text)">${['Arena','Negro','Blanco','Camel','Verde'][selectedColor] || 'Seleccionado'}</span>
+    </div>
+    <div class="color-options">
+      ${p.colors.map((c,i) => `<div class="color-option ${i===selectedColor?'active':''}" style="background:${c};outline:${i===selectedColor?'2px solid var(--text)':'none'};outline-offset:3px" onclick="selectColor(${i})" title="Color ${i+1}"></div>`).join('')}
+    </div>
+    <div class="modal-label">
+      <span>Talla</span>
+      <a href="#" style="color:var(--accent);font-size:0.65rem">Guía de tallas</a>
+    </div>
+    <div class="size-options">
+      ${p.sizes.map(s => `<button class="size-btn ${s===selectedSize?'active':''}" onclick="selectSize('${s}')">${s}</button>`).join('')}
+    </div>
+    <div class="modal-qty-row">
+      <div class="modal-qty">
+        <button class="modal-qty-btn" onclick="changeModalQty(-1)">−</button>
+        <span class="modal-qty-num" id="mqn">${modalQty}</span>
+        <button class="modal-qty-btn" onclick="changeModalQty(1)">+</button>
+      </div>
+      <button class="modal-add-btn" onclick="modalAddToCart()">Añadir al carrito · €${(p.price*modalQty).toFixed(2)}</button>
+      <button class="modal-wish-btn ${wishlist.find(w=>w.id===p.id)?'active':''}" onclick="toggleWish(${p.id});renderModal()" title="Favorito">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="${wishlist.find(w=>w.id===p.id)?'white':'none'}" stroke="${wishlist.find(w=>w.id===p.id)?'white':'currentColor'}" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </button>
+    </div>
+    <div class="modal-guarantee">
+      <span>✓</span>
+      <span>Devolución gratuita en 30 días · Stock disponible · Envío en 48h</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.8rem;font-size:0.7rem;color:var(--muted)">
+      <span style="width:7px;height:7px;border-radius:50%;background:#E74C3C;display:inline-block;animation:pulse 1.5s infinite"></span>
+      <span>${viewerData[p.id] || 5} personas están viendo este producto ahora mismo</span>
+    </div>
+    <div style="margin-top:0.6rem;font-size:0.7rem;color:#E74C3C;font-weight:500">
+      ${(stockData[p.id]||10) <= 4 ? `⚠️ ¡Solo quedan ${stockData[p.id]} unidades en stock!` : ''}
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('desc',this)">Descripción</button>
+      <button class="modal-tab" onclick="switchTab('details',this)">Detalles</button>
+      <button class="modal-tab" onclick="switchTab('reviews',this)">Reseñas (${p.reviews})</button>
+    </div>
+    <div class="modal-tab-content active" id="tab-desc"><p>${p.desc}</p></div>
+    <div class="modal-tab-content" id="tab-details"><ul>${p.details.map(d=>`<li>${d}</li>`).join('')}</ul></div>
+    <div class="modal-tab-content" id="tab-reviews">
+      <div class="modal-review-item"><div class="review-meta"><span class="review-author">Laura M. <span style="color:var(--accent)">★★★★★</span></span><span class="review-date">Hace 2 días</span></div><p class="review-text">Increíble calidad. Exactamente lo que esperaba, el tejido es muy suave y la talla es perfecta.</p></div>
+      <div class="modal-review-item"><div class="review-meta"><span class="review-author">Carlos R. <span style="color:var(--accent)">★★★★☆</span></span><span class="review-date">Hace 1 semana</span></div><p class="review-text">Muy buen producto. El envío fue rápido y el embalaje muy cuidado. Repetiré sin duda.</p></div>
+    </div>
+    <div class="cross-sell">
+      <div class="cross-sell-title">Completa el look</div>
+      <div class="cross-sell-grid">
+        ${products.filter(x=>x.id!==p.id).sort(()=>Math.random()-0.5).slice(0,3).map(x=>`
+          <div class="cs-card" onclick="closeModalDirect();openModal(${x.id})">
+            <div class="cs-img" style="background:${x.bg}">${x.emoji}</div>
+            <div class="cs-name">${x.name}</div>
+            <div class="cs-price">€${x.price.toFixed(2)}</div>
+            <button class="cs-add" onclick="event.stopPropagation();quickAdd(${x.id})">+ Añadir</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function selectSize(s) { selectedSize = s; renderModal(); }
+function selectColor(i) { selectedColor = i; renderModal(); }
+function changeModalQty(d) { modalQty = Math.max(1, modalQty+d); renderModal(); }
+function modalAddToCart() { addToCart(modalProduct, selectedSize, selectedColor, modalQty); closeModalDirect(); openCart(); }
+function switchTab(id, btn) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('tab-'+id);
+  if(el) el.classList.add('active');
+}
+function closeModal(e) { if(e.target.id==='productModal') closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('productModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ══════════════════════════════
+   TESTIMONIALS SLIDER
+══════════════════════════════ */
+function moveTestimonial(dir) {
+  const track = document.getElementById('testiTrack');
+  const cards = track.querySelectorAll('.testimonial-card');
+  const max = Math.max(0, cards.length - 3);
+  testiIndex = Math.max(0, Math.min(max, testiIndex + dir));
+  const cardW = cards[0] ? cards[0].offsetWidth + 24 : 0;
+  track.style.transform = `translateX(-${testiIndex * cardW}px)`;
+}
+
+/* ══════════════════════════════
+   MOBILE MENU
+══════════════════════════════ */
+function toggleMobileMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+/* ══════════════════════════════
+   FAQ ACCORDION
+══════════════════════════════ */
+function renderFaq() {
+  const list = document.getElementById('faqList');
+  list.innerHTML = faqs.map((f,i) => `
+    <div class="faq-item" id="faq-${i}">
+      <button class="faq-question" onclick="toggleFaq(${i})">
+        ${f.q}
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer" id="faq-ans-${i}">
+        <p>${f.a}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleFaq(i) {
+  const item = document.getElementById(`faq-${i}`);
+  const ans = document.getElementById(`faq-ans-${i}`);
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-answer').style.maxHeight = '0';
+  });
+  if(!isOpen) {
+    item.classList.add('open');
+    ans.style.maxHeight = ans.scrollHeight + 'px';
+  }
+}
+
+/* ══════════════════════════════
+   NEWSLETTER
+══════════════════════════════ */
+function subscribeNewsletter() {
+  const email = document.getElementById('nlEmail').value.trim();
+  if(!email || !email.includes('@')) { showToast('Por favor, introduce un email válido','error'); return; }
+  document.getElementById('nlEmail').value = '';
+  showToast(`🎉 ¡Suscrito! Bienvenido/a a la familia genMyTee`,'success');
+}
+
+/* ══════════════════════════════
+   SCROLL TO TOP + ANIMATIONS
+══════════════════════════════ */
+const scrollTopBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if(rect.top < window.innerHeight - 80) el.classList.add('visible');
+  });
+});
+
+/* ══════════════════════════════
+   CUSTOM PRODUCT CONFIGURATOR
+══════════════════════════════ */
+const garmentEmojis = {camiseta:'👕',sudadera:'🧥',hoodie:'🥷',polo:'👔'};
+const garmentPrices = {camiseta:39,sudadera:55,hoodie:65,polo:45};
+let selectedGarment = 'camiseta';
+let selectedGarmentColor = '#FFFFFF';
+let panelSize = 'S';
+let panelQty = 1;
+let hasDesign = false;
+let selectedStyle = '';
+
+function selectGarmentType(type, btn) {
+  selectedGarment = type;
+  document.querySelectorAll('.g-type').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('garmentEmoji').textContent = garmentEmojis[type];
+  updateCreatorPrice();
+  if(currentGuideStep === 1) advanceStep(2);
+}
+
+function selectGarmentColor(hex, name, el) {
+  selectedGarmentColor = hex;
+  document.querySelectorAll('.g-color').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('colorName').textContent = name;
+}
+
+function selectPanelSize(size, btn) {
+  panelSize = size;
+  document.querySelectorAll('.p-size').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function changePanelQty(dir) {
+  panelQty = Math.max(1, panelQty + dir);
+  document.getElementById('panelQtyNum').textContent = panelQty;
+  updateCreatorPrice();
+}
+
+function updateCreatorPrice() {
+  const base = garmentPrices[selectedGarment] || 39;
+  document.getElementById('creatorPrice').textContent = `€${(base * panelQty).toFixed(2)}`;
+}
+
+function updateCharCount(el) {
+  document.getElementById('charCount').textContent = `${el.value.length}/200`;
+}
+
+function applyChip(text) {
+  const inp = document.getElementById('promptInput');
+  inp.value = text; updateCharCount(inp); inp.focus();
+}
+
+function applyStyle(styleText, btn) {
+  selectedStyle = styleText;
+  document.querySelectorAll('.style-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast(`Estilo aplicado · Ve a Diseñar y genera tu prenda`,'');
+  setTimeout(() => {
+    const firstTab = document.querySelector('.panel-tab');
+    switchPanelTab('diseñar', firstTab);
+  }, 600);
+}
+
+function applyInspo(text) {
+  const inp = document.getElementById('promptInput');
+  inp.value = selectedStyle ? text + ', ' + selectedStyle : text;
+  updateCharCount(inp);
+  switchPanelTab('diseñar', document.querySelector('.panel-tab'));
+  showToast('Inspiración aplicada · Pulsa Generar','');
+}
+
+function switchPanelTab(tab, btn) {
+  document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  ['diseñar','estilos','inspiracion'].forEach(t => {
+    const el = document.getElementById('panelTab-'+t);
+    if(el) el.style.display = t===tab ? 'block' : 'none';
+  });
+}
+
+const designEmojis = ['🐺','🏔️','🌊','🦊','🌹','🐯','⭐','🌿','🔮','🦅','🌺','🎭','🐉','🦁','🌙'];
+let designIdx = 0;
+
+/* ── Guide system ── */
+let currentGuideStep = 1;
+
+const ctxTips = {
+  1: { icon:'👕', title:'Primero lo primero: elige tu prenda', text:'Toca el tipo que más te guste — camiseta, sudadera, hoodie o polo — y luego el color de la tela. Verás la previsualización cambiar en tiempo real.' },
+  2: { icon:'🎨', title:'Hora de crear tu diseño único', text:'Puedes <strong>escribir lo que imaginas</strong> (ej: "un lobo con luna llena, estilo grabado") o <strong>subir tu propia imagen</strong>. Si subes una foto, puedes usarla tal cual o transformarla con IA.' },
+  3: { icon:'👀', title:'¡Casi listo! Pulsa "Generar"', text:'Haz clic en el botón naranja de abajo para ver cómo queda tu diseño sobre la prenda. Puedes repetirlo las veces que quieras hasta que te convenza.' },
+  4: { icon:'🛒', title:'¡Tu diseño está listo para ser tuyo!', text:'Elige tu talla (si tienes dudas, nuestras prendas tienen corte holgado — elige tu talla habitual) y pulsa "Añadir al carrito". Tu prenda llegará en 5–7 días.' },
+};
+
+function renderCtxTip(step) {
+  const tip = ctxTips[step];
+  if(!tip) return;
+  const el = document.getElementById('ctxTip');
+  el.innerHTML = `
+    <div class="ctx-tip">
+      <span class="ctx-tip-icon">${tip.icon}</span>
+      <div class="ctx-tip-text">
+        <strong>${tip.title}</strong>
+        ${tip.text}
+      </div>
+      <button class="ctx-tip-dismiss" onclick="document.getElementById('ctxTip').innerHTML=''" title="Cerrar">✕</button>
+    </div>`;
+}
+
+function setGuideStep(step) {
+  currentGuideStep = step;
+  // Update circles
+  for(let i=1;i<=4;i++){
+    const el = document.getElementById('step-'+i);
+    if(!el) continue;
+    el.classList.remove('active','done','just-done');
+    if(i < step){ el.classList.add('done'); el.querySelector('.step-circle').textContent='✓'; }
+    else if(i === step){ el.classList.add('active'); el.querySelector('.step-circle').textContent=i; }
+    else { el.querySelector('.step-circle').textContent=i; }
+  }
+  // Dim/highlight step 4 label
+  const s4 = document.getElementById('step4Label');
+  if(s4) s4.style.opacity = step >= 4 ? '1' : '0.35';
+  // Show tip
+  renderCtxTip(step);
+}
+
+function advanceStep(step) {
+  // brief celebration on completing a step
+  const prevEl = document.getElementById('step-'+currentGuideStep);
+  if(prevEl && step > currentGuideStep){
+    prevEl.classList.add('just-done');
+    setTimeout(()=>prevEl.classList.remove('just-done'),600);
+  }
+  setGuideStep(step);
+}
+
+function toggleHowto() {
+  document.getElementById('howtoBbar').classList.toggle('open');
+}
+
+/* ── Guide system ── */
+let designMode = 'describe'; // 'describe' | 'upload'
+let uploadedImageData = null;
+let modifyEnabled = false;
+
+function switchDesignMode(mode) {
+  designMode = mode;
+  document.getElementById('modeDescribe').style.display = mode==='describe' ? 'block' : 'none';
+  document.getElementById('modeUpload').style.display   = mode==='upload'   ? 'block' : 'none';
+  document.getElementById('modeDescBtn').classList.toggle('active', mode==='describe');
+  document.getElementById('modeUploadBtn').classList.toggle('active', mode==='upload');
+  const btnText = document.getElementById('generateBtnText');
+  if(mode==='describe') btnText.textContent = '✦ Generar mi diseño único';
+  else updateGenerateBtnText();
+}
+
+function updateGenerateBtnText() {
+  const btnText = document.getElementById('generateBtnText');
+  if(!uploadedImageData) { btnText.textContent = '📁 Sube una imagen primero'; return; }
+  btnText.textContent = modifyEnabled ? '✦ Transformar y estampar' : '✦ Usar imagen tal cual';
+}
+
+function handleImageUpload(input) {
+  const file = input.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024) { showToast('La imagen supera 10MB','error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedImageData = e.target.result;
+    showUploadPreview(file, uploadedImageData);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(!file || !file.type.startsWith('image/')) { showToast('Solo se aceptan imágenes','error'); return; }
+  const fakeInput = {files:[file]};
+  handleImageUpload(fakeInput);
+}
+
+function showUploadPreview(file, dataUrl) {
+  const preview = document.getElementById('uploadedPreview');
+  document.getElementById('uploadedThumb').src = dataUrl;
+  document.getElementById('uploadedName').textContent = file.name || 'imagen.png';
+  document.getElementById('uploadedSize').textContent = (file.size/1024).toFixed(0) + ' KB';
+  preview.classList.add('show');
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('modifyToggle').style.display = 'flex';
+  updateGenerateBtnText();
+  // Show image on garment preview immediately
+  applyImageToGarment(dataUrl, false);
+  showToast('✓ Imagen cargada · Puedes usarla tal cual o transformarla','success');
+  if(currentGuideStep <= 2) advanceStep(3);
+}
+
+function removeUpload() {
+  uploadedImageData = null;
+  modifyEnabled = false;
+  document.getElementById('uploadedPreview').classList.remove('show');
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('modifyToggle').style.display = 'none';
+  document.getElementById('modifyPromptArea').classList.remove('open');
+  document.getElementById('modifySwitch').classList.remove('on');
+  document.getElementById('imageUpload').value = '';
+  // Reset garment design
+  hasDesign = false;
+  const design = document.getElementById('garmentDesign');
+  design.classList.remove('has-design');
+  design.innerHTML = `<div class="garment-design-placeholder"><span>✦</span><span>Tu diseño<br>aquí</span></div>`;
+  document.getElementById('panelAddBtn').disabled = true;
+  updateGenerateBtnText();
+}
+
+function toggleModify() {
+  modifyEnabled = !modifyEnabled;
+  document.getElementById('modifySwitch').classList.toggle('on', modifyEnabled);
+  document.getElementById('modifyPromptArea').classList.toggle('open', modifyEnabled);
+  updateGenerateBtnText();
+}
+
+function applyModifyChip(text) {
+  document.getElementById('modifyPromptInput').value = text;
+  document.getElementById('modifyCharCount').textContent = text.length + '/150';
+}
+
+function applyImageToGarment(dataUrl, withEffect) {
+  hasDesign = true;
+  const design = document.getElementById('garmentDesign');
+  design.classList.add('has-design');
+  const overlay = withEffect ? `<div style="position:absolute;inset:0;background:rgba(181,96,63,0.15);mix-blend-mode:multiply"></div>` : '';
+  design.innerHTML = `
+    <div style="width:100%;height:100%;position:relative;overflow:hidden">
+      <img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;"/>
+      ${overlay}
+      ${withEffect ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(181,96,63,0.9);font-size:0.4rem;letter-spacing:0.1em;text-transform:uppercase;color:white;text-align:center;padding:3px">Transformado por IA</div>` : ''}
+    </div>`;
+  document.getElementById('panelAddBtn').disabled = false;
+}
+
+function generateDesign() {
+  const btn = document.getElementById('generateBtn');
+
+  // MODE: UPLOAD
+  if(designMode === 'upload') {
+    if(!uploadedImageData) { showToast('Sube una imagen primero 📁','error'); return; }
+    if(modifyEnabled) {
+      const modPrompt = document.getElementById('modifyPromptInput').value.trim();
+      if(!modPrompt) { showToast('Describe cómo quieres transformarla','error'); return; }
+      // Simulate AI transform
+      btn.classList.add('loading'); btn.disabled = true;
+      setTimeout(() => {
+        btn.classList.remove('loading'); btn.disabled = false;
+        applyImageToGarment(uploadedImageData, true);
+        showToast('✨ ¡Imagen transformada y lista!','success');
+        advanceStep(4);
+        updateCreatorPrice();
+      }, 2400);
+    } else {
+      // Use as-is immediately
+      applyImageToGarment(uploadedImageData, false);
+      showToast('✓ ¡Imagen aplicada a la prenda!','success');
+      advanceStep(4);
+      updateCreatorPrice();
+    }
+    return;
+  }
+
+  // MODE: DESCRIBE (original flow)
+  const prompt = document.getElementById('promptInput').value.trim();
+  if(!prompt) { showToast('Describe tu diseño primero ✏️','error'); return; }
+  btn.classList.add('loading'); btn.disabled = true;
+  setTimeout(() => {
+    btn.classList.remove('loading'); btn.disabled = false;
+    hasDesign = true;
+    const design = document.getElementById('garmentDesign');
+    const emoji = designEmojis[designIdx++ % designEmojis.length];
+    design.classList.add('has-design');
+    design.innerHTML = `
+      <div style="width:100%;height:100%;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:12px">
+        <div style="font-size:3.5rem;line-height:1">${emoji}</div>
+        <div style="font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:#8C8680;text-align:center;line-height:1.4">${prompt.slice(0,30)}${prompt.length>30?'…':''}</div>
+        <div style="font-size:0.45rem;color:#B5603F;letter-spacing:0.1em;text-transform:uppercase">genMyTee</div>
+      </div>`;
+    document.getElementById('panelAddBtn').disabled = false;
+    showToast('🎨 ¡Diseño generado! Añádelo al carrito','success');
+    advanceStep(4);
+    updateCreatorPrice();
+  }, 2200);
+}
+
+function addCustomToCart() {
+  if(!hasDesign) { showToast('Genera un diseño primero','error'); return; }
+  const prompt = document.getElementById('promptInput').value || 'Diseño personalizado';
+  const price = garmentPrices[selectedGarment] || 39;
+  const customProduct = {
+    id:999,
+    name:`${selectedGarment.charAt(0).toUpperCase()+selectedGarment.slice(1)} Única — "${prompt.slice(0,28)}…"`,
+    cat:'custom',catLabel:'Personalizada',
+    price,old:null,emoji:'✨',
+    bg:'linear-gradient(135deg,#1C1A18,#3D2B1A)',
+    tag:'hot',tagLabel:'Exclusiva',
+    key:`custom-${Date.now()}`
+  };
+  cart.push({...customProduct,size:panelSize,colorIdx:0,qty:panelQty});
+  updateCartUI();
+  showToast(`✓ ¡Prenda personalizada añadida!`,'success');
+  openCart();
+}
+
+/* ══════════════════════════════
+   WELCOME POPUP
+══════════════════════════════ */
+function openPopup() { document.getElementById('welcomePopup').classList.add('open'); }
+function closePopup() { document.getElementById('welcomePopup').classList.remove('open'); }
+function submitPopup() {
+  const email = document.getElementById('popupEmail').value.trim();
+  if(!email || !email.includes('@')) { showToast('Introduce un email válido','error'); return; }
+  closePopup();
+  showToast('🎉 ¡Código BIENVENIDA activado! −10% en tu compra','success');
+}
+
+/* ══════════════════════════════
+   SOCIAL PROOF LIVE UPDATER
+══════════════════════════════ */
+function updateSocialProof() {
+  const viewers = document.getElementById('spViewers');
+  const orders = document.getElementById('spOrders');
+  const sales = document.getElementById('spSales');
+  if(viewers) viewers.textContent = Math.floor(18 + Math.random()*15);
+  if(orders) orders.textContent = Math.floor(15 + Math.random()*8);
+  if(sales) {
+    const current = parseInt(sales.textContent.replace('.','').replace(',',''));
+    sales.textContent = (current + Math.floor(Math.random()*2)).toLocaleString('es-ES');
+  }
+}
+setInterval(updateSocialProof, 8000);
+
+/* ══════════════════════════════
+   SALE NOTIFICATION
+══════════════════════════════ */
+const saleNotifs = [
+  {name:'Laura de Madrid', action:'acaba de comprar Camisa Lino Esencial'},
+  {name:'Carlos de Barcelona', action:'añadió Bolso Cuero Tote al carrito'},
+  {name:'Ana de Valencia', action:'compró Vestido Midi Seda'},
+  {name:'Marta de Sevilla', action:'acaba de comprar Jersey Cashmere'},
+  {name:'Sofía de Bilbao', action:'añadió Zapatillas Minimal al carrito'},
+  {name:'Pablo de Málaga', action:'compró Chaqueta Oversize'},
+  {name:'Lucía de Zaragoza', action:'acaba de comprar Pantalón Wide Leg'},
+];
+let notifIndex = 0;
+function showSaleNotif() {
+  const notif = saleNotifs[notifIndex % saleNotifs.length];
+  notifIndex++;
+  document.getElementById('saleNotifName').textContent = notif.name;
+  document.getElementById('saleNotifAction').textContent = notif.action;
+  const el = document.getElementById('saleNotif');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4500);
+}
+function hideSaleNotif() { document.getElementById('saleNotif').classList.remove('show'); }
+setTimeout(() => { showSaleNotif(); setInterval(showSaleNotif, 12000); }, 5000);
+
+/* ══════════════════════════════
+   RECENTLY VIEWED
+══════════════════════════════ */
+let recentlyViewed = [];
+function addToRecentlyViewed(id) {
+  recentlyViewed = [id, ...recentlyViewed.filter(i=>i!==id)].slice(0,8);
+  renderRecentlyViewed();
+}
+function renderRecentlyViewed() {
+  const sec = document.getElementById('recentlyViewedSection');
+  const grid = document.getElementById('rvGrid');
+  if(!sec||!grid) return;
+  if(recentlyViewed.length < 2) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  const items = recentlyViewed.map(id => products.find(p=>p.id===id)).filter(Boolean);
+  grid.innerHTML = items.map(p => `
+    <div class="rv-card" onclick="openModal(${p.id})">
+      <div class="rv-img" style="background:${p.bg}">${p.emoji}</div>
+      <div class="rv-name">${p.name}</div>
+      <div class="rv-price">€${p.price.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+renderProducts();
+renderFaq();
+updateCartUI();
+// Init guide
+setGuideStep(1);
+// Show welcome popup after 3 seconds
+setTimeout(openPopup, 3000);
+</script>
+</body>
+</html>

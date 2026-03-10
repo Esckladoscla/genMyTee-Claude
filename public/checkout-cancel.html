@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pago cancelado — genMyTee</title>
+<link rel="stylesheet" href="/css/base.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<style>
+.cancel-page{
+  min-height:calc(100vh - 200px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:4rem 2rem;text-align:center;
+}
+.cancel-icon{font-size:4rem;margin-bottom:1.5rem}
+.cancel-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.1;
+  margin-bottom:1rem;
+}
+.cancel-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:420px;margin-bottom:2.5rem}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-top">
+    <a href="/" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li><a href="/#productos">Prendas</a></li>
+      <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
+    </ul>
+    <div class="nav-actions"></div>
+  </div>
+</nav>
+
+<div class="cancel-page">
+  <div class="cancel-icon">&#x1F6D2;</div>
+  <h1 class="cancel-title">Pago cancelado</h1>
+  <p class="cancel-desc">
+    No se ha realizado ningún cargo. Tu carrito sigue intacto
+    por si quieres completar tu compra más adelante.
+  </p>
+  <a href="/" class="btn-primary">Volver a la tienda</a>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <span>&copy; 2026 genMyTee</span>
+  </div>
+</footer>
+</body>
+</html>
