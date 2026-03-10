@@ -1,7 +1,14 @@
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import previewRouter from "./routes/preview.js";
 import webhooksRouter from "./routes/webhooks.js";
+import ordersRouter from "./routes/orders.js";
+import catalogRouter from "./routes/catalog.js";
+import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function addVaryOrigin(res) {
   const existing = res.getHeader("Vary");
@@ -35,7 +42,7 @@ function buildCorsMiddleware() {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Shopify-Hmac-Sha256");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Shopify-Hmac-Sha256");
 
     if (req.method === "OPTIONS") {
       return res.status(204).end();
@@ -56,12 +63,27 @@ export function createApp() {
   app.disable("x-powered-by");
   app.use(buildCorsMiddleware());
 
-  const webhookRawBody = express.raw({ type: "application/json", limit: "2mb" });
-  app.use("/api/webhooks", webhookRawBody, webhooksRouter);
-  app.use("/webhooks", webhookRawBody, logLegacyWebhookRoute, webhooksRouter);
+  // Raw-body routes (webhooks need unparsed body for signature verification)
+  const rawBody = express.raw({ type: "application/json", limit: "2mb" });
+  app.use("/api/webhooks", rawBody, webhooksRouter);
+  app.use("/webhooks", rawBody, logLegacyWebhookRoute, webhooksRouter);
 
+  // Stripe checkout webhook needs raw body (before express.json)
+  const checkoutRouter = buildCheckoutRouter();
+  app.use("/api/checkout/webhook", rawBody, (req, res, next) => {
+    // Forward to the checkout router's /webhook handler
+    req.url = "/webhook";
+    checkoutRouter(req, res, next);
+  });
+
+  // JSON-body routes
   app.use(express.json({ limit: "10mb" }));
+  app.use("/api/checkout", checkoutRouter);
   app.use("/api/preview", previewRouter);
+  app.use("/api/orders", ordersRouter);
+  app.use("/api/catalog", catalogRouter);
+
+  app.use(express.static(join(__dirname, "public")));
 
   app.get("/health", (_req, res) => {
     res.status(200).send("ok");

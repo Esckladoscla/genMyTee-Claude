@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pedido confirmado — genMyTee</title>
+<link rel="stylesheet" href="/css/base.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<style>
+.success-page{
+  min-height:calc(100vh - 200px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:4rem 2rem;text-align:center;
+}
+.success-icon{font-size:4rem;margin-bottom:1.5rem}
+.success-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.1;
+  margin-bottom:1rem;
+}
+.success-title em{font-style:italic;color:var(--accent)}
+.success-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:420px;margin-bottom:2.5rem}
+.success-id{
+  font-size:0.72rem;color:var(--muted);background:var(--surface);
+  padding:0.5rem 1rem;margin-bottom:2rem;letter-spacing:0.05em;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-top">
+    <a href="/" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li><a href="/#productos">Prendas</a></li>
+      <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
+    </ul>
+    <div class="nav-actions"></div>
+  </div>
+</nav>
+
+<div class="success-page">
+  <div class="success-icon">&#x2705;</div>
+  <h1 class="success-title">Pedido <em>confirmado</em></h1>
+  <p class="success-desc">
+    Gracias por tu compra. Tu prenda personalizada se está preparando.
+    Recibirás un email de confirmación con los detalles del envío.
+    Entrega estimada: 5-7 días laborables.
+  </p>
+  <div class="success-id" id="sessionId"></div>
+  <a href="/" class="btn-primary">Volver a la tienda</a>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <span>&copy; 2026 genMyTee</span>
+  </div>
+</footer>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const el = document.getElementById('sessionId');
+  if (sessionId && el) {
+    el.textContent = 'Ref: ' + sessionId.slice(0, 20) + '...';
+  } else if (el) {
+    el.style.display = 'none';
+  }
+  // Clear cart on successful checkout
+  try { localStorage.removeItem('genmytee_cart'); } catch {}
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "products": [
+    {
+      "slug": "camiseta-personalizada",
+      "name": "Camiseta Personalizada",
+      "description": "Tu diseño, hecho prenda. Camiseta atlética con impresión integral all-over de alta calidad.",
+      "product_key": "all-over-print-mens-athletic-t-shirt",
+      "base_price_eur": 39,
+      "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "garment_emoji": "\uD83D\uDC55"
+    },
+    {
+      "slug": "camiseta-clasica",
+      "name": "Camiseta Clásica",
+      "description": "Camiseta de algodón con impresión DTG frontal. Un clásico reinventado con tu diseño.",
+      "product_key": "all-over-print-mens-crew-neck-t-shirt",
+      "base_price_eur": 35,
+      "colors": ["White"],
+      "sizes": ["XS", "S", "M", "L", "XL", "2XL"],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "garment_emoji": "\uD83D\uDC55"
+    },
+    {
+      "slug": "camiseta-algodon",
+      "name": "Camiseta Algodón Premium",
+      "description": "Camiseta Gildan 5000 de algodón pesado con impresión DTG. Calidad duradera, diseño único.",
+      "product_key": "gildan-5000",
+      "base_price_eur": 29,
+      "colors": ["Black", "White", "Navy", "Sport Grey", "Sand", "Maroon"],
+      "sizes": ["S", "M", "L", "XL", "2XL", "3XL"],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "garment_emoji": "\uD83D\uDC55"
+    },
+    {
+      "slug": "crop-top-personalizado",
+      "name": "Crop Top Personalizado",
+      "description": "Crop tee all-over print. Diseño vibrante que cubre toda la prenda.",
+      "product_key": "all-over-print-crop-tee",
+      "base_price_eur": 35,
+      "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "garment_emoji": "\uD83D\uDC5A"
+    },
+    {
+      "slug": "tank-top-personalizado",
+      "name": "Tank Top Personalizado",
+      "description": "Tank top all-over print para los días de calor. Tu diseño, sin mangas.",
+      "product_key": "all-over-print-mens-tank-top",
+      "base_price_eur": 35,
+      "sizes": ["XS", "S", "M", "L", "XL", "2XL"],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "garment_emoji": "\uD83E\uDE72"
+    },
+    {
+      "slug": "polo-adidas",
+      "name": "Polo Adidas Premium",
+      "description": "Polo Adidas con bordado personalizado. Elegancia deportiva con tu toque personal.",
+      "product_key": "adidas-premium-polo-shirt",
+      "base_price_eur": 55,
+      "colors": ["Black", "White"],
+      "sizes": ["S", "M", "L", "XL", "2XL"],
+      "placement": "embroidery_chest_left",
+      "customizable": true,
+      "garment_type": "polo",
+      "garment_emoji": "\uD83D\uDC54"
+    }
+  ]
+}

@@ -117,15 +117,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 ### Route layer (`routes/`)
 - `preview.js` — `POST /api/preview/image` (AI generation), `POST /api/preview/mockup` (Printful mockup), `GET /api/preview/mockup/status`, `GET /api/preview/openai/usage`
 - `webhooks.js` — `POST /api/webhooks/orders/create` (Shopify webhook → Printful order)
+- `orders.js` — `POST /api/orders` (generic order creation, Shopify-independent)
+- `catalog.js` — `GET /api/catalog/products`, `GET /api/catalog/products/:slug` (product catalog from `data/products.json`)
+- `checkout.js` — `POST /api/checkout/session` (creates Stripe Checkout Session from cart items), `POST /api/checkout/webhook` (handles Stripe `checkout.session.completed` → Printful order via `order-processing.js`)
 
-Both route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
+All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
 ### Service layer (`services/`)
 - `openai.js` — prompt moderation (`omni-moderation-latest`) and image generation (`gpt-image-1`), with retry logic and in-memory usage tracking
 - `storage.js` — uploads image buffers to Cloudflare R2 via S3-compatible API
 - `printful.js` — creates Printful orders and generates mockups
-- `variants.js` — resolves Shopify variant titles (e.g. "Black / M") to Printful variant IDs using `data/variants-map.json`
-- `idempotency.js` — SQLite-backed (`node:sqlite` `DatabaseSync`) deduplication for webhook orders; falls back to in-memory if file DB unavailable
+- `order-processing.js` — extracted order processing core: `buildPrintfulItems()` and `processOrder()`. Accepts both generic `{product_key, color, size}` items and Shopify-format items with properties. Used by both `routes/orders.js` and `routes/webhooks.js`.
+- `variants.js` — resolves variant titles (e.g. "Black / M") to Printful variant IDs using `data/variants-map.json`
+- `idempotency.js` — SQLite-backed (`node:sqlite` `DatabaseSync`) deduplication for orders; falls back to in-memory if file DB unavailable
+- `stripe.js` — Stripe SDK wrapper: `createCheckoutSession()`, `verifyWebhookSignature()`, `extractOrderFromSession()`
 - `shopify-webhook-auth.js` — HMAC signature verification for Shopify webhooks
 - `env.js` — typed env getters (`getEnv`, `requireEnv`, `getBooleanEnv`, `getNumberEnv`) with legacy alias support and deprecation warnings
 
@@ -133,14 +138,23 @@ Both route files export a `build*Router()` factory that accepts dependency injec
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
 - `color-alias.json` — color name normalization
 - `printful_product_ids.json` — Printful product metadata
+- `products.json` — product catalog (slug, name, product_key, base_price_eur, sizes, colors, placement)
 - `app.db` — SQLite database for idempotency
 
-### Frontend / Theme (`FRONT/Theme Horizon/`)
-Shopify Horizon theme with custom AI design block. Key files:
-- `blocks/ai-design-generator.liquid` — Liquid block for product pages
-- `assets/ai-design-horizon.js` — client-side JS for prompt→image→mockup flow
+### Frontend (`public/`)
+Standalone vanilla HTML/CSS/JS frontend served by Express. Design follows `references/frontend-reference.html`.
+- `index.html` — homepage with hero, product grid, creator section, footer
+- `css/base.css` — design system (CSS custom properties, typography, animations)
+- `css/components.css` — nav, hero, product cards, cart drawer, footer, responsive
+- `css/creator.css` — 4-step creator panel (garment selection, prompt, preview, size/cart)
+- `js/app.js` — global UI (cart with localStorage, nav, toast, checkout via `/api/checkout/session`)
+- `js/catalog.js` — fetches products from `/api/catalog/products`, renders product grid
+- `js/creator.js` — 4-step design flow: garment → prompt → generate → size/add-to-cart. Calls `/api/preview/image` and `/api/preview/mockup`.
+- `checkout-success.html` — post-payment success page (clears cart, shows confirmation)
+- `checkout-cancel.html` — payment cancelled page
 
-There is also a simpler/legacy theme integration in `theme/`.
+### Legacy Frontend (`FRONT/Theme Horizon/`, `theme/`)
+Shopify Liquid theme (being replaced). Key reference file: `assets/ai-design-horizon.js`.
 
 ## Testing
 
@@ -159,4 +173,19 @@ Services expose `_reset*ForTests()` functions to clear cached singletons between
 
 ## Environment variables
 
-See README.md for the full list. Key ones: `OPENAI_KEY`, `R2_*` (Cloudflare storage), `SHOPIFY_WEBHOOK_SECRET`, `PRINTFUL_API_KEY`, `AI_ENABLED`, `ALLOWED_ORIGINS`.
+See README.md for the full list. Key ones: `OPENAI_KEY`, `R2_*` (Cloudflare storage), `SHOPIFY_WEBHOOK_SECRET`, `PRINTFUL_API_KEY`, `AI_ENABLED`, `ALLOWED_ORIGINS`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
+
+## Product positioning
+
+This product should be presented primarily as personalized, expressive, and created from the customer's idea.
+
+Do not frame the main value proposition as “AI-generated clothing”.
+AI is an enabling technology, not the main emotional selling point.
+
+In customer-facing UX and copy:
+- lead with personalization and identity,
+- keep language natural and emotional,
+- avoid overly technical AI-first messaging,
+- treat the customization flow as a core product experience.
+
+Avoid strong claims like “unique in the world” unless they can be genuinely supported.

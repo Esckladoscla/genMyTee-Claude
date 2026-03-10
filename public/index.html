@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>genMyTee — Tu imaginación, hecha prenda</title>
+<meta name="description" content="Diseña prendas únicas con tu imaginación. Describe tu diseño, previsualízalo y recíbelo en casa."/>
+<link rel="stylesheet" href="/css/base.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<link rel="stylesheet" href="/css/creator.css"/>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="mainOverlay" onclick="closeCart()"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-top">
+    <button class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="/" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li class="active"><a href="/#productos">Prendas</a></li>
+      <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="openCart()" title="Carrito">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-badge" id="cartBadge" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <ul class="mobile-nav-list">
+    <li><a href="/#productos">Prendas</a></li>
+    <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
+  </ul>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Diseño personalizado</div>
+    <h1 class="hero-title">Tu imaginación,<br><em>hecha prenda</em></h1>
+    <p class="hero-desc">Describe lo que imaginas. Nosotros lo convertimos en una prenda única que puedes llevar. Sin límites creativos.</p>
+    <div class="hero-cta">
+      <a href="#creador" class="btn-primary">Crear mi prenda</a>
+      <a href="#productos" class="btn-outline">Ver prendas</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-visual-inner">&#x1F455;</div>
+  </div>
+</section>
+
+<!-- TRUST BADGES -->
+<div class="trust-row">
+  <div class="trust-item">
+    <div class="trust-icon">&#x2728;</div>
+    <div class="trust-text">
+      <strong>Diseño único</strong>
+      <span>Creado desde tu idea</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">&#x1F6E1;&#xFE0F;</div>
+    <div class="trust-text">
+      <strong>Calidad premium</strong>
+      <span>Impresión profesional</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">&#x1F4E6;</div>
+    <div class="trust-text">
+      <strong>Envío 5-7 días</strong>
+      <span>A toda Europa</span>
+    </div>
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon">&#x1F504;</div>
+    <div class="trust-text">
+      <strong>Devolución fácil</strong>
+      <span>Garantía de satisfacción</span>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="section" id="productos">
+  <div class="section-header">
+    <h2 class="section-title">Elige tu <em>prenda</em></h2>
+  </div>
+  <div class="product-grid" id="productGrid">
+    <!-- Loaded by JS -->
+  </div>
+</section>
+
+<!-- CREATOR SECTION -->
+<section class="creator-section" id="creador">
+  <div class="creator-inner">
+    <!-- LEFT: PITCH -->
+    <div>
+      <div class="creator-label">Producto Estrella</div>
+      <h2 class="creator-title">Tu imaginación,<br><em>hecha prenda</em></h2>
+      <p class="creator-subtitle">Diseña una prenda única que no existe en ningún otro sitio. Tú describes, nosotros la creamos y te la enviamos en 5-7 días.</p>
+
+      <div class="creator-steps">
+        <div class="creator-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Elige tu prenda y color</strong>
+            <span>Camiseta, crop top, tank top o polo</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Describe tu diseño con palabras</strong>
+            <span>"Un lobo en la niebla, estilo grabado en madera"</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Previsualiza al instante</strong>
+            <span>Ve cómo queda antes de comprar</span>
+          </div>
+        </div>
+        <div class="creator-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <strong>Elige talla y añade al carrito</strong>
+            <span>Impresión premium, colores que duran</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="creator-cta-row">
+        <button class="btn-glow" onclick="document.getElementById('promptInput').focus()">
+          Crear mi prenda &#x2192;
+        </button>
+        <span class="creator-note">Desde <span>&#x20AC;29</span></span>
+      </div>
+
+      <div class="creator-features">
+        <div class="creator-feature"><span class="check">&#x2713;</span> Impresión premium</div>
+        <div class="creator-feature"><span class="check">&#x2713;</span> Envío en 5-7 días</div>
+        <div class="creator-feature"><span class="check">&#x2713;</span> Devolución garantizada</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONFIGURATOR -->
+    <div class="creator-panel">
+
+      <!-- STEP PROGRESS -->
+      <div class="step-progress" id="stepProgress">
+        <div class="step-item active" data-step="1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Prenda<br>& color</span>
+        </div>
+        <div class="step-item" data-step="2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Tu<br>diseño</span>
+        </div>
+        <div class="step-item" data-step="3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Vista<br>previa</span>
+        </div>
+        <div class="step-item" data-step="4">
+          <div class="step-circle">4</div>
+          <span class="step-label">Talla<br>& carrito</span>
+        </div>
+      </div>
+
+      <!-- PANEL TABS -->
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab="disenar">&#x270F;&#xFE0F; Diseñar</button>
+        <button class="panel-tab" data-tab="estilos">&#x1F3A8; Estilos</button>
+        <button class="panel-tab" data-tab="inspiracion">&#x2728; Inspiración</button>
+      </div>
+
+      <!-- TAB: DISEÑAR -->
+      <div id="panelTab-disenar">
+
+        <!-- GARMENT TYPE -->
+        <div style="margin-bottom:1rem">
+          <div class="prompt-label"><span>Tipo de prenda</span></div>
+          <div class="garment-type-row" id="garmentTypeRow">
+            <!-- Loaded by JS from catalog -->
+          </div>
+        </div>
+
+        <!-- COLOR -->
+        <div style="margin-bottom:1.2rem" id="colorSection" style="display:none">
+          <div class="prompt-label"><span>Color</span><span id="colorName"></span></div>
+          <div class="garment-color-row" id="garmentColorRow">
+            <!-- Loaded by JS -->
+          </div>
+        </div>
+
+        <!-- GARMENT PREVIEW -->
+        <div class="garment-preview">
+          <div class="garment-bg" id="garmentEmoji">&#x1F455;</div>
+          <div class="garment-canvas">
+            <div class="garment-design" id="garmentDesign">
+              <div class="garment-design-placeholder" id="designPlaceholder">
+                <span>&#x2726;</span>
+                <span>Tu diseño<br>aquí</span>
+              </div>
+              <img id="generatedImg" style="display:none;width:100%;height:100%;object-fit:cover;" alt="Diseño generado"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROMPT -->
+        <div class="prompt-area">
+          <div class="prompt-label">
+            <span>Describe tu diseño</span>
+            <span id="charCount">0/200</span>
+          </div>
+          <textarea class="prompt-input" id="promptInput"
+            placeholder="Ej: Un zorro geométrico mirando la luna llena, colores tierra, estilo minimalista nórdico..."
+            maxlength="200"></textarea>
+        </div>
+
+        <!-- PROMPT CHIPS -->
+        <div class="prompt-suggestions" id="promptChips">
+          <button class="prompt-chip" data-prompt="Montañas nevadas al amanecer, estilo grabado vintage">&#x1F3D4;&#xFE0F; Montañas vintage</button>
+          <button class="prompt-chip" data-prompt="Tigre en blanco y negro, trazo de pincel japonés">&#x1F42F; Tigre japonés</button>
+          <button class="prompt-chip" data-prompt="Flores silvestres botánicas, ilustración acuarela">&#x1F338; Flores botánicas</button>
+          <button class="prompt-chip" data-prompt="Constelaciones y luna, estilo grabado celestial">&#x1F319; Constelaciones</button>
+          <button class="prompt-chip" data-prompt="Ola oceánica, estilo ukiyo-e japonés moderno">&#x1F30A; Ola japonesa</button>
+          <button class="prompt-chip" data-prompt="Lobo geométrico en triángulos, estilo low poly">&#x1F43A; Lobo geométrico</button>
+        </div>
+
+        <!-- GENERATE BUTTON -->
+        <button class="generate-btn" id="generateBtn" disabled>
+          <span class="btn-text" id="generateBtnText">&#x2726; Generar mi diseño único</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+
+      <!-- TAB: ESTILOS -->
+      <div id="panelTab-estilos" style="display:none">
+        <div class="prompt-label" style="margin-bottom:1rem"><span>Elige un estilo artístico</span></div>
+        <div class="style-grid">
+          <div class="style-preset" data-style="Ilustración acuarela suave y artística">
+            <span>&#x1F3A8;</span><span class="style-preset-name">Acuarela</span>
+          </div>
+          <div class="style-preset" data-style="Grabado en madera vintage, líneas finas detalladas">
+            <span>&#x1FAB5;</span><span class="style-preset-name">Grabado</span>
+          </div>
+          <div class="style-preset" data-style="Minimalista línea negra, trazo limpio y moderno">
+            <span>&#x2B1B;</span><span class="style-preset-name">Minimalista</span>
+          </div>
+          <div class="style-preset" data-style="Arte abstracto geométrico, formas y colores planos">
+            <span>&#x1F537;</span><span class="style-preset-name">Geométrico</span>
+          </div>
+          <div class="style-preset" data-style="Ilustración botánica científica vintage detallada">
+            <span>&#x1F33F;</span><span class="style-preset-name">Botánico</span>
+          </div>
+          <div class="style-preset" data-style="Tipografía artística con lettering a mano">
+            <span>&#x270D;&#xFE0F;</span><span class="style-preset-name">Lettering</span>
+          </div>
+          <div class="style-preset" data-style="Ukiyo-e japonés moderno, bloques de color">
+            <span>&#x1F3EF;</span><span class="style-preset-name">Japonés</span>
+          </div>
+          <div class="style-preset" data-style="Sticker pop art años 90 colores neón">
+            <span>&#x26A1;</span><span class="style-preset-name">Pop Art</span>
+          </div>
+          <div class="style-preset" data-style="Fotografía artística en blanco y negro alto contraste">
+            <span>&#x1F4F7;</span><span class="style-preset-name">B&W</span>
+          </div>
+        </div>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.3);line-height:1.6">
+          Selecciona un estilo para añadirlo a tu descripción. Luego ve a <strong style="color:rgba(255,255,255,0.5)">Diseñar</strong> y personaliza el motivo.
+        </p>
+      </div>
+
+      <!-- TAB: INSPIRACIÓN -->
+      <div id="panelTab-inspiracion" style="display:none">
+        <div class="prompt-label" style="margin-bottom:1rem"><span>Diseños populares</span></div>
+        <div class="inspo-grid">
+          <div class="inspo-item" data-inspo="Lobo aullando, luna llena, bosque de pinos, grabado vintage">&#x1F43A;<div class="inspo-label">El lobo</div></div>
+          <div class="inspo-item" data-inspo="Montaña triangular minimal con sol naciente y líneas paralelas">&#x1F3D4;&#xFE0F;<div class="inspo-label">La montaña</div></div>
+          <div class="inspo-item" data-inspo="Cráneo rodeado de flores silvestres, estilo Day of the Dead mexicano">&#x1F480;<div class="inspo-label">El cráneo</div></div>
+          <div class="inspo-item" data-inspo="Mapa estelar constelaciones Osa Mayor, líneas doradas sobre negro">&#x2B50;<div class="inspo-label">Constelaciones</div></div>
+          <div class="inspo-item" data-inspo="Ola grande de Kanagawa reinterpretada en estilo moderno minimalista">&#x1F30A;<div class="inspo-label">La ola</div></div>
+          <div class="inspo-item" data-inspo="Zorro geométrico en triángulos degradado naranja a morado">&#x1F98A;<div class="inspo-label">El zorro</div></div>
+          <div class="inspo-item" data-inspo="Rosa botánica detallada ilustración científica vintage en rosa palo">&#x1F339;<div class="inspo-label">La rosa</div></div>
+          <div class="inspo-item" data-inspo="Astronauta flotando entre plantas tropicales, estilo surrealista">&#x1F9D1;&#x200D;&#x1F680;<div class="inspo-label">Astronauta</div></div>
+          <div class="inspo-item" data-inspo="Pez koi y flor de loto, tinta negra estilo tatuaje tradicional japonés">&#x1F41F;<div class="inspo-label">Koi japonés</div></div>
+        </div>
+      </div>
+
+      <!-- SIZE + QTY + ADD -->
+      <div id="step4Section" style="opacity:0.5">
+        <div class="prompt-label" style="margin-top:1.2rem">
+          <span>Paso 4 - Elige tu talla y añade al carrito</span>
+        </div>
+        <div class="panel-size-row" id="sizeRow">
+          <!-- Loaded by JS -->
+        </div>
+
+        <div class="creator-price-row">
+          <span class="creator-price-base">Prenda única personalizada</span>
+          <span class="creator-price" id="creatorPrice">&#x20AC;39.00</span>
+        </div>
+
+        <div class="panel-add-row">
+          <div class="panel-qty">
+            <button class="panel-qty-btn" id="qtyMinus">&#x2212;</button>
+            <span class="panel-qty-num" id="panelQtyNum">1</span>
+            <button class="panel-qty-btn" id="qtyPlus">+</button>
+          </div>
+          <button class="panel-add" id="panelAddBtn" disabled>
+            Añadir al carrito
+          </button>
+        </div>
+        <p style="font-size:0.62rem;color:rgba(255,255,255,0.2);margin-top:0.6rem;text-align:center">
+          Diseño generado con inteligencia artificial - Impresión artesanal
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="faq-grid">
+    <div class="faq-sidebar">
+      <h2 class="section-title">Preguntas<br><em>frecuentes</em></h2>
+      <p>Todo lo que necesitas saber sobre tu prenda personalizada.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;Cómo funciona el proceso de diseño?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Elige tu prenda, describe tu diseño con palabras (por ejemplo, "un lobo geométrico bajo la luna") y nuestro sistema genera una imagen única. La previsualizas sobre la prenda, eliges talla y la añades al carrito.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;Cuánto tarda en llegar mi pedido?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Los pedidos se producen bajo demanda y se envían en 5-7 días laborables. Recibirás un email con el número de seguimiento una vez que tu prenda se envíe.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;Puedo devolver mi prenda personalizada?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Si la prenda tiene un defecto de impresión o fabricación, la reemplazamos sin coste. Al ser un producto personalizado hecho a medida, no aceptamos devoluciones por cambio de opinión.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;Qué calidad de impresión tienen las prendas?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Utilizamos impresión DTG (Direct-to-Garment) y all-over print de alta resolución. Los colores son vibrantes y resistentes al lavado. Las prendas base son de algodón premium.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;A qué países enviáis?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Enviamos a toda Europa (España, Francia, Alemania, Italia, Portugal, etc.), Reino Unido, Estados Unidos, Canadá y México.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>&#x00BF;Puedo regenerar el diseño si no me gusta?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>Sí, puedes generar tantos diseños como quieras antes de comprar. Solo se añade al carrito el diseño que elijas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter animate-on-scroll">
+  <p class="nl-eyebrow">Únete a genMyTee</p>
+  <h2 class="nl-title">Primero en saber,<br><em>primero en crear</em></h2>
+  <p class="nl-desc">Accede a descuentos exclusivos e inspiración para tus diseños.</p>
+  <div class="nl-form">
+    <input class="nl-input" id="nlEmail" type="email" placeholder="tu@email.com"/>
+    <button class="nl-btn" onclick="subscribeNewsletter()">Suscribirme</button>
+  </div>
+  <p class="nl-note">Sin spam. Puedes darte de baja cuando quieras.</p>
+</section>
+
+<!-- COOKIE BANNER -->
+<div class="cookie-banner" id="cookieBanner">
+  <p class="cookie-text">Usamos cookies para mejorar tu experiencia. <a href="#">Más información</a>.</p>
+  <div class="cookie-actions">
+    <button class="cookie-decline" onclick="dismissCookie()">Solo esenciales</button>
+    <button class="cookie-accept" onclick="dismissCookie()">Aceptar</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">genMyTee</div>
+      <p class="footer-about">Prendas únicas diseñadas desde tu imaginación. Tu idea, hecha realidad con impresión de calidad profesional.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Ayuda</h4>
+      <ul>
+        <li><a href="/order-status.html">Seguir pedido</a></li>
+        <li><a href="#">Devoluciones</a></li>
+        <li><a href="#">Guía de tallas</a></li>
+        <li><a href="#">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacidad</a></li>
+        <li><a href="#">Cookies</a></li>
+        <li><a href="#">Términos</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 genMyTee</span>
+    <div class="footer-payments">
+      <span class="pay-chip">Visa</span>
+      <span class="pay-chip">Mastercard</span>
+      <span class="pay-chip">Apple Pay</span>
+      <span class="pay-chip">Google Pay</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Carrito</span>
+    <button class="drawer-close" onclick="closeCart()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="cart-items-list" id="cartItemsList">
+    <div class="cart-empty-msg" id="cartEmpty">
+      <span>&#x1F6D2;</span>
+      <p>Tu carrito está vacío</p>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal-label">Subtotal</span>
+      <span class="cart-subtotal-value" id="cartTotal">&#x20AC;0.00</span>
+    </div>
+    <div class="cart-shipping-note">Envío calculado en el checkout</div>
+    <button class="checkout-btn" id="checkoutBtn">Finalizar compra</button>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/creator.js"></script>
+</body>
+</html>
