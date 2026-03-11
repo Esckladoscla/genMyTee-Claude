@@ -7,29 +7,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Act as a senior full-stack engineer and pragmatic solution architect.
 
 Your job is to help build, improve, and evolve this product safely.
-Do not assume the current architecture is final.
-Do not assume the current Shopify-based structure should remain the long-term default.
-
-Be explicit about:
-- what is currently true,
-- what is a working assumption,
-- what is a proposed direction,
-- and what is risky.
+Be explicit about what is currently true, what is a working assumption, what is a proposed direction, and what is risky.
 
 ## Product direction
 
-This project is currently built around Shopify, Render, Printful, OpenAI, and Cloudflare R2.
+This project is a **standalone web application** — the Shopify migration is complete.
 
-However, the product is still under active construction.
+Stack: Node/Express · Stripe · OpenAI · Printful · Cloudflare R2 · Render
 
-The project has multiple simultaneous goals:
-- continue building the backend;
-- redesign and improve the frontend;
-- evolve the product into a more independent web application over time;
-- reduce unnecessary Shopify lock-in where it makes sense;
-- keep the business functional while architecture evolves.
+The product is live at https://genmytee.com and under active development.
 
-Shopify is the current platform context, not necessarily the final architecture.
+Current priorities:
+- frontend UX improvements and new features;
+- backend feature development;
+- improved maintainability and reliability.
 
 ## Constraints and rules
 
@@ -37,23 +28,10 @@ Shopify is the current platform context, not necessarily the final architecture.
 - Never store real `.env` secrets in the repository
 - Prefer `.env.example` for documented variables
 - Assume real secrets live in Render environment variables
-- Do not introduce new hard dependencies on Shopify unless explicitly requested
+- No dependencies on Shopify — the migration is complete and Shopify is no longer part of the stack
 - Prefer modular design and provider abstraction when reasonable
 - Avoid large risky rewrites unless clearly justified
 - Flag risky changes before implementing them
-
-## Current priorities
-
-Claude should assume that the repository may require work in all of these areas:
-- frontend redesign / UX changes;
-- backend feature development;
-- architecture cleanup;
-- gradual decoupling from Shopify where justified;
-- improved maintainability and deployment reliability.
-
-Do not optimize only for migration.
-Do not optimize only for preserving the current Shopify structure.
-Think in terms of product evolution.
 
 ## Working style
 
@@ -77,20 +55,16 @@ When proposing solutions:
 
 ## Project overview
 
-Node/Express backend for a Shopify store selling AI-generated print-on-demand apparel. Customers enter a text prompt on the storefront, the backend generates artwork via OpenAI (gpt-image-1), uploads it to Cloudflare R2, creates Printful mockups, and fulfills orders through Shopify webhooks routed to Printful.
+Standalone web application for personalized print-on-demand apparel. Customers describe a design in natural language → backend generates artwork via OpenAI (gpt-image-1) → uploads to Cloudflare R2 → creates Printful mockups → customer pays via Stripe Checkout → Stripe webhook triggers Printful order fulfillment.
 
-This project currently operates around Shopify, but that is the current state, not the long-term target.
-
-Current business/infrastructure context:
-- Public domain: `genmytee.com`
-- The domain is currently purchased/configured through Shopify
-- The application runs on Render
-- Printful is used for product creation / fulfillment
-- OpenAI is used to generate customer-requested artwork
-
-Important:
-this repository should be treated as an evolving full-stack product, not just as a fixed Shopify backend.
-Frontend, backend, integrations, and architecture may all change.
+Infrastructure:
+- Public domain: `genmytee.com` (Cloudflare DNS → Render)
+- Application runs on Render (deployed from `development` branch)
+- Printful for product manufacturing and fulfillment
+- OpenAI for image generation and moderation
+- Cloudflare R2 for image storage
+- Stripe for payments (Checkout Sessions + webhooks)
+- SQLite for order idempotency and newsletter subscribers
 
 ## Commands
 
