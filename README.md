@@ -1,205 +1,139 @@
-# Shopify AI Apparel Backend (OpenAI + Printful)
+# genMyTee
 
-Node/Express backend for a Shopify store that sells print-on-demand products generated from customer prompts.
+Aplicación web standalone de prendas personalizadas con diseño por IA. El cliente describe un diseño, el backend genera la imagen con OpenAI, y Printful fabrica y envía la prenda.
 
-## What this MVP does
+**Stack:** Node/Express · Stripe · OpenAI · Printful · Cloudflare R2 · Render
 
-- Generates artwork before add-to-cart via `POST /api/preview/image`.
-- Generates product mockups over the selected shirt via `POST /api/preview/mockup`.
-- Stores prompt + generated image URL + Printful metadata in Shopify line item properties.
-- Processes Shopify `orders/create` webhooks at `POST /api/webhooks/orders/create`.
-- Verifies webhook HMAC signature (required).
-- Prevents duplicate Printful orders with SQLite idempotency.
-- Creates Printful orders using the image URL captured pre-cart (no regeneration in webhook).
+**Producción:** https://genmytee.com
 
-## API routes
+---
 
-- `GET /health`
-- `POST /api/preview/image`
-- `POST /api/preview/mockup`
-- `GET /api/preview/openai/usage` (in-memory usage snapshot)
-- `POST /api/webhooks/orders/create`
-- Legacy alias: `POST /webhooks/orders/create` (deprecated, logs warning)
+## Cómo funciona
 
-## Environment variables
+1. Cliente elige prenda y color en la web
+2. Describe su diseño con palabras → OpenAI genera la imagen
+3. Se previsualiza el diseño sobre la prenda (mockup Printful)
+4. Cliente elige talla, añade al carrito
+5. Pago vía Stripe Checkout
+6. Stripe webhook → backend → Printful crea el pedido de producción
 
-### Canonical variables
+---
 
-- `PORT` (default `3000`)
-- `ALLOWED_ORIGINS` (comma-separated list)
-- `OPENAI_KEY`
-- `AI_ENABLED` (`true`/`false`, default `true`)
-- `AI_FALLBACK_IMAGE_URL` (optional; if empty, uses `${R2_PUBLIC_BASE_URL}/printful/fallback.png` when `AI_ENABLED=false`)
-- `AI_IMAGE_SIZE` (`auto`, `1024x1024`, `1024x1536`, `1536x1024`)
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET`
-- `R2_PUBLIC_BASE_URL`
-- `SHOPIFY_WEBHOOK_SECRET`
-- `PRINTFUL_API_KEY`
-- `PRINTFUL_CONFIRM` (`true`/`false`, default `false`)
-- `PRINTFUL_PLACEMENT` (default `front`)
-- `PRINTFUL_STITCH_COLOR` (default `black`)
-- `DB_PATH` (default `data/app.db`)
-
-### Legacy aliases (supported temporarily)
-
-- `PRINTFUL_KEY` -> `PRINTFUL_API_KEY`
-- `SHOPIFY_ACCESS_TOKEN` -> `SHOPIFY_ADMIN_TOKEN`
-
-The app logs a deprecation warning when aliases are used.
-
-## Install and run
+## Instalación y arranque
 
 ```bash
 npm install
-npm start
+npm start        # Servidor en puerto 3000
+npm run dev      # Con auto-restart (--watch)
+npm test         # Tests
 ```
 
-Run tests:
+Copia `.env.example` a `.env` y rellena las variables.
+
+---
+
+## Rutas API
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/health` | Health check |
+| POST | `/api/preview/image` | Genera imagen con OpenAI |
+| POST | `/api/preview/mockup` | Genera mockup Printful |
+| GET | `/api/preview/mockup/status` | Estado de mockup asíncrono |
+| GET | `/api/preview/openai/usage` | Snapshot de uso OpenAI |
+| GET | `/api/catalog/products` | Catálogo de productos |
+| GET | `/api/catalog/products/:slug` | Producto por slug |
+| POST | `/api/checkout/session` | Crea sesión Stripe Checkout |
+| POST | `/api/checkout/webhook` | Webhook Stripe (raw body) |
+| GET | `/api/checkout/status` | Estado de sesión/pedido |
+| POST | `/api/orders` | Creación de pedido genérico |
+| POST | `/api/newsletter` | Suscripción newsletter |
+
+---
+
+## Variables de entorno
+
+Ver `.env.example` para la lista completa. Las principales:
+
+| Variable | Descripción |
+|----------|-------------|
+| `OPENAI_KEY` | Clave API OpenAI |
+| `PRINTFUL_API_KEY` | Clave API Printful (alias: `PRINTFUL_KEY`) |
+| `PRINTFUL_CONFIRM` | `true` = auto-confirma pedidos (default `false`) |
+| `STRIPE_SECRET_KEY` | Clave secreta Stripe |
+| `STRIPE_PUBLISHABLE_KEY` | Clave pública Stripe |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret del webhook Stripe |
+| `R2_ACCOUNT_ID` | Cloudflare R2 Account ID |
+| `R2_ACCESS_KEY_ID` | Cloudflare R2 Access Key |
+| `R2_SECRET_ACCESS_KEY` | Cloudflare R2 Secret Key |
+| `R2_BUCKET` | Nombre del bucket R2 |
+| `R2_PUBLIC_BASE_URL` | URL pública del bucket (ej. `https://assets.genmytee.com`) |
+| `ALLOWED_ORIGINS` | Orígenes CORS permitidos (comma-separated) |
+| `AI_ENABLED` | `false` desactiva OpenAI (devuelve 503) |
+| `DB_PATH` | Ruta SQLite (default `data/app.db`) |
+
+---
+
+## Arquitectura
+
+```
+server.js           → carga dotenv, inicia Express en PORT
+app.js              → createApp(): middleware, rutas, CORS, error handler
+
+routes/
+  preview.js        → generación de imagen y mockup
+  catalog.js        → catálogo de productos
+  checkout.js       → Stripe Checkout + webhook
+  orders.js         → creación de pedido genérico
+  newsletter.js     → suscripción a newsletter
+
+services/
+  openai.js         → moderación e imagen (gpt-image-1)
+  storage.js        → Cloudflare R2 (S3-compatible)
+  printful.js       → creación de pedidos y mockups
+  stripe.js         → Stripe SDK wrapper
+  order-processing.js → lógica central de pedido
+  variants.js       → resolución de variantes Printful
+  idempotency.js    → deduplicación SQLite
+  newsletter.js     → suscriptores en SQLite
+  env.js            → typed env getters
+
+data/
+  products.json     → catálogo (6 productos)
+  variants-map.json → mapa product_key → color → talla → variant_id
+  color-alias.json  → normalización de colores
+
+public/             → frontend standalone (vanilla HTML/CSS/JS)
+  index.html
+  css/base.css, components.css, creator.css
+  js/app.js, catalog.js, creator.js
+  checkout-success.html, checkout-cancel.html, order-status.html
+```
+
+---
+
+## Tests
 
 ```bash
 npm test
 ```
 
-Run local smoke checks (server must be running):
+Framework: `node:test` + `node:assert` (sin dependencias externas). 47 tests. Las rutas usan factory pattern (`buildPreviewRouter()`, etc.) con mocks inyectados.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
-```
+---
 
-## OpenAI billing setup and no-spend mode
-
-1. In OpenAI project settings, configure `Limits`:
-   - monthly budget
-   - alert thresholds
-   - allowed model usage
-2. Create an API key in that billed project/org and set it in `.env` as `OPENAI_KEY`.
-3. While billing is not ready, use test mode:
+## Modo sin IA
 
 ```env
 AI_ENABLED=false
 ```
 
-In test mode:
-- `POST /api/preview/image` returns `503 ai_disabled` without calling OpenAI.
-- Webhook processing can still continue using fallback image URL if `ai_image_url` is missing.
+`POST /api/preview/image` devuelve `503 ai_disabled` sin llamar a OpenAI.
 
-## Preview endpoint contracts
+---
 
-`GET /api/preview/openai/usage`
+## Notas
 
-- Returns in-memory OpenAI call history tracked by this process.
-- Includes moderation and image-generation attempts, timestamp, status, duration.
-- Optional query: `?limit=200` (min `1`, max `500`).
-
-`POST /api/preview/image`
-
-Request body:
-
-```json
-{
-  "prompt": "A retro geometric tiger in orange and blue",
-  "pf_product_key": "all-over-print-mens-athletic-t-shirt",
-  "pf_placement": "front"
-}
-```
-
-Success response:
-
-```json
-{
-  "ok": true,
-  "image_url": "https://cdn.example.com/previews/art-123.png",
-  "moderation": { "flagged": false }
-}
-```
-
-Validation rules:
-
-- Prompt length must be 8-280 characters.
-- Prompt must pass OpenAI moderation.
-- Rate limit: 10 requests per IP per 5 minutes.
-
-`POST /api/preview/mockup`
-
-Request body:
-
-```json
-{
-  "image_url": "https://cdn.example.com/previews/art-123.png",
-  "pf_product_key": "all-over-print-mens-athletic-t-shirt",
-  "pf_placement": "front",
-  "variant_title": "M"
-}
-```
-
-Success response:
-
-```json
-{
-  "ok": true,
-  "mockup_status": "completed",
-  "mockup_url": "https://files.cdn.printful.com/mockup.png",
-  "reason": null
-}
-```
-
-`mockup_status` values:
-
-- `completed`
-- `processing`
-- `failed`
-- `skipped`
-
-## Webhook endpoint contract
-
-`POST /api/webhooks/orders/create`
-
-- Request body must be raw JSON from Shopify.
-- Header `X-Shopify-Hmac-Sha256` is mandatory.
-
-Response fields:
-
-- `ok`
-- `skipped`
-- `reason`
-- `external_id`
-- `printful_order_id`
-
-## Required Shopify line item properties
-
-- `ai_prompt`
-- `ai_image_url`
-- `ai_mockup_url` (optional)
-- `pf_product_key`
-- `pf_placement`
-
-The webhook reads `ai_image_url` and sends that exact asset to Printful.
-
-## Variants map source
-
-Primary file:
-
-- `data/variants-map.json`
-
-Fallback (deprecated):
-
-- `variants-map.json`
-
-## Theme integration
-
-See `docs/theme-integration.md`.
-
-For Horizon theme, use:
-
-- `FRONT/Theme Horizon/blocks/ai-design-generator.liquid`
-- `FRONT/Theme Horizon/assets/ai-design-horizon.js`
-
-## Notes
-
-- This MVP defaults to product key `all-over-print-mens-athletic-t-shirt` and placement `front`.
-- Duplicate webhook deliveries do not create duplicate Printful orders.
-- If SQLite file storage is unavailable in your environment, idempotency falls back to in-memory mode and logs a warning.
-- For production, keep webhook URL public and serve over HTTPS.
+- Los pedidos duplicados no generan pedidos dobles en Printful (idempotencia SQLite)
+- `PRINTFUL_CONFIRM=false` deja los pedidos en borrador en Printful (recomendado durante pruebas)
+- Si SQLite no está disponible, la idempotencia cae a in-memory y registra un warning

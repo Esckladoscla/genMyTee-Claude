@@ -4,7 +4,6 @@ const files = [
   "./preview-route.test.js",
   "./smoke-imports.test.js",
   "./variants.test.js",
-  "./webhooks-route.test.js",
   "./orders-route.test.js",
   "./catalog-route.test.js",
   "./checkout-route.test.js",

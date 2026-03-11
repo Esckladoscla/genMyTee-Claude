@@ -15,7 +15,20 @@
       "Bash(node tests/run-tests.js 2>&1)",
       "Read(//c/Program Files/GitHub CLI//**)",
       "Read(//c/Program Files \\(x86\\)/**)",
-      "Bash(cmd.exe /c \"where gh\")"
+      "Bash(cmd.exe /c \"where gh\")",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" --version)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(gh auth:*)",
+      "Bash(wc -l /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/public/js/*.js)",
+      "Bash(wc -l /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/tests/*.js)",
+      "Bash(wc -l /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/public/css/*.css)",
+      "Bash(ls -lah /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/ | grep -v \"^d\" | grep -E \"\\\\.\\(js|json|md\\)$\")",
+      "Bash(grep -n \"GET /api/catalog/products\\\\|POST /api/orders\" /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/routes/*.js 2>/dev/null | head -10)",
+      "Bash(ls -1 /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/public/*.html)",
+      "Bash(ls -1 /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/tests/*.test.js 2>/dev/null)",
+      "Bash(ls -1 /c/Users/Daniel/OneDrive/Documents/GitHub/genMyTee-Claude/services/ | grep -E \"\\\\.js$\")",
+      "Bash(cd \"C:\\\\Users\\\\Daniel\\\\OneDrive\\\\Documents\\\\GitHub\\\\genMyTee-Claude\" && npm test 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Daniel\\\\OneDrive\\\\Documents\\\\GitHub\\\\genMyTee-Claude\" && npm test 2>&1 | tail -15)"
     ]
   }
 }
