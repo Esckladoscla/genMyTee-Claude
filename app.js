@@ -2,9 +2,9 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import previewRouter from "./routes/preview.js";
-import webhooksRouter from "./routes/webhooks.js";
 import ordersRouter from "./routes/orders.js";
 import catalogRouter from "./routes/catalog.js";
+import newsletterRouter from "./routes/newsletter.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 
@@ -42,7 +42,7 @@ function buildCorsMiddleware() {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Shopify-Hmac-Sha256");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
     if (req.method === "OPTIONS") {
       return res.status(204).end();
@@ -50,11 +50,6 @@ function buildCorsMiddleware() {
 
     return next();
   };
-}
-
-function logLegacyWebhookRoute(req, _res, next) {
-  console.warn(`[deprecation] ${req.method} ${req.originalUrl} is deprecated. Use /api/webhooks/orders/create`);
-  next();
 }
 
 export function createApp() {
@@ -65,8 +60,6 @@ export function createApp() {
 
   // Raw-body routes (webhooks need unparsed body for signature verification)
   const rawBody = express.raw({ type: "application/json", limit: "2mb" });
-  app.use("/api/webhooks", rawBody, webhooksRouter);
-  app.use("/webhooks", rawBody, logLegacyWebhookRoute, webhooksRouter);
 
   // Stripe checkout webhook needs raw body (before express.json)
   const checkoutRouter = buildCheckoutRouter();
@@ -82,6 +75,7 @@ export function createApp() {
   app.use("/api/preview", previewRouter);
   app.use("/api/orders", ordersRouter);
   app.use("/api/catalog", catalogRouter);
+  app.use("/api/newsletter", newsletterRouter);
 
   app.use(express.static(join(__dirname, "public")));
 

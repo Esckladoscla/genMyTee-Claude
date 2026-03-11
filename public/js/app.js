@@ -159,15 +159,26 @@ function initCookieBanner() {
 }
 
 // ── Newsletter ──
-function subscribeNewsletter() {
+async function subscribeNewsletter() {
   const input = document.getElementById('nlEmail');
-  if (!input || !input.value.trim()) {
-    showToast('Introduce tu email');
-    return;
+  const email = input?.value.trim();
+  if (!email) { showToast('Introduce tu email'); return; }
+  try {
+    const res = await fetch('/api/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.already_subscribed) {
+      showToast('Ya estás suscrito');
+    } else {
+      showToast('Gracias por suscribirte');
+      input.value = '';
+    }
+  } catch {
+    showToast('Error al suscribirse, inténtalo de nuevo');
   }
-  // For now, just show confirmation
-  showToast('Gracias por suscribirte');
-  input.value = '';
 }
 
 // ── Scroll animations ──
