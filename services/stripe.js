@@ -114,9 +114,14 @@ export async function extractOrderFromSession(session) {
     };
   });
 
+  // Printful external_id has a 64-char limit; session.id can exceed that.
+  // Use payment_intent (shorter, ~27 chars) when available, fall back to truncated session id.
+  const shortId = session.payment_intent || session.id.slice(-32);
+  const externalId = `gmt-${shortId}`;
+
   return {
     order_id: session.id,
-    external_id: `genmytee-${session.id}`,
+    external_id: externalId,
     recipient,
     items,
   };
