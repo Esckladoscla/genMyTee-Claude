@@ -8,6 +8,7 @@ let selectedColor = null;
 let selectedSize = null;
 let selectedStyle = '';
 let generatedImageUrl = null;
+let currentMockupUrl = null;
 let currentStep = 1;
 let panelQty = 1;
 
@@ -81,9 +82,18 @@ function selectProduct(slug) {
   selectedColor = null;
   selectedSize = null;
 
-  // Update garment emoji
+  // Update garment preview (mockup > real photo > emoji fallback)
   const emojiEl = document.getElementById('garmentEmoji');
-  if (emojiEl) emojiEl.textContent = product.garment_emoji || '\uD83D\uDC55';
+  const previewImg = product.default_mockup_url || product.image_url;
+  if (emojiEl && previewImg) {
+    emojiEl.innerHTML = `<img src="${previewImg}" alt="${product.name}" class="garment-product-img">`;
+  } else if (emojiEl) {
+    emojiEl.textContent = product.garment_emoji || '\uD83D\uDC55';
+  }
+
+  // Reset mockup state
+  currentMockupUrl = null;
+  hideMockup();
 
   // Update price
   updatePrice();
@@ -131,6 +141,8 @@ function renderColors(product) {
       swatch.classList.add('active');
       selectedColor = color;
       if (nameEl) nameEl.textContent = color;
+      // Update product image to color-specific variant
+      updateProductImage(color);
     });
     row.appendChild(swatch);
   });
@@ -318,6 +330,9 @@ async function generateDesign() {
 
 async function requestMockup(productKey) {
   try {
+    showMockupLoading();
+    currentMockupUrl = null;
+
     const size = selectedSize || 'M';
     const color = selectedColor || undefined;
     const variantTitle = color ? `${color} / ${size}` : size;
@@ -327,26 +342,30 @@ async function requestMockup(productKey) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         image_url: generatedImageUrl,
-        product_key: productKey,
+        pf_product_key: productKey,
         variant_title: variantTitle,
       }),
     });
     const mockupData = await mockupRes.json();
 
     if (mockupData.ok && mockupData.mockup_url) {
-      // Could display mockup in a gallery — for now, the AI image is shown
-      console.log('[creator] mockup ready:', mockupData.mockup_url);
+      displayMockup(mockupData.mockup_url, mockupData.mockup_urls || []);
     } else if (mockupData.task_key) {
-      // Poll for async mockup
       pollMockupStatus(mockupData.task_key);
+    } else {
+      hideMockupLoading();
     }
   } catch (err) {
     console.error('[creator] mockup request failed', err);
+    hideMockupLoading();
   }
 }
 
 async function pollMockupStatus(taskKey, attempt = 0) {
-  if (attempt > 10) return;
+  if (attempt > 10) {
+    hideMockupLoading();
+    return;
+  }
 
   await new Promise(r => setTimeout(r, 3000));
 
@@ -355,13 +374,105 @@ async function pollMockupStatus(taskKey, attempt = 0) {
     const data = await res.json();
 
     if (data.mockup_status === 'completed' && data.mockup_url) {
-      console.log('[creator] mockup completed:', data.mockup_url);
+      displayMockup(data.mockup_url, data.mockup_urls || []);
     } else if (data.mockup_status === 'processing') {
       pollMockupStatus(taskKey, attempt + 1);
+    } else {
+      hideMockupLoading();
     }
   } catch (err) {
     console.error('[creator] mockup poll failed', err);
+    hideMockupLoading();
   }
+}
+
+// ── Product image helpers ──
+function updateProductImage(color) {
+  if (!selectedProduct) return;
+  const emojiEl = document.getElementById('garmentEmoji');
+  if (!emojiEl) return;
+  const colorImg = selectedProduct.color_images?.[color];
+  const imgSrc = colorImg || selectedProduct.default_mockup_url || selectedProduct.image_url;
+  if (imgSrc) {
+    emojiEl.innerHTML = `<img src="${imgSrc}" alt="${selectedProduct.name}" class="garment-product-img">`;
+  }
+}
+
+// ── Mockup display ──
+function showMockupLoading() {
+  const preview = document.querySelector('.garment-preview');
+  if (!preview || preview.querySelector('.mockup-loading')) return;
+  const loader = document.createElement('div');
+  loader.className = 'mockup-loading';
+  loader.innerHTML = '<div class="mockup-loading-text">Aplicando dise\u00F1o a la prenda\u2026</div>';
+  preview.appendChild(loader);
+}
+
+function hideMockupLoading() {
+  document.querySelectorAll('.mockup-loading').forEach(el => el.remove());
+}
+
+function displayMockup(primaryUrl, allUrls) {
+  hideMockupLoading();
+  currentMockupUrl = primaryUrl;
+
+  const preview = document.querySelector('.garment-preview');
+  if (!preview) return;
+
+  // Hide the garment photo and design overlay — the mockup replaces everything
+  const garmentBg = preview.querySelector('.garment-bg');
+  const garmentCanvas = preview.querySelector('.garment-canvas');
+  if (garmentBg) garmentBg.style.display = 'none';
+  if (garmentCanvas) garmentCanvas.style.display = 'none';
+
+  // Remove existing mockup container
+  const existing = preview.querySelector('.mockup-container');
+  if (existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.className = 'mockup-container';
+
+  const mainImg = document.createElement('img');
+  mainImg.className = 'mockup-img';
+  mainImg.src = primaryUrl;
+  mainImg.alt = 'Vista previa del producto';
+  container.appendChild(mainImg);
+
+  // Gallery thumbnails if multiple mockups
+  const urls = allUrls.length > 0 ? allUrls : [primaryUrl];
+  if (urls.length > 1) {
+    const gallery = document.createElement('div');
+    gallery.className = 'mockup-gallery';
+    urls.forEach((url, i) => {
+      const thumb = document.createElement('img');
+      thumb.className = 'mockup-thumb' + (i === 0 ? ' active' : '');
+      thumb.src = url;
+      thumb.alt = `Vista ${i + 1}`;
+      thumb.addEventListener('click', () => {
+        mainImg.src = url;
+        gallery.querySelectorAll('.mockup-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        currentMockupUrl = url;
+      });
+      gallery.appendChild(thumb);
+    });
+    container.appendChild(gallery);
+  }
+
+  preview.appendChild(container);
+}
+
+function hideMockup() {
+  hideMockupLoading();
+  document.querySelectorAll('.mockup-container').forEach(el => el.remove());
+
+  // Restore garment photo and design overlay
+  const preview = document.querySelector('.garment-preview');
+  if (!preview) return;
+  const garmentBg = preview.querySelector('.garment-bg');
+  const garmentCanvas = preview.querySelector('.garment-canvas');
+  if (garmentBg) garmentBg.style.display = '';
+  if (garmentCanvas) garmentCanvas.style.display = '';
 }
 
 // ── Step progress ──
@@ -424,6 +535,8 @@ function initAddToCartButton() {
       price: selectedProduct.base_price_eur,
       image_url: generatedImageUrl,
       emoji: selectedProduct.garment_emoji || '\uD83D\uDC55',
+      mockup_url: currentMockupUrl || null,
+      product_image_url: selectedProduct.image_url || null,
     });
   });
 }

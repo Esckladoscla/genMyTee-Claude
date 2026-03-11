@@ -6,11 +6,21 @@
       "description": "Tu diseño, hecho prenda. Camiseta atlética con impresión integral all-over de alta calidad.",
       "product_key": "all-over-print-mens-athletic-t-shirt",
       "base_price_eur": 39,
-      "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
       "placement": "front",
       "customizable": true,
       "garment_type": "camiseta",
-      "garment_emoji": "\uD83D\uDC55"
+      "category": "camisetas",
+      "garment_emoji": "👕",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/24/243d158018882a4fee017e357d584e2b_l"
     },
     {
       "slug": "camiseta-clasica",
@@ -18,12 +28,26 @@
       "description": "Camiseta de algodón con impresión DTG frontal. Un clásico reinventado con tu diseño.",
       "product_key": "all-over-print-mens-crew-neck-t-shirt",
       "base_price_eur": 35,
-      "colors": ["White"],
-      "sizes": ["XS", "S", "M", "L", "XL", "2XL"],
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
+      ],
       "placement": "front",
       "customizable": true,
       "garment_type": "camiseta",
-      "garment_emoji": "\uD83D\uDC55"
+      "category": "camisetas",
+      "garment_emoji": "👕",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/fd/fdb7214913fd3c6c56d683e1f8997c58_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/257/8855_1530703808.jpg"
+      }
     },
     {
       "slug": "camiseta-algodon",
@@ -31,12 +55,36 @@
       "description": "Camiseta Gildan 5000 de algodón pesado con impresión DTG. Calidad duradera, diseño único.",
       "product_key": "gildan-5000",
       "base_price_eur": 29,
-      "colors": ["Black", "White", "Navy", "Sport Grey", "Sand", "Maroon"],
-      "sizes": ["S", "M", "L", "XL", "2XL", "3XL"],
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Sport Grey",
+        "Sand",
+        "Maroon"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
       "placement": "front",
       "customizable": true,
       "garment_type": "camiseta",
-      "garment_emoji": "\uD83D\uDC55"
+      "category": "camisetas",
+      "garment_emoji": "👕",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/51/5137d67bedbf56010d1daa04555a6d03_l",
+      "color_images": {
+        "Black": "https://files.cdn.printful.com/products/438/11550_1642678229.jpg",
+        "White": "https://files.cdn.printful.com/products/438/11580_1693310960.jpg",
+        "Navy": "https://files.cdn.printful.com/products/438/11565_1642678321.jpg",
+        "Sport Grey": "https://files.cdn.printful.com/products/438/11575_1642678405.jpg",
+        "Sand": "https://files.cdn.printful.com/products/438/12643_1642678374.jpg",
+        "Maroon": "https://files.cdn.printful.com/products/438/12638_1642678271.jpg"
+      }
     },
     {
       "slug": "crop-top-personalizado",
@@ -44,11 +92,21 @@
       "description": "Crop tee all-over print. Diseño vibrante que cubre toda la prenda.",
       "product_key": "all-over-print-crop-tee",
       "base_price_eur": 35,
-      "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
       "placement": "front",
       "customizable": true,
       "garment_type": "camiseta",
-      "garment_emoji": "\uD83D\uDC5A"
+      "category": "camisetas",
+      "garment_emoji": "👚",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/9d/9dc2eede066f8fda36fbf719caffde32_l"
     },
     {
       "slug": "tank-top-personalizado",
@@ -56,11 +114,20 @@
       "description": "Tank top all-over print para los días de calor. Tu diseño, sin mangas.",
       "product_key": "all-over-print-mens-tank-top",
       "base_price_eur": 35,
-      "sizes": ["XS", "S", "M", "L", "XL", "2XL"],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
+      ],
       "placement": "front",
       "customizable": true,
       "garment_type": "camiseta",
-      "garment_emoji": "\uD83E\uDE72"
+      "category": "camisetas",
+      "garment_emoji": "🩲",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/e2/e2ccc26380d655ad98939e7b50716486_l"
     },
     {
       "slug": "polo-adidas",
@@ -68,12 +135,391 @@
       "description": "Polo Adidas con bordado personalizado. Elegancia deportiva con tu toque personal.",
       "product_key": "adidas-premium-polo-shirt",
       "base_price_eur": 55,
-      "colors": ["Black", "White"],
-      "sizes": ["S", "M", "L", "XL", "2XL"],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
+      ],
       "placement": "embroidery_chest_left",
       "customizable": true,
       "garment_type": "polo",
-      "garment_emoji": "\uD83D\uDC54"
+      "category": "camisetas",
+      "garment_emoji": "👔",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/23/236eb3fe48ea255da5f34db0bf1c5a28_l",
+      "color_images": {
+        "Black": "https://files.cdn.printful.com/products/655/16405_1680239251.jpg",
+        "White": "https://files.cdn.printful.com/products/655/16410_1680239265.jpg"
+      }
+    },
+    {
+      "slug": "tank-top-mujer",
+      "name": "Tank Top Mujer",
+      "description": "Tank top femenino all-over print. Diseño vibrante para los días de sol.",
+      "product_key": "all-over-print-womens-tank-top",
+      "base_price_eur": 35,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "category": "camisetas",
+      "garment_emoji": "👚",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/59/593485966c7533363d6d6e0274c57f97_l"
+    },
+    {
+      "slug": "hoodie-personalizado",
+      "name": "Hoodie Personalizado",
+      "description": "Sudadera con capucha all-over print reciclada. Tu diseño cubre toda la prenda.",
+      "product_key": "all-over-print-recycled-unisex-hoodie",
+      "base_price_eur": 59,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "sudadera",
+      "category": "sudaderas",
+      "garment_emoji": "🧥",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7c/7c6f71d3de5db0ef1f05f397fc497f0b_l"
+    },
+    {
+      "slug": "leggings-personalizados",
+      "name": "Leggings Personalizados",
+      "description": "Leggings all-over print. Tu diseño de la cintura al tobillo.",
+      "product_key": "all-over-print-leggings",
+      "base_price_eur": 45,
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "pantalón",
+      "category": "pantalones",
+      "garment_emoji": "👖",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/d9/d9df6470d54437c30c4e561cd735abfe_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/189/7679_1582108091.jpg"
+      }
+    },
+    {
+      "slug": "shorts-atleticos",
+      "name": "Shorts Atléticos",
+      "description": "Shorts deportivos all-over print. Tu diseño en movimiento.",
+      "product_key": "all-over-print-unisex-athletic-long-shorts",
+      "base_price_eur": 42,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "pantalón",
+      "category": "pantalones",
+      "garment_emoji": "🩳",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7a/7aacb9339e476e810b6a58652d49e93b_l"
+    },
+    {
+      "slug": "vestido-midi",
+      "name": "Vestido Midi",
+      "description": "Vestido midi manga larga all-over print. Elegancia personalizada.",
+      "product_key": "all-over-print-long-sleeve-midi-dress",
+      "base_price_eur": 55,
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "vestido",
+      "category": "vestidos",
+      "garment_emoji": "👗",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/0f/0f1e6ffde2bb9ce58f37f729ac7b1848_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/589/15109_1651840587.jpg"
+      }
+    },
+    {
+      "slug": "banador-mujer",
+      "name": "Bañador Mujer",
+      "description": "Bañador de una pieza all-over print. Diseño único para la playa o piscina.",
+      "product_key": "all-over-print-one-piece-swimsuit",
+      "base_price_eur": 45,
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bañador",
+      "category": "bano",
+      "garment_emoji": "👙",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/37/37b621c104379d9c1b5312781a61f14c_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/272/9019_1530797786.jpg"
+      }
+    },
+    {
+      "slug": "banador-hombre",
+      "name": "Bañador Hombre",
+      "description": "Bermudas de baño recicladas all-over print. Sostenibilidad con estilo.",
+      "product_key": "all-over-print-recycled-swim-trunks",
+      "base_price_eur": 45,
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "2XL",
+        "3XL"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bañador",
+      "category": "bano",
+      "garment_emoji": "🩳",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/76/765cc9cc83cffb1c0e0aadaf9441d55d_l"
+    },
+    {
+      "slug": "banador-infantil",
+      "name": "Bañador Infantil",
+      "description": "Bañador infantil all-over print. Diversión garantizada.",
+      "product_key": "all-over-print-kids-swimsuit",
+      "base_price_eur": 35,
+      "sizes": [
+        "2T",
+        "3T",
+        "4T",
+        "5T",
+        "6",
+        "6X",
+        "7"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bañador",
+      "category": "infantil",
+      "garment_emoji": "🧒",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/aa/aa24c8766bfe721261e02763321c7cae_l"
+    },
+    {
+      "slug": "camiseta-infantil",
+      "name": "Camiseta Infantil",
+      "description": "Camiseta infantil all-over print. Para los más pequeños de la casa.",
+      "product_key": "all-over-print-kids-crew-neck-t-shirt",
+      "base_price_eur": 29,
+      "sizes": [
+        "2T",
+        "3T",
+        "4T",
+        "5T",
+        "6",
+        "6X",
+        "7"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "camiseta",
+      "category": "infantil",
+      "garment_emoji": "👶",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1c17a67ab90975c4b8181db65b0f3363_l"
+    },
+    {
+      "slug": "tote-bag",
+      "name": "Tote Bag",
+      "description": "Bolsa tote all-over print. Lleva tu diseño a todas partes.",
+      "product_key": "all-over-print-tote-bag",
+      "base_price_eur": 25,
+      "sizes": [
+        "15″×15″"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "👜",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/18/188a606268f59e0c026a2ed0e41b20a3_l"
+    },
+    {
+      "slug": "rinonera",
+      "name": "Riñonera",
+      "description": "Riñonera all-over print. Práctica y con tu diseño personalizado.",
+      "product_key": "all-over-print-fanny-pack",
+      "base_price_eur": 30,
+      "sizes": [
+        "S/M",
+        "M/L"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "👝",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5b065fbef259cc4554b04bcad64f006_l"
+    },
+    {
+      "slug": "mochila",
+      "name": "Mochila",
+      "description": "Mochila all-over print. Tu diseño te acompaña a donde vayas.",
+      "product_key": "all-over-print-backpack",
+      "base_price_eur": 45,
+      "sizes": [
+        "One size"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "🎒",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1cb4394b298d1d9e5d622976d8b89213_l"
+    },
+    {
+      "slug": "bandolera",
+      "name": "Bandolera",
+      "description": "Bolso bandolera all-over print. Estilo cruzado con tu toque personal.",
+      "product_key": "all-over-print-crossbody-bag",
+      "base_price_eur": 35,
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "sizes": [
+        "One size"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "👜",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/c9/c97eee111c050ec8a271b9fcfb6094b5_l",
+      "color_images": {
+        "Black": "https://files.cdn.printful.com/products/672/16708_1679643890.jpg",
+        "White": "https://files.cdn.printful.com/products/672/16704_1679643890.jpg"
+      }
+    },
+    {
+      "slug": "bolsa-deporte",
+      "name": "Bolsa de Deporte",
+      "description": "Bolsa de deporte all-over print. Tu diseño en el gimnasio.",
+      "product_key": "all-over-print-duffle-bag",
+      "base_price_eur": 45,
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "One size"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "🏋️",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/0c/0c1a5f944c18301aa3b8db21bc5a8bf7_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/465/12021_1610632090.jpg"
+      }
+    },
+    {
+      "slug": "bolsa-gym",
+      "name": "Bolsa Gym",
+      "description": "Bolsa de gimnasio all-over print. Lleva tu estilo al entreno.",
+      "product_key": "all-over-print-gym-bag",
+      "base_price_eur": 35,
+      "colors": [
+        "White"
+      ],
+      "sizes": [
+        "One size"
+      ],
+      "placement": "front",
+      "customizable": true,
+      "garment_type": "bolso",
+      "category": "bolsos",
+      "garment_emoji": "💪",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/ed/ed1e2bcfb0b0e2e680f14f2b50e0ea25_l",
+      "color_images": {
+        "White": "https://files.cdn.printful.com/products/594/15155_1652879339.jpg"
+      }
+    },
+    {
+      "slug": "poster",
+      "name": "Póster Premium",
+      "description": "Póster en papel mate premium. Tu diseño hecho arte para la pared.",
+      "product_key": "enhanced-matte-paper-poster-in",
+      "base_price_eur": 15,
+      "sizes": [
+        "12″×16″",
+        "12″×18″",
+        "16″×20″",
+        "18″×24″",
+        "24″×36″"
+      ],
+      "placement": "default",
+      "customizable": true,
+      "garment_type": "póster",
+      "category": "decoracion",
+      "garment_emoji": "🖼️",
+      "image_url": "https://files.cdn.printful.com/o/products/1/product_1613463122.jpg"
+    },
+    {
+      "slug": "taza",
+      "name": "Taza Personalizada",
+      "description": "Taza blanca brillante con tu diseño. El mejor regalo personalizado.",
+      "product_key": "white-glossy-mug",
+      "base_price_eur": 15,
+      "sizes": [
+        "11 OZ",
+        "15 OZ"
+      ],
+      "placement": "default",
+      "customizable": true,
+      "garment_type": "taza",
+      "category": "hogar",
+      "garment_emoji": "☕",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/8c/8c4ac4a450b8485bc8a6e041a5a23666_l"
     }
   ]
 }

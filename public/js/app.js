@@ -69,8 +69,11 @@ function renderCartItems() {
 
     const div = document.createElement('div');
     div.className = 'cart-item';
+    const thumbSrc = item.mockup_url || item.product_image_url;
     div.innerHTML = `
-      <div class="cart-item-img">${item.emoji || '\uD83D\uDC55'}</div>
+      <div class="cart-item-img">${thumbSrc
+        ? `<img src="${thumbSrc}" alt="${escapeHtml(item.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">`
+        : (item.emoji || '\uD83D\uDC55')}</div>
       <div class="cart-item-details">
         <div class="cart-item-name">${escapeHtml(item.name)}</div>
         <div class="cart-item-meta">${escapeHtml(item.size || '')} ${item.color ? '· ' + escapeHtml(item.color) : ''} · x${item.quantity || 1}</div>

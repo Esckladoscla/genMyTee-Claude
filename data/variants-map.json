@@ -1862,5 +1862,193 @@
         "variant_id": 21690
       }
     }
+  },
+  "all-over-print-recycled-unisex-hoodie": {
+    "2XS": {
+      "variant_id": 18730
+    },
+    "4XL": {
+      "variant_id": 18731
+    },
+    "5XL": {
+      "variant_id": 18732
+    },
+    "6XL": {
+      "variant_id": 18733
+    },
+    "2XL": {
+      "variant_id": 10874
+    },
+    "3XL": {
+      "variant_id": 10875
+    },
+    "L": {
+      "variant_id": 10872
+    },
+    "M": {
+      "variant_id": 10871
+    },
+    "S": {
+      "variant_id": 10870
+    },
+    "XL": {
+      "variant_id": 10873
+    },
+    "XS": {
+      "variant_id": 10869
+    }
+  },
+  "all-over-print-unisex-athletic-long-shorts": {
+    "2XL": {
+      "variant_id": 9816
+    },
+    "3XL": {
+      "variant_id": 9817
+    },
+    "L": {
+      "variant_id": 9814
+    },
+    "M": {
+      "variant_id": 9813
+    },
+    "S": {
+      "variant_id": 9812
+    },
+    "2XS": {
+      "variant_id": 16588
+    },
+    "4XL": {
+      "variant_id": 16342
+    },
+    "5XL": {
+      "variant_id": 16343
+    },
+    "6XL": {
+      "variant_id": 16344
+    },
+    "XL": {
+      "variant_id": 9815
+    },
+    "XS": {
+      "variant_id": 9811
+    }
+  },
+  "all-over-print-recycled-swim-trunks": {
+    "2XL": {
+      "variant_id": 14642
+    },
+    "2XS": {
+      "variant_id": 14636
+    },
+    "3XL": {
+      "variant_id": 14643
+    },
+    "4XL": {
+      "variant_id": 14644
+    },
+    "5XL": {
+      "variant_id": 14645
+    },
+    "6XL": {
+      "variant_id": 14646
+    },
+    "L": {
+      "variant_id": 14640
+    },
+    "M": {
+      "variant_id": 14639
+    },
+    "S": {
+      "variant_id": 14638
+    },
+    "XL": {
+      "variant_id": 14641
+    },
+    "XS": {
+      "variant_id": 14637
+    }
+  },
+  "all-over-print-tote-bag": {
+    "15″×15″": {
+      "variant_id": 8905
+    }
+  },
+  "enhanced-matte-paper-poster-in": {
+    "A1 (23.3″×33.1″)": {
+      "variant_id": 19527
+    },
+    "A2 (16.5″×23.3″)": {
+      "variant_id": 19528
+    },
+    "10″×10″": {
+      "variant_id": 6239
+    },
+    "11″×14″": {
+      "variant_id": 14125
+    },
+    "12″×12″": {
+      "variant_id": 4464
+    },
+    "12″×16″": {
+      "variant_id": 1349
+    },
+    "12″×18″": {
+      "variant_id": 3876
+    },
+    "14″×14″": {
+      "variant_id": 6240
+    },
+    "16″×16″": {
+      "variant_id": 4465
+    },
+    "16″×20″": {
+      "variant_id": 3877
+    },
+    "18″×18″": {
+      "variant_id": 6242
+    },
+    "18″×24″": {
+      "variant_id": 1
+    },
+    "20″×30″": {
+      "variant_id": 16365
+    },
+    "24″×36″": {
+      "variant_id": 2
+    },
+    "5″×7″": {
+      "variant_id": 16364
+    },
+    "8″×10″": {
+      "variant_id": 4463
+    }
+  },
+  "white-glossy-mug": {
+    "11 OZ": {
+      "variant_id": 1320
+    },
+    "15 OZ": {
+      "variant_id": 4830
+    },
+    "20 OZ": {
+      "variant_id": 16586
+    }
+  },
+  "all-over-print-womens-tank-top": {
+    "L": {
+      "variant_id": 7823
+    },
+    "M": {
+      "variant_id": 7822
+    },
+    "S": {
+      "variant_id": 7821
+    },
+    "XL": {
+      "variant_id": 7824
+    },
+    "XS": {
+      "variant_id": 7820
+    }
   }
 }
