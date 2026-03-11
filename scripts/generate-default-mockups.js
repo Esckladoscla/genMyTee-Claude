@@ -25,7 +25,7 @@ const PRODUCTS_PATH = join(__dirname, '..', 'data', 'products.json');
 
 const DEFAULT_BASE_URL = 'https://genmytee.com';
 const DEFAULT_IMAGE_PATH = '/img/hero.png';
-const DELAY_MS = 2000;
+const DELAY_MS = 30000;
 
 function parseArgs() {
   const args = process.argv.slice(2);

@@ -20,7 +20,14 @@
       "garment_type": "camiseta",
       "category": "camisetas",
       "garment_emoji": "👕",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/24/243d158018882a4fee017e357d584e2b_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/24/243d158018882a4fee017e357d584e2b_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c87d440eb74671f3a61060307c591303/all-over-print-mens-athletic-t-shirt-white-front-69b1d004a8aaa.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c87d440eb74671f3a61060307c591303/all-over-print-mens-athletic-t-shirt-white-front-69b1d004a8aaa.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f28dc795e497ae24d7ef047d1caa8d4a/all-over-print-mens-athletic-t-shirt-white-right-69b1d004a98b1.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e81af68b63970b9b57d61468038a525a/all-over-print-mens-athletic-t-shirt-white-front-69b1d004a92b8.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d5ec8653e20478b784f940d992786bef/all-over-print-mens-athletic-t-shirt-white-back-69b1d004a997c.png"
+      ]
     },
     {
       "slug": "camiseta-clasica",
@@ -47,7 +54,14 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/fd/fdb7214913fd3c6c56d683e1f8997c58_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/257/8855_1530703808.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ed9ea4643e5ff37e7a93dc0ae6363eda/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b381af5.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ed9ea4643e5ff37e7a93dc0ae6363eda/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b381af5.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8ef5475a14b8884e17d90d54b349dd6d/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b38265c.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/57ec01666c201be9ed044e96e4d55fd1/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b3820a5.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/41a9ed8605b2a57a3c2a813ff4191c20/all-over-print-mens-crew-neck-t-shirt-white-front-2-69b1d0b38271c.png"
+      ]
     },
     {
       "slug": "camiseta-algodon",
@@ -84,7 +98,14 @@
         "Sport Grey": "https://files.cdn.printful.com/products/438/11575_1642678405.jpg",
         "Sand": "https://files.cdn.printful.com/products/438/12643_1642678374.jpg",
         "Maroon": "https://files.cdn.printful.com/products/438/12638_1642678271.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e93c5724dee0fd02f19c5943b8b553c1/unisex-classic-tee-black-front-69b1d16232e42.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e93c5724dee0fd02f19c5943b8b553c1/unisex-classic-tee-black-front-69b1d16232e42.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ff6e1ab80c9f49b2e9a57cadb9c989b6/unisex-classic-tee-black-front-69b1d16237283.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e306cf747462d31db33e84131bea6bf/unisex-classic-tee-black-front-69b1d16234ff9.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d7124390ca1b58a4ff251751c7bef9dd/unisex-classic-tee-black-front-69b1d1623770d.png"
+      ]
     },
     {
       "slug": "crop-top-personalizado",
@@ -106,7 +127,14 @@
       "garment_type": "camiseta",
       "category": "camisetas",
       "garment_emoji": "👚",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/9d/9dc2eede066f8fda36fbf719caffde32_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/9d/9dc2eede066f8fda36fbf719caffde32_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e1f59d76a0f6e86e074a5426604ba231/all-over-print-crop-tee-white-front-69b1d18b53f4d.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e1f59d76a0f6e86e074a5426604ba231/all-over-print-crop-tee-white-front-69b1d18b53f4d.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1bb6b738ec74cbd5d78662fe60b54286/all-over-print-crop-tee-white-left-front-69b1d18b54bdd.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d4e5e7c30d872903a6bf7a6fd9cad709/all-over-print-crop-tee-white-back-69b1d18b545d0.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b21018e5af9c1b40417bdb0f8eb1bca5/all-over-print-crop-tee-white-right-front-69b1d18b54cbb.png"
+      ]
     },
     {
       "slug": "tank-top-personalizado",
@@ -127,7 +155,14 @@
       "garment_type": "camiseta",
       "category": "camisetas",
       "garment_emoji": "🩲",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/e2/e2ccc26380d655ad98939e7b50716486_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/e2/e2ccc26380d655ad98939e7b50716486_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1ba0ca8ca4766623ba8f086624e53558/all-over-print-mens-tank-top-white-front-69b1dfa642a20.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1ba0ca8ca4766623ba8f086624e53558/all-over-print-mens-tank-top-white-front-69b1dfa642a20.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/13d7363726537546516192560735608d/all-over-print-mens-tank-top-white-left-69b1dfa6430f7.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e508959169e0928fb471b40000ff9bab/all-over-print-mens-tank-top-white-right-front-69b1dfa642d7a.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c73f46a8b1169c9ced2b5cf6e9d40bb2/all-over-print-mens-tank-top-white-left-front-69b1dfa642f43.png"
+      ]
     },
     {
       "slug": "polo-adidas",
@@ -155,7 +190,13 @@
       "color_images": {
         "Black": "https://files.cdn.printful.com/products/655/16405_1680239251.jpg",
         "White": "https://files.cdn.printful.com/products/655/16410_1680239265.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ddde9a92b03dd378a0b235260a3d653d/adidas-premium-polo-shirt-black-front-69b1d1d05414f.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ddde9a92b03dd378a0b235260a3d653d/adidas-premium-polo-shirt-black-front-69b1d1d05414f.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/aa564bb10df4db692528b1689917ec96/adidas-premium-polo-shirt-black-right-front-69b1d1d0556e2.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/4bad442ef4a7354140825de0dca8a33f/adidas-premium-polo-shirt-black-left-69b1d1d05597b.png"
+      ]
     },
     {
       "slug": "tank-top-mujer",
@@ -175,7 +216,12 @@
       "garment_type": "camiseta",
       "category": "camisetas",
       "garment_emoji": "👚",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/59/593485966c7533363d6d6e0274c57f97_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/59/593485966c7533363d6d6e0274c57f97_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/163c1674b9e47121a8827989e21761ed/all-over-print-womens-tank-top-white-front-69b1e188004d3.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/163c1674b9e47121a8827989e21761ed/all-over-print-womens-tank-top-white-front-69b1e188004d3.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5c48255f73fdd2b20cb84bbc482c680e/all-over-print-womens-tank-top-white-front-69b1e18800a3c.png"
+      ]
     },
     {
       "slug": "hoodie-personalizado",
@@ -197,7 +243,14 @@
       "garment_type": "sudadera",
       "category": "sudaderas",
       "garment_emoji": "🧥",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7c/7c6f71d3de5db0ef1f05f397fc497f0b_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7c/7c6f71d3de5db0ef1f05f397fc497f0b_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7c5893c0168d1191b0ac36f78c3f7ae7/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129ae1f.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7c5893c0168d1191b0ac36f78c3f7ae7/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129ae1f.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2d2556faf7c727626e54f3abef847e07/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129d539.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/763ddfc7ebed6d53282cf7f97199cd77/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129bbce.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9e018ab7bf833ee10200cbc22121e343/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129d89c.png"
+      ]
     },
     {
       "slug": "leggings-personalizados",
@@ -223,7 +276,14 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/d9/d9df6470d54437c30c4e561cd735abfe_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/189/7679_1582108091.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/a371f355cfd56d1f1ff6a05f57299b39/all-over-print-leggings-white-front-69b1e27125b5a.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/a371f355cfd56d1f1ff6a05f57299b39/all-over-print-leggings-white-front-69b1e27125b5a.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/cb254a8438e956159cd013d9c14923fc/all-over-print-leggings-white-right-69b1e271267c3.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2dd51065154c8f3cae5064782f9460c0/all-over-print-leggings-white-front-69b1e27126279.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fddbfc4c882fffcd7fdf0e4257071ba5/all-over-print-leggings-white-front-69b1e27126871.png"
+      ]
     },
     {
       "slug": "shorts-atleticos",
@@ -245,7 +305,14 @@
       "garment_type": "pantalón",
       "category": "pantalones",
       "garment_emoji": "🩳",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7a/7aacb9339e476e810b6a58652d49e93b_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/7a/7aacb9339e476e810b6a58652d49e93b_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fba28f64863eb7e1f04d29e8d76ae310/all-over-print-unisex-athletic-long-shorts-white-front-69b1e00b7d118.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fba28f64863eb7e1f04d29e8d76ae310/all-over-print-unisex-athletic-long-shorts-white-front-69b1e00b7d118.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1d1617c1f32840b8e24ebb25fd2cbdd2/all-over-print-unisex-athletic-long-shorts-white-back-2-69b1e00b7e0bd.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7bbfd578e0a11907818c7b9653463bc9/all-over-print-unisex-athletic-long-shorts-white-left-69b1e00b7d876.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b811440da6d8df86608d5622a41cac57/all-over-print-unisex-athletic-long-shorts-white-front-69b1e00b7e1cc.png"
+      ]
     },
     {
       "slug": "vestido-midi",
@@ -272,7 +339,14 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/0f/0f1e6ffde2bb9ce58f37f729ac7b1848_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/589/15109_1651840587.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/375959af2b14c6683e027cfe9ec4f87b/all-over-print-long-sleeve-midi-dress-white-front-69b1d27ace5c6.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/375959af2b14c6683e027cfe9ec4f87b/all-over-print-long-sleeve-midi-dress-white-front-69b1d27ace5c6.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12476fe928717f0adab120cf7e8ae8af/all-over-print-long-sleeve-midi-dress-white-left-69b1d27acff77.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/17e7bc7edec0fb07547f4f1015423ff6/all-over-print-long-sleeve-midi-dress-white-product-details-2-69b1d27acf249.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12f78b25a6a699e382ac364dbba9c60a/all-over-print-long-sleeve-midi-dress-white-right-front-69b1d27acf8b6.png"
+      ]
     },
     {
       "slug": "banador-mujer",
@@ -299,7 +373,14 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/37/37b621c104379d9c1b5312781a61f14c_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/272/9019_1530797786.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/18268796202b7c7dbd1cd4a71c54ea03/all-over-print-one-piece-swimsuit-white-front-69b1d2a18bb17.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/18268796202b7c7dbd1cd4a71c54ea03/all-over-print-one-piece-swimsuit-white-front-69b1d2a18bb17.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9469fb49069bbd68b00b107c81d49854/all-over-print-one-piece-swimsuit-white-left-69b1d2a18cbe8.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/40bd4d8e9e62a80b2f847cb58b8e789a/all-over-print-one-piece-swimsuit-white-right-69b1d2a18c419.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9be0fb18865ecc6fd397249c11696eb4/all-over-print-one-piece-swimsuit-white-right-69b1d2a18cce8.png"
+      ]
     },
     {
       "slug": "banador-hombre",
@@ -321,7 +402,14 @@
       "garment_type": "bañador",
       "category": "bano",
       "garment_emoji": "🩳",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/76/765cc9cc83cffb1c0e0aadaf9441d55d_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/76/765cc9cc83cffb1c0e0aadaf9441d55d_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c230f978b42778b88012097072aa0c13/all-over-print-recycled-swim-trunks-white-front-69b1e03313e44.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c230f978b42778b88012097072aa0c13/all-over-print-recycled-swim-trunks-white-front-69b1e03313e44.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1ea7a94963d80bbcc45c37c779e1c5c4/all-over-print-recycled-swim-trunks-white-front-69b1e033149fc.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/bdde5171115d220dbdcc40792984a6d7/all-over-print-recycled-swim-trunks-white-left-front-69b1e033143f7.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c47e031a9b36bb8a2890b408b96fe4a3/all-over-print-recycled-swim-trunks-white-left-front-69b1e03314aad.png"
+      ]
     },
     {
       "slug": "banador-infantil",
@@ -343,7 +431,14 @@
       "garment_type": "bañador",
       "category": "infantil",
       "garment_emoji": "🧒",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/aa/aa24c8766bfe721261e02763321c7cae_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/aa/aa24c8766bfe721261e02763321c7cae_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/51a4937d0573d9df55a4c2e6d7444639/all-over-print-kids-swimsuit-white-right-front-69b1d2e7a7875.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/51a4937d0573d9df55a4c2e6d7444639/all-over-print-kids-swimsuit-white-right-front-69b1d2e7a7875.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2e97194cb1c64eba3cd62f631b1cd85f/all-over-print-kids-swimsuit-white-left-69b1d2e7a8021.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/496ee5706f84e569e3842629a37c3b89/all-over-print-kids-swimsuit-white-left-69b1d2e7a7d16.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c2371dd38fe7ffbcd4fd83ad9334b68b/all-over-print-kids-swimsuit-white-right-69b1d2e7a8089.png"
+      ]
     },
     {
       "slug": "camiseta-infantil",
@@ -365,7 +460,12 @@
       "garment_type": "camiseta",
       "category": "infantil",
       "garment_emoji": "👶",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1c17a67ab90975c4b8181db65b0f3363_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1c17a67ab90975c4b8181db65b0f3363_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9c99de65babb401ffc19a4bea0da8f46/all-over-print-kids-crew-neck-t-shirt-white-front-69b1e1cd904a0.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9c99de65babb401ffc19a4bea0da8f46/all-over-print-kids-crew-neck-t-shirt-white-front-69b1e1cd904a0.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d9db6636e31b4bf0492b7eed9cdd2e5d/all-over-print-kids-crew-neck-t-shirt-white-left-front-69b1e1cd90e0e.png"
+      ]
     },
     {
       "slug": "tote-bag",
@@ -381,7 +481,13 @@
       "garment_type": "bolso",
       "category": "bolsos",
       "garment_emoji": "👜",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/18/188a606268f59e0c026a2ed0e41b20a3_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/18/188a606268f59e0c026a2ed0e41b20a3_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c9154897bc5ba22324007e11eb82ccb5/all-over-print-tote-bag-yellow-15x15-mockup-69b1d338b8e2e.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c9154897bc5ba22324007e11eb82ccb5/all-over-print-tote-bag-yellow-15x15-mockup-69b1d338b8e2e.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b46e0a3f1675e61d42ccda1fd78b90a6/all-over-print-tote-bag-yellow-15x15-front-69b1d338b90ce.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/afa49223f490526a4563dec10a260610/all-over-print-tote-bag-yellow-15x15-mockup-69b1d338b9221.png"
+      ]
     },
     {
       "slug": "rinonera",
@@ -414,7 +520,14 @@
       "garment_type": "bolso",
       "category": "bolsos",
       "garment_emoji": "🎒",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1cb4394b298d1d9e5d622976d8b89213_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/1c/1cb4394b298d1d9e5d622976d8b89213_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8ea609bab927085d4a6244892a91e1b9/all-over-print-backpack-white-front-69b1d37e51914.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8ea609bab927085d4a6244892a91e1b9/all-over-print-backpack-white-front-69b1d37e51914.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/24dceabcdf7e3ba1ca7e24f912fa4255/all-over-print-backpack-white-right-69b1d37e52961.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3cdf179aef72c367bac4cceb37e90f6f/all-over-print-backpack-white-front-69b1d37e52171.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e7a59dbebbda4e0e54d0914205e07312/all-over-print-backpack-white-front-69b1d37e52a0b.png"
+      ]
     },
     {
       "slug": "bandolera",
@@ -438,7 +551,14 @@
       "color_images": {
         "Black": "https://files.cdn.printful.com/products/672/16708_1679643890.jpg",
         "White": "https://files.cdn.printful.com/products/672/16704_1679643890.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2566d8f410392059e1e40f0ad21a3ae9/all-over-print-crossbody-bag-black-front-69b1d3a47dd74.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2566d8f410392059e1e40f0ad21a3ae9/all-over-print-crossbody-bag-black-front-69b1d3a47dd74.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/545dd16bfa1f2340b5aaf44946a4ca67/all-over-print-crossbody-bag-black-back-69b1d3a47e84a.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/4208e994ea7d9dc5431e78835efe02f5/all-over-print-crossbody-bag-black-front-69b1d3a47e316.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7a57e3f534740a2709c39fa8786b6a10/all-over-print-crossbody-bag-black-back-69b1d3a47e8db.png"
+      ]
     },
     {
       "slug": "bolsa-deporte",
@@ -460,7 +580,14 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/0c/0c1a5f944c18301aa3b8db21bc5a8bf7_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/465/12021_1610632090.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d64d1a8f21bb24c5cfca1c0e82fd3243/all-over-print-duffle-bag-white-front-69b1d04c7f3bb.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d64d1a8f21bb24c5cfca1c0e82fd3243/all-over-print-duffle-bag-white-front-69b1d04c7f3bb.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3bac92330d6451fcfcaf265891339787/all-over-print-duffle-bag-white-left-side-69b1d04c80497.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12b2285b97d406832e95af4467c3472f/all-over-print-duffle-bag-white-front-69b1d04c7fbc4.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/85d214378037bc575e31f362a5aea203/all-over-print-duffle-bag-white-right-side-69b1d04c805bf.png"
+      ]
     },
     {
       "slug": "bolsa-gym",
@@ -482,7 +609,13 @@
       "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/ed/ed1e2bcfb0b0e2e680f14f2b50e0ea25_l",
       "color_images": {
         "White": "https://files.cdn.printful.com/products/594/15155_1652879339.jpg"
-      }
+      },
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/639911416b5b649b6fcaf114c4e1318c/all-over-print-gym-bag-white-front-69b1d05957e75.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/639911416b5b649b6fcaf114c4e1318c/all-over-print-gym-bag-white-front-69b1d05957e75.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f891bf3fb1c788ff5c28e0d8f6f2d4ef/all-over-print-gym-bag-white-bottom-69b1d05958543.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2f8ce6d1b2867825e4772d9bed01e61c/all-over-print-gym-bag-white-right-front-69b1d0595886f.png"
+      ]
     },
     {
       "slug": "poster",
@@ -502,7 +635,14 @@
       "garment_type": "póster",
       "category": "decoracion",
       "garment_emoji": "🖼️",
-      "image_url": "https://files.cdn.printful.com/o/products/1/product_1613463122.jpg"
+      "image_url": "https://files.cdn.printful.com/o/products/1/product_1613463122.jpg",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f132a0ed464e1912ae373cc0dd8ea038/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a62e96.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f132a0ed464e1912ae373cc0dd8ea038/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a62e96.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/cd7aeea3f5c8fe248fe6797a4838eeb7/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a63515.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fe4acae3b3fc72c76a89aab511893ea3/enhanced-matte-paper-poster-(in)-12x16-lifestyle-2-69b1e09a632b8.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3cf907592977bf4cfa48ec0146ce92d1/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a63547.png"
+      ]
     },
     {
       "slug": "taza",
@@ -519,7 +659,14 @@
       "garment_type": "taza",
       "category": "hogar",
       "garment_emoji": "☕",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/8c/8c4ac4a450b8485bc8a6e041a5a23666_l"
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/8c/8c4ac4a450b8485bc8a6e041a5a23666_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7d3ee38baa538e30122ba72150255b19/white-glossy-mug-white-11-oz-handle-on-right-69b1d3e954718.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7d3ee38baa538e30122ba72150255b19/white-glossy-mug-white-11-oz-handle-on-right-69b1d3e954718.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/85d0ce9fba56830eda5ce87907c5bd7b/white-glossy-mug-white-11-oz-handle-on-right-69b1d3e954f0d.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/93a98816fd362bec92e6b8fce4c9aca1/white-glossy-mug-white-11-oz-halloween-69b1d3e954cc0.png",
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e47104981833fa3474be769dc1d366a5/white-glossy-mug-white-11-oz-front-view-69b1d3e954f55.png"
+      ]
     }
   ]
 }
