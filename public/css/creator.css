@@ -421,6 +421,11 @@
 .layout-update-btn.loading{
   opacity:0.6;cursor:wait;
 }
+.layout-update-btn.cooldown{
+  opacity:0.7;cursor:default;
+  background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);
+  border-color:rgba(255,255,255,0.1);
+}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
