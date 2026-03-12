@@ -14,6 +14,7 @@ let panelQty = 1;
 let layoutScale = 100;
 let layoutX = 0;
 let layoutY = 0;
+let previewMode = 'mockup'; // 'mockup' | 'adjusting'
 
 // ── Color hex map ──
 const COLOR_HEX = {
@@ -481,12 +482,18 @@ function displayMockup(primaryUrl, allUrls) {
   }
 
   preview.appendChild(container);
-  showLayoutControls();
+  exitAdjustMode();
+  if (selectedProduct?.supports_layout) {
+    showLayoutControls();
+  } else {
+    hideLayoutControls();
+  }
 }
 
 function hideMockup() {
   hideLayoutControls();
   resetLayout();
+  exitAdjustMode();
   hideMockupLoading();
   document.querySelectorAll('.mockup-container').forEach(el => el.remove());
 
@@ -578,19 +585,30 @@ function initLayoutControls() {
   scaleSlider.addEventListener('input', () => {
     layoutScale = parseInt(scaleSlider.value, 10);
     document.getElementById('layoutScaleValue').textContent = layoutScale + '%';
+    enterAdjustMode();
+    updateClientPreview();
   });
 
   xSlider.addEventListener('input', () => {
     layoutX = parseInt(xSlider.value, 10);
     document.getElementById('layoutXValue').textContent = layoutX;
+    enterAdjustMode();
+    updateClientPreview();
   });
 
   ySlider.addEventListener('input', () => {
     layoutY = parseInt(ySlider.value, 10);
     document.getElementById('layoutYValue').textContent = layoutY;
+    enterAdjustMode();
+    updateClientPreview();
   });
 
-  resetBtn.addEventListener('click', resetLayout);
+  resetBtn.addEventListener('click', () => {
+    resetLayout();
+    if (previewMode === 'adjusting') {
+      updateClientPreview();
+    }
+  });
 
   updateBtn.addEventListener('click', async () => {
     if (!generatedImageUrl || !selectedProduct) return;
@@ -600,7 +618,7 @@ function initLayoutControls() {
     await requestMockup(selectedProduct.product_key);
     updateBtn.disabled = false;
     updateBtn.classList.remove('loading');
-    updateBtn.textContent = '\u21BB Actualizar mockup';
+    updateBtn.textContent = 'Ver mockup real';
   });
 }
 
@@ -636,6 +654,75 @@ function getLayoutParam() {
     offset_x: layoutX,
     offset_y: layoutY,
   };
+}
+
+// ── Client-side layout preview ──
+function enterAdjustMode() {
+  if (previewMode === 'adjusting') return;
+  if (!generatedImageUrl || !selectedProduct) return;
+  previewMode = 'adjusting';
+
+  // Hide Printful mockup
+  const mockupContainer = document.querySelector('.mockup-container');
+  if (mockupContainer) mockupContainer.style.display = 'none';
+
+  setupClientPreview();
+}
+
+function exitAdjustMode() {
+  if (previewMode !== 'adjusting') return;
+  previewMode = 'mockup';
+
+  const clientPreview = document.getElementById('clientPreview');
+  if (clientPreview) clientPreview.style.display = 'none';
+
+  // Restore Printful mockup
+  const mockupContainer = document.querySelector('.mockup-container');
+  if (mockupContainer) mockupContainer.style.display = '';
+}
+
+function setupClientPreview() {
+  const clientPreview = document.getElementById('clientPreview');
+  const baseImg = document.getElementById('clientPreviewBase');
+  const designImg = document.getElementById('clientPreviewDesign');
+  const printArea = document.getElementById('clientPreviewPrintArea');
+  if (!clientPreview || !baseImg || !designImg || !printArea) return;
+
+  // Base image: product color photo or catalog image
+  const baseUrl = selectedProduct.color_images?.[selectedColor]
+    || selectedProduct.image_url
+    || selectedProduct.default_mockup_url;
+  baseImg.src = baseUrl;
+
+  // Design image: the AI-generated artwork
+  designImg.src = generatedImageUrl;
+
+  // Position the print area overlay
+  const area = selectedProduct.preview_print_area;
+  if (area) {
+    printArea.style.top = area.top_pct + '%';
+    printArea.style.left = area.left_pct + '%';
+    printArea.style.width = area.width_pct + '%';
+    printArea.style.height = area.height_pct + '%';
+  } else {
+    // Fallback: center area
+    printArea.style.top = '15%';
+    printArea.style.left = '15%';
+    printArea.style.width = '70%';
+    printArea.style.height = '70%';
+  }
+
+  clientPreview.style.display = '';
+  updateClientPreview();
+}
+
+function updateClientPreview() {
+  const designImg = document.getElementById('clientPreviewDesign');
+  if (!designImg) return;
+  const scaleVal = layoutScale / 100;
+  const txPct = layoutX * 0.3;
+  const tyPct = layoutY * 0.3;
+  designImg.style.transform = `scale(${scaleVal}) translate(${txPct}%, ${tyPct}%)`;
 }
 
 // Expose for catalog.js product card clicks

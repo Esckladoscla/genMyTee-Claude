@@ -24,6 +24,8 @@ const sampleProducts = [
   },
 ];
 
+const stubLayoutSupport = () => null;
+
 function createCatalogApp(router) {
   const app = express();
   app.use("/api/catalog", router);
@@ -31,7 +33,7 @@ function createCatalogApp(router) {
 }
 
 test("catalog returns all products", async () => {
-  const router = buildCatalogRouter({ productsFn: () => sampleProducts });
+  const router = buildCatalogRouter({ productsFn: () => sampleProducts, layoutSupportFn: stubLayoutSupport });
 
   await withServer(createCatalogApp(router), async (baseUrl) => {
     const res = await fetch(`${baseUrl}/api/catalog/products`);
@@ -44,7 +46,7 @@ test("catalog returns all products", async () => {
 });
 
 test("catalog returns single product by slug", async () => {
-  const router = buildCatalogRouter({ productsFn: () => sampleProducts });
+  const router = buildCatalogRouter({ productsFn: () => sampleProducts, layoutSupportFn: stubLayoutSupport });
 
   await withServer(createCatalogApp(router), async (baseUrl) => {
     const res = await fetch(`${baseUrl}/api/catalog/products/polo-adidas`);
@@ -57,7 +59,7 @@ test("catalog returns single product by slug", async () => {
 });
 
 test("catalog returns 404 for unknown slug", async () => {
-  const router = buildCatalogRouter({ productsFn: () => sampleProducts });
+  const router = buildCatalogRouter({ productsFn: () => sampleProducts, layoutSupportFn: stubLayoutSupport });
 
   await withServer(createCatalogApp(router), async (baseUrl) => {
     const res = await fetch(`${baseUrl}/api/catalog/products/no-existe`);
@@ -69,7 +71,7 @@ test("catalog returns 404 for unknown slug", async () => {
 });
 
 test("catalog loads from real products.json", async () => {
-  const router = buildCatalogRouter();
+  const router = buildCatalogRouter({ layoutSupportFn: stubLayoutSupport });
 
   await withServer(createCatalogApp(router), async (baseUrl) => {
     const res = await fetch(`${baseUrl}/api/catalog/products`);
