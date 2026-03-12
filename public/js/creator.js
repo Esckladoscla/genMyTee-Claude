@@ -15,6 +15,7 @@ let layoutScale = 100;
 let layoutX = 0;
 let layoutY = 0;
 let previewMode = 'mockup'; // 'mockup' | 'adjusting'
+let mockupGeneration = 0; // incremented on each requestMockup to cancel stale polls
 
 // ── Color hex map ──
 const COLOR_HEX = {
@@ -301,8 +302,8 @@ async function generateDesign() {
     const imageData = await imageRes.json();
 
     if (!imageData.ok || !imageData.image_url) {
-      const errorMsg = imageData.error || imageData.message || 'Error al generar el diseño';
-      showToast(typeof errorMsg === 'string' ? errorMsg : 'Error al generar el diseño');
+      const errorMsg = imageData.error || imageData.message || 'Error al generar el dise\u00f1o';
+      showGenerationError(typeof errorMsg === 'string' ? errorMsg : 'Error al generar el dise\u00f1o');
       return;
     }
 
@@ -343,6 +344,7 @@ async function generateDesign() {
 
 // Returns true if mockup was received or is being polled, false if failed
 async function requestMockup(productKey) {
+  const thisGeneration = ++mockupGeneration;
   try {
     showMockupLoading();
     currentMockupUrl = null;
@@ -370,7 +372,9 @@ async function requestMockup(productKey) {
     const mockupData = await mockupRes.json();
 
     if (mockupData.ok && mockupData.mockup_url) {
-      displayMockup(mockupData.mockup_url, mockupData.mockup_urls || []);
+      if (thisGeneration === mockupGeneration) {
+        displayMockup(mockupData.mockup_url, mockupData.mockup_urls || []);
+      }
       return true;
     } else if (mockupData.reason === 'layout_not_supported') {
       hideMockupLoading();
@@ -383,7 +387,7 @@ async function requestMockup(productKey) {
       showToast(`L\u00EDmite de Printful alcanzado. Espera ${waitSecs}s e int\u00E9ntalo de nuevo.`);
       return false;
     } else if (mockupData.task_key) {
-      pollMockupStatus(mockupData.task_key);
+      pollMockupStatus(mockupData.task_key, 0, thisGeneration);
       return true; // polling in progress
     } else {
       hideMockupLoading();
@@ -400,22 +404,24 @@ async function requestMockup(productKey) {
   }
 }
 
-async function pollMockupStatus(taskKey, attempt = 0) {
-  if (attempt > 10) {
-    hideMockupLoading();
+async function pollMockupStatus(taskKey, attempt = 0, generation = 0) {
+  if (attempt > 10 || generation !== mockupGeneration) {
+    if (generation === mockupGeneration) hideMockupLoading();
     return;
   }
 
   await new Promise(r => setTimeout(r, 3000));
+  if (generation !== mockupGeneration) return;
 
   try {
     const res = await fetch(`/api/preview/mockup/status?task_key=${encodeURIComponent(taskKey)}`);
     const data = await res.json();
+    if (generation !== mockupGeneration) return;
 
     if (data.mockup_status === 'completed' && data.mockup_url) {
       displayMockup(data.mockup_url, data.mockup_urls || []);
     } else if (data.mockup_status === 'processing') {
-      pollMockupStatus(taskKey, attempt + 1);
+      pollMockupStatus(taskKey, attempt + 1, generation);
     } else if (data.mockup_status === 'rate_limited') {
       hideMockupLoading();
       showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
@@ -424,7 +430,7 @@ async function pollMockupStatus(taskKey, attempt = 0) {
     }
   } catch (err) {
     console.error('[creator] mockup poll failed', err);
-    hideMockupLoading();
+    if (generation === mockupGeneration) hideMockupLoading();
   }
 }
 
@@ -438,6 +444,31 @@ function updateProductImage(color) {
   if (imgSrc) {
     emojiEl.innerHTML = `<img src="${imgSrc}" alt="${selectedProduct.name}" class="garment-product-img">`;
   }
+}
+
+// ── Generation error overlay ──
+function showGenerationError(message) {
+  // Remove existing overlay if any
+  document.querySelectorAll('.gen-error-overlay').forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'gen-error-overlay';
+  overlay.innerHTML = `
+    <div class="gen-error-card">
+      <div class="gen-error-icon">!</div>
+      <div class="gen-error-msg">${escapeHtmlLocal(message)}</div>
+      <button class="gen-error-close">Entendido</button>
+    </div>
+  `;
+  overlay.querySelector('.gen-error-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function escapeHtmlLocal(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // ── Mockup display ──

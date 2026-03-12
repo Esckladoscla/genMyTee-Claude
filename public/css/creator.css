@@ -306,6 +306,37 @@
   50%{opacity:1}
 }
 
+/* ── GENERATION ERROR OVERLAY ── */
+.gen-error-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.6);
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn 0.2s ease-out;
+}
+.gen-error-card{
+  background:var(--white,#fff);color:var(--text,#1C1A18);
+  border-radius:16px;padding:2.5rem 2rem;
+  max-width:420px;width:90%;text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,0.3);
+}
+.gen-error-icon{
+  width:56px;height:56px;margin:0 auto 1.2rem;
+  background:#e74c3c;color:#fff;
+  border-radius:50%;font-size:2rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;
+}
+.gen-error-msg{
+  font-size:1.05rem;line-height:1.5;margin-bottom:1.5rem;
+}
+.gen-error-close{
+  background:var(--text,#1C1A18);color:#fff;
+  border:none;border-radius:8px;padding:0.7rem 2rem;
+  font-size:0.9rem;cursor:pointer;font-weight:600;
+  transition:opacity 0.2s;
+}
+.gen-error-close:hover{opacity:0.85}
+
 /* ── CLIENT-SIDE LAYOUT PREVIEW ── */
 .client-preview{
   position:absolute;inset:0;z-index:10;
