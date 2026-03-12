@@ -220,6 +220,13 @@
               <img id="generatedImg" style="display:none;width:100%;height:100%;object-fit:cover;" alt="Diseño generado"/>
             </div>
           </div>
+          <!-- Client-side layout preview (shown while adjusting sliders) -->
+          <div class="client-preview" id="clientPreview" style="display:none">
+            <img class="client-preview-base" id="clientPreviewBase" alt="" />
+            <div class="client-preview-print-area" id="clientPreviewPrintArea">
+              <img class="client-preview-design" id="clientPreviewDesign" alt="" />
+            </div>
+          </div>
         </div>
 
         <!-- LAYOUT CONTROLS (shown after mockup) -->
@@ -249,7 +256,7 @@
             </label>
             <input type="range" class="layout-range" id="layoutY" min="-100" max="100" value="0" step="5">
           </div>
-          <button class="layout-update-btn" id="layoutUpdateBtn">&#x21BB; Actualizar mockup</button>
+          <button class="layout-update-btn" id="layoutUpdateBtn">Ver mockup real</button>
         </div>
 
         <!-- PROMPT -->

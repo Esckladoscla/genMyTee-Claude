@@ -2,6 +2,7 @@ import express from "express";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getLayoutSupport } from "../services/layout-probe.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -13,12 +14,22 @@ function loadProducts() {
   return JSON.parse(raw).products;
 }
 
-export function buildCatalogRouter({ productsFn = loadProducts } = {}) {
+function enrichWithLayoutSupport(product, layoutSupportFn) {
+  const support = layoutSupportFn(product.product_key);
+  return { ...product, supports_layout: support === true };
+}
+
+export function buildCatalogRouter({
+  productsFn = loadProducts,
+  layoutSupportFn = getLayoutSupport,
+} = {}) {
   const router = express.Router();
 
   router.get("/products", (_req, res) => {
     try {
-      const products = productsFn();
+      const products = productsFn().map((p) =>
+        enrichWithLayoutSupport(p, layoutSupportFn)
+      );
       return res.json({ ok: true, products });
     } catch (error) {
       return res.status(500).json({ ok: false, error: "catalog_unavailable" });
@@ -32,7 +43,10 @@ export function buildCatalogRouter({ productsFn = loadProducts } = {}) {
       if (!product) {
         return res.status(404).json({ ok: false, error: "product_not_found" });
       }
-      return res.json({ ok: true, product });
+      return res.json({
+        ok: true,
+        product: enrichWithLayoutSupport(product, layoutSupportFn),
+      });
     } catch (error) {
       return res.status(500).json({ ok: false, error: "catalog_unavailable" });
     }

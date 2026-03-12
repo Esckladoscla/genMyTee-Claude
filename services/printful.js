@@ -454,6 +454,7 @@ export async function createMockupTask(
     format = "png",
     field = "position",
     layout = null,
+    fileSpec = {},
     optionGroups = [],
     options = [],
   }
@@ -462,7 +463,7 @@ export async function createMockupTask(
   if (field === "position") {
     file = {
       placement,
-      position: buildPositionFromLayout({}, layout),
+      position: buildPositionFromLayout(fileSpec, layout),
       image_url: imageUrl,
     };
   } else {
@@ -540,6 +541,7 @@ async function createMockupTaskWithPlacementFallbacks(
   { variantId, imageUrl, placement = "front", format = "png", layout = null }
 ) {
   const placementCandidates = collectPlacementCandidates(variantPayload, placement);
+  const variantFileSpecs = collectVariantFileSpecs(variantPayload);
   const cacheKey = `${productId}:${variantId}`;
   const cachedStrategy = mockupTaskStrategyCache.get(cacheKey);
   const normalizedLayout = normalizeMockupLayout(layout);
@@ -604,6 +606,9 @@ async function createMockupTaskWithPlacementFallbacks(
 
         for (const candidate of placementCandidates) {
           try {
+            const matchingFileSpec = variantFileSpecs.find(
+              (s) => s.type === candidate
+            ) || {};
             const result = await createMockupTask(productId, {
               variantId,
               imageUrl,
@@ -611,6 +616,7 @@ async function createMockupTaskWithPlacementFallbacks(
               format,
               field: "position",
               layout: layoutCandidate,
+              fileSpec: matchingFileSpec,
               optionGroups: optionFilters.optionGroups,
               options: optionFilters.options,
             });
@@ -629,7 +635,7 @@ async function createMockupTaskWithPlacementFallbacks(
     }
   }
 
-  if (wantsCustomLayout && isRetryableMockupPayloadError(lastError)) {
+  if (wantsCustomLayout) {
     const error = new Error(
       "Printful mockup API for this product does not support manual layout adjustments"
     );

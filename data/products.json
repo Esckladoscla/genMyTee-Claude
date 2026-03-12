@@ -27,7 +27,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f28dc795e497ae24d7ef047d1caa8d4a/all-over-print-mens-athletic-t-shirt-white-right-69b1d004a98b1.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e81af68b63970b9b57d61468038a525a/all-over-print-mens-athletic-t-shirt-white-front-69b1d004a92b8.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d5ec8653e20478b784f940d992786bef/all-over-print-mens-athletic-t-shirt-white-back-69b1d004a997c.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "camiseta-clasica",
@@ -61,7 +67,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8ef5475a14b8884e17d90d54b349dd6d/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b38265c.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/57ec01666c201be9ed044e96e4d55fd1/all-over-print-mens-crew-neck-t-shirt-white-front-69b1d0b3820a5.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/41a9ed8605b2a57a3c2a813ff4191c20/all-over-print-mens-crew-neck-t-shirt-white-front-2-69b1d0b38271c.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "camiseta-algodon",
@@ -105,7 +117,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ff6e1ab80c9f49b2e9a57cadb9c989b6/unisex-classic-tee-black-front-69b1d16237283.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e306cf747462d31db33e84131bea6bf/unisex-classic-tee-black-front-69b1d16234ff9.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d7124390ca1b58a4ff251751c7bef9dd/unisex-classic-tee-black-front-69b1d1623770d.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 20,
+        "left_pct": 22,
+        "width_pct": 56,
+        "height_pct": 45
+      }
     },
     {
       "slug": "crop-top-personalizado",
@@ -134,7 +152,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1bb6b738ec74cbd5d78662fe60b54286/all-over-print-crop-tee-white-left-front-69b1d18b54bdd.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d4e5e7c30d872903a6bf7a6fd9cad709/all-over-print-crop-tee-white-back-69b1d18b545d0.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b21018e5af9c1b40417bdb0f8eb1bca5/all-over-print-crop-tee-white-right-front-69b1d18b54cbb.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "tank-top-personalizado",
@@ -162,7 +186,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/13d7363726537546516192560735608d/all-over-print-mens-tank-top-white-left-69b1dfa6430f7.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e508959169e0928fb471b40000ff9bab/all-over-print-mens-tank-top-white-right-front-69b1dfa642d7a.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c73f46a8b1169c9ced2b5cf6e9d40bb2/all-over-print-mens-tank-top-white-left-front-69b1dfa642f43.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "polo-adidas",
@@ -196,7 +226,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/ddde9a92b03dd378a0b235260a3d653d/adidas-premium-polo-shirt-black-front-69b1d1d05414f.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/aa564bb10df4db692528b1689917ec96/adidas-premium-polo-shirt-black-right-front-69b1d1d0556e2.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/4bad442ef4a7354140825de0dca8a33f/adidas-premium-polo-shirt-black-left-69b1d1d05597b.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 25,
+        "left_pct": 15,
+        "width_pct": 25,
+        "height_pct": 15
+      }
     },
     {
       "slug": "tank-top-mujer",
@@ -221,7 +257,13 @@
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/163c1674b9e47121a8827989e21761ed/all-over-print-womens-tank-top-white-front-69b1e188004d3.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5c48255f73fdd2b20cb84bbc482c680e/all-over-print-womens-tank-top-white-front-69b1e18800a3c.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "hoodie-personalizado",
@@ -250,7 +292,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2d2556faf7c727626e54f3abef847e07/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129d539.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/763ddfc7ebed6d53282cf7f97199cd77/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129bbce.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9e018ab7bf833ee10200cbc22121e343/all-over-print-recycled-unisex-hoodie-white-front-69b1d2129d89c.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 12,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 76
+      }
     },
     {
       "slug": "leggings-personalizados",
@@ -283,7 +331,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/cb254a8438e956159cd013d9c14923fc/all-over-print-leggings-white-right-69b1e271267c3.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2dd51065154c8f3cae5064782f9460c0/all-over-print-leggings-white-front-69b1e27126279.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fddbfc4c882fffcd7fdf0e4257071ba5/all-over-print-leggings-white-front-69b1e27126871.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 5,
+        "left_pct": 15,
+        "width_pct": 70,
+        "height_pct": 90
+      }
     },
     {
       "slug": "shorts-atleticos",
@@ -312,7 +366,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1d1617c1f32840b8e24ebb25fd2cbdd2/all-over-print-unisex-athletic-long-shorts-white-back-2-69b1e00b7e0bd.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7bbfd578e0a11907818c7b9653463bc9/all-over-print-unisex-athletic-long-shorts-white-left-69b1e00b7d876.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b811440da6d8df86608d5622a41cac57/all-over-print-unisex-athletic-long-shorts-white-front-69b1e00b7e1cc.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 10,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 80
+      }
     },
     {
       "slug": "vestido-midi",
@@ -346,7 +406,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12476fe928717f0adab120cf7e8ae8af/all-over-print-long-sleeve-midi-dress-white-left-69b1d27acff77.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/17e7bc7edec0fb07547f4f1015423ff6/all-over-print-long-sleeve-midi-dress-white-product-details-2-69b1d27acf249.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12f78b25a6a699e382ac364dbba9c60a/all-over-print-long-sleeve-midi-dress-white-right-front-69b1d27acf8b6.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 12,
+        "width_pct": 76,
+        "height_pct": 84
+      }
     },
     {
       "slug": "banador-mujer",
@@ -380,7 +446,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9469fb49069bbd68b00b107c81d49854/all-over-print-one-piece-swimsuit-white-left-69b1d2a18cbe8.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/40bd4d8e9e62a80b2f847cb58b8e789a/all-over-print-one-piece-swimsuit-white-right-69b1d2a18c419.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9be0fb18865ecc6fd397249c11696eb4/all-over-print-one-piece-swimsuit-white-right-69b1d2a18cce8.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 84
+      }
     },
     {
       "slug": "banador-hombre",
@@ -409,7 +481,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/1ea7a94963d80bbcc45c37c779e1c5c4/all-over-print-recycled-swim-trunks-white-front-69b1e033149fc.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/bdde5171115d220dbdcc40792984a6d7/all-over-print-recycled-swim-trunks-white-left-front-69b1e033143f7.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c47e031a9b36bb8a2890b408b96fe4a3/all-over-print-recycled-swim-trunks-white-left-front-69b1e03314aad.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 84
+      }
     },
     {
       "slug": "banador-infantil",
@@ -438,7 +516,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2e97194cb1c64eba3cd62f631b1cd85f/all-over-print-kids-swimsuit-white-left-69b1d2e7a8021.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/496ee5706f84e569e3842629a37c3b89/all-over-print-kids-swimsuit-white-left-69b1d2e7a7d16.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c2371dd38fe7ffbcd4fd83ad9334b68b/all-over-print-kids-swimsuit-white-right-69b1d2e7a8089.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 84
+      }
     },
     {
       "slug": "camiseta-infantil",
@@ -465,7 +549,13 @@
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/9c99de65babb401ffc19a4bea0da8f46/all-over-print-kids-crew-neck-t-shirt-white-front-69b1e1cd904a0.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/d9db6636e31b4bf0492b7eed9cdd2e5d/all-over-print-kids-crew-neck-t-shirt-white-left-front-69b1e1cd90e0e.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 8,
+        "width_pct": 84,
+        "height_pct": 84
+      }
     },
     {
       "slug": "tote-bag",
@@ -487,7 +577,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/c9154897bc5ba22324007e11eb82ccb5/all-over-print-tote-bag-yellow-15x15-mockup-69b1d338b8e2e.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/b46e0a3f1675e61d42ccda1fd78b90a6/all-over-print-tote-bag-yellow-15x15-front-69b1d338b90ce.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/afa49223f490526a4563dec10a260610/all-over-print-tote-bag-yellow-15x15-mockup-69b1d338b9221.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 10,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 80
+      }
     },
     {
       "slug": "bucket-hat",
@@ -508,7 +604,13 @@
       "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fde44ea03f7b0bcbcad3e13b2717b8de/all-over-print-reversible-bucket-hat-white-front-outside-69b2882bb9b8e.png",
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fde44ea03f7b0bcbcad3e13b2717b8de/all-over-print-reversible-bucket-hat-white-front-outside-69b2882bb9b8e.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 15,
+        "left_pct": 15,
+        "width_pct": 70,
+        "height_pct": 55
+      }
     },
     {
       "slug": "dad-hat",
@@ -536,7 +638,13 @@
       "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5568b4ea442eb48789a2b73eb0175d44/classic-dad-hat-black-front-69b288425eb3a.png",
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5568b4ea442eb48789a2b73eb0175d44/classic-dad-hat-black-front-69b288425eb3a.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 25,
+        "left_pct": 20,
+        "width_pct": 60,
+        "height_pct": 35
+      }
     },
     {
       "slug": "trucker-cap",
@@ -564,7 +672,13 @@
       "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/00e962858f17c945e0b1dd9366a8e5a4/5-panel-trucker-cap-black-front-69b288a7278f4.png",
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/00e962858f17c945e0b1dd9366a8e5a4/5-panel-trucker-cap-black-front-69b288a7278f4.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 25,
+        "left_pct": 20,
+        "width_pct": 60,
+        "height_pct": 35
+      }
     },
     {
       "slug": "funda-iphone",
@@ -594,7 +708,13 @@
       "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e9737cd02613533233fe4f003685412/snap-case-for-iphone-glossy-iphone-16-front-69b2889346f48.png",
       "default_mockup_urls": [
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e9737cd02613533233fe4f003685412/snap-case-for-iphone-glossy-iphone-16-front-69b2889346f48.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 8,
+        "left_pct": 12,
+        "width_pct": 76,
+        "height_pct": 84
+      }
     },
     {
       "slug": "mochila",
@@ -617,7 +737,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/24dceabcdf7e3ba1ca7e24f912fa4255/all-over-print-backpack-white-right-69b1d37e52961.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3cdf179aef72c367bac4cceb37e90f6f/all-over-print-backpack-white-front-69b1d37e52171.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e7a59dbebbda4e0e54d0914205e07312/all-over-print-backpack-white-front-69b1d37e52a0b.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 10,
+        "left_pct": 15,
+        "width_pct": 70,
+        "height_pct": 75
+      }
     },
     {
       "slug": "bandolera",
@@ -648,7 +774,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/545dd16bfa1f2340b5aaf44946a4ca67/all-over-print-crossbody-bag-black-back-69b1d3a47e84a.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/4208e994ea7d9dc5431e78835efe02f5/all-over-print-crossbody-bag-black-front-69b1d3a47e316.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/7a57e3f534740a2709c39fa8786b6a10/all-over-print-crossbody-bag-black-back-69b1d3a47e8db.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 10,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 80
+      }
     },
     {
       "slug": "bolsa-deporte",
@@ -677,7 +809,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3bac92330d6451fcfcaf265891339787/all-over-print-duffle-bag-white-left-side-69b1d04c80497.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/12b2285b97d406832e95af4467c3472f/all-over-print-duffle-bag-white-front-69b1d04c7fbc4.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/85d214378037bc575e31f362a5aea203/all-over-print-duffle-bag-white-right-side-69b1d04c805bf.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 15,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 70
+      }
     },
     {
       "slug": "bolsa-gym",
@@ -705,7 +843,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/639911416b5b649b6fcaf114c4e1318c/all-over-print-gym-bag-white-front-69b1d05957e75.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/f891bf3fb1c788ff5c28e0d8f6f2d4ef/all-over-print-gym-bag-white-bottom-69b1d05958543.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/2f8ce6d1b2867825e4772d9bed01e61c/all-over-print-gym-bag-white-right-front-69b1d0595886f.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 10,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 80
+      }
     },
     {
       "slug": "poster",
@@ -732,7 +876,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/cd7aeea3f5c8fe248fe6797a4838eeb7/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a63515.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fe4acae3b3fc72c76a89aab511893ea3/enhanced-matte-paper-poster-(in)-12x16-lifestyle-2-69b1e09a632b8.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/3cf907592977bf4cfa48ec0146ce92d1/enhanced-matte-paper-poster-(in)-12x16-front-69b1e09a63547.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 5,
+        "left_pct": 5,
+        "width_pct": 90,
+        "height_pct": 90
+      }
     },
     {
       "slug": "taza",
@@ -756,7 +906,13 @@
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/85d0ce9fba56830eda5ce87907c5bd7b/white-glossy-mug-white-11-oz-handle-on-right-69b1d3e954f0d.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/93a98816fd362bec92e6b8fce4c9aca1/white-glossy-mug-white-11-oz-halloween-69b1d3e954cc0.png",
         "https://printful-upload.s3-accelerate.amazonaws.com/tmp/e47104981833fa3474be769dc1d366a5/white-glossy-mug-white-11-oz-front-view-69b1d3e954f55.png"
-      ]
+      ],
+      "preview_print_area": {
+        "top_pct": 15,
+        "left_pct": 10,
+        "width_pct": 80,
+        "height_pct": 70
+      }
     }
   ]
 }
