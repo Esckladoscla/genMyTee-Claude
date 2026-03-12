@@ -359,6 +359,8 @@ async function requestMockup(productKey) {
     const layout = getLayoutParam();
     if (layout) body.layout = layout;
 
+    console.log('[creator] requestMockup body:', JSON.stringify(body, null, 2));
+
     const mockupRes = await fetch('/api/preview/mockup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

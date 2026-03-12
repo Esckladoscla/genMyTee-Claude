@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveVariantId } from "./variants.js";
-import { getVariant, createMockupTask, collectVariantFileSpecs } from "./printful.js";
+import { getVariant, createMockupTask, collectVariantFileSpecs, getMockupPrintfiles, extractPrintfileDimensions } from "./printful.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CACHE_PATH = join(__dirname, "..", "data", "layout-support-cache.json");
@@ -73,11 +73,26 @@ async function probeProduct(product) {
   const testLayout = { scale: 0.85, offset_x: 10, offset_y: 10 };
   const placement = product.placement || "front";
 
-  // Extract real file spec from variant data for correct dimensions
+  // Extract real file spec from variant data and printfile dimensions
   const variantFileSpecs = collectVariantFileSpecs(variant);
   const matchingFileSpec = variantFileSpecs.find(
     (s) => s.type === placement
   ) || variantFileSpecs[0] || {};
+
+  // Use printfile dimensions as fallback for correct area_width/area_height
+  let printfileDims = null;
+  try {
+    const printfiles = await getMockupPrintfiles(productId);
+    printfileDims = extractPrintfileDimensions(printfiles, placement);
+  } catch {
+    // non-critical, continue with variant specs
+  }
+
+  const effectiveFileSpec = {
+    ...matchingFileSpec,
+    width: matchingFileSpec.width || printfileDims?.width || null,
+    height: matchingFileSpec.height || printfileDims?.height || null,
+  };
 
   try {
     await createMockupTask(productId, {
@@ -87,7 +102,7 @@ async function probeProduct(product) {
       format: "png",
       field: "position",
       layout: testLayout,
-      fileSpec: matchingFileSpec,
+      fileSpec: effectiveFileSpec,
     });
     return true;
   } catch (err) {
