@@ -12,7 +12,9 @@ const CATEGORY_LABELS = {
   vestidos: 'Vestidos',
   bano: 'Baño',
   infantil: 'Infantil',
+  gorras: 'Gorras',
   bolsos: 'Bolsos',
+  accesorios: 'Accesorios',
   decoracion: 'Decoración',
   hogar: 'Hogar',
 };

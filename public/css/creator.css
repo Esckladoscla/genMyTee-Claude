@@ -306,6 +306,64 @@
   50%{opacity:1}
 }
 
+/* ── LAYOUT CONTROLS ── */
+.layout-controls{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  padding:0.8rem 1rem;margin-bottom:1.2rem;
+}
+.layout-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;
+}
+.layout-title{
+  font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);
+}
+.layout-reset-btn{
+  background:none;border:1px solid rgba(255,255,255,0.1);cursor:pointer;
+  color:rgba(255,255,255,0.4);font-size:0.85rem;
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;transition:all 0.2s;
+}
+.layout-reset-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+
+.layout-slider-group{margin-bottom:0.5rem}
+.layout-slider-group:last-of-type{margin-bottom:0.8rem}
+.layout-label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);margin-bottom:0.2rem;
+}
+.layout-value{color:var(--accent2);font-variant-numeric:tabular-nums}
+
+.layout-range{
+  width:100%;height:4px;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,0.1);outline:none;border-radius:2px;
+  cursor:pointer;
+}
+.layout-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent2);cursor:pointer;border:none;
+  box-shadow:0 1px 4px rgba(0,0,0,0.4);
+}
+.layout-range::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent2);cursor:pointer;border:none;
+  box-shadow:0 1px 4px rgba(0,0,0,0.4);
+}
+
+.layout-update-btn{
+  width:100%;background:rgba(181,96,63,0.2);color:var(--accent2);
+  border:1px solid rgba(181,96,63,0.4);cursor:pointer;
+  font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.6rem;transition:all 0.25s;
+}
+.layout-update-btn:hover{background:rgba(181,96,63,0.35)}
+.layout-update-btn:disabled{opacity:0.4;cursor:not-allowed}
+.layout-update-btn.loading{
+  opacity:0.6;cursor:wait;
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   .creator-inner{grid-template-columns:1fr;gap:3rem}

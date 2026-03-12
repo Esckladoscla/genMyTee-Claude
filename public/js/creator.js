@@ -11,6 +11,9 @@ let generatedImageUrl = null;
 let currentMockupUrl = null;
 let currentStep = 1;
 let panelQty = 1;
+let layoutScale = 100;
+let layoutX = 0;
+let layoutY = 0;
 
 // ── Color hex map ──
 const COLOR_HEX = {
@@ -20,6 +23,14 @@ const COLOR_HEX = {
   'Sport Grey': '#B5AFA3',
   'Sand': '#C2B280',
   'Maroon': '#6B2C3B',
+  'Khaki': '#C3B091',
+  'Stone': '#928E85',
+  'Pink': '#FFB6C1',
+  'Charcoal': '#4A4A4A',
+  'Black/White': 'linear-gradient(135deg, #1C1A18 50%, #FFFFFF 50%)',
+  'Navy/White': 'linear-gradient(135deg, #2C3E60 50%, #FFFFFF 50%)',
+  'Glossy': 'linear-gradient(135deg, #E8E8E8, #FFFFFF, #D0D0D0)',
+  'Matte': '#A0A0A0',
 };
 
 // ── Init ──
@@ -37,6 +48,7 @@ function initCreator() {
   initQuantityControls();
   initAddToCartButton();
   initGarmentTypes();
+  initLayoutControls();
 }
 
 // ── Garment types from catalog ──
@@ -337,19 +349,28 @@ async function requestMockup(productKey) {
     const color = selectedColor || undefined;
     const variantTitle = color ? `${color} / ${size}` : size;
 
+    const body = {
+      image_url: generatedImageUrl,
+      pf_product_key: productKey,
+      variant_title: variantTitle,
+    };
+    if (selectedProduct?.placement) body.pf_placement = selectedProduct.placement;
+    const layout = getLayoutParam();
+    if (layout) body.layout = layout;
+
     const mockupRes = await fetch('/api/preview/mockup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image_url: generatedImageUrl,
-        pf_product_key: productKey,
-        variant_title: variantTitle,
-      }),
+      body: JSON.stringify(body),
     });
     const mockupData = await mockupRes.json();
 
     if (mockupData.ok && mockupData.mockup_url) {
       displayMockup(mockupData.mockup_url, mockupData.mockup_urls || []);
+    } else if (mockupData.reason === 'layout_not_supported') {
+      hideMockupLoading();
+      showToast('Este producto no soporta ajuste de posici\u00F3n. Prueba con valores por defecto.');
+      resetLayout();
     } else if (mockupData.task_key) {
       pollMockupStatus(mockupData.task_key);
     } else {
@@ -460,9 +481,12 @@ function displayMockup(primaryUrl, allUrls) {
   }
 
   preview.appendChild(container);
+  showLayoutControls();
 }
 
 function hideMockup() {
+  hideLayoutControls();
+  resetLayout();
   hideMockupLoading();
   document.querySelectorAll('.mockup-container').forEach(el => el.remove());
 
@@ -539,6 +563,79 @@ function initAddToCartButton() {
       product_image_url: selectedProduct.image_url || null,
     });
   });
+}
+
+// ── Layout controls ──
+function initLayoutControls() {
+  const scaleSlider = document.getElementById('layoutScale');
+  const xSlider = document.getElementById('layoutX');
+  const ySlider = document.getElementById('layoutY');
+  const resetBtn = document.getElementById('layoutResetBtn');
+  const updateBtn = document.getElementById('layoutUpdateBtn');
+
+  if (!scaleSlider) return;
+
+  scaleSlider.addEventListener('input', () => {
+    layoutScale = parseInt(scaleSlider.value, 10);
+    document.getElementById('layoutScaleValue').textContent = layoutScale + '%';
+  });
+
+  xSlider.addEventListener('input', () => {
+    layoutX = parseInt(xSlider.value, 10);
+    document.getElementById('layoutXValue').textContent = layoutX;
+  });
+
+  ySlider.addEventListener('input', () => {
+    layoutY = parseInt(ySlider.value, 10);
+    document.getElementById('layoutYValue').textContent = layoutY;
+  });
+
+  resetBtn.addEventListener('click', resetLayout);
+
+  updateBtn.addEventListener('click', async () => {
+    if (!generatedImageUrl || !selectedProduct) return;
+    updateBtn.disabled = true;
+    updateBtn.classList.add('loading');
+    updateBtn.textContent = 'Generando\u2026';
+    await requestMockup(selectedProduct.product_key);
+    updateBtn.disabled = false;
+    updateBtn.classList.remove('loading');
+    updateBtn.textContent = '\u21BB Actualizar mockup';
+  });
+}
+
+function resetLayout() {
+  layoutScale = 100;
+  layoutX = 0;
+  layoutY = 0;
+  const scaleSlider = document.getElementById('layoutScale');
+  const xSlider = document.getElementById('layoutX');
+  const ySlider = document.getElementById('layoutY');
+  if (scaleSlider) scaleSlider.value = 100;
+  if (xSlider) xSlider.value = 0;
+  if (ySlider) ySlider.value = 0;
+  document.getElementById('layoutScaleValue').textContent = '100%';
+  document.getElementById('layoutXValue').textContent = '0';
+  document.getElementById('layoutYValue').textContent = '0';
+}
+
+function showLayoutControls() {
+  const el = document.getElementById('layoutControls');
+  if (el) el.style.display = '';
+}
+
+function hideLayoutControls() {
+  const el = document.getElementById('layoutControls');
+  if (el) el.style.display = 'none';
+}
+
+function getLayoutParam() {
+  if (layoutScale === 100 && layoutX === 0 && layoutY === 0) return undefined;
+  return {
+    scale: layoutScale / 100,
+    offset_x: layoutX,
+    offset_y: layoutY,
+  };
 }
 
 // Expose for catalog.js product card clicks

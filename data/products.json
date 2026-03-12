@@ -490,21 +490,111 @@
       ]
     },
     {
-      "slug": "rinonera",
-      "name": "Riñonera",
-      "description": "Riñonera all-over print. Práctica y con tu diseño personalizado.",
-      "product_key": "all-over-print-fanny-pack",
-      "base_price_eur": 30,
+      "slug": "bucket-hat",
+      "name": "Bucket Hat Reversible",
+      "description": "Gorro pescador reversible all-over print. Dos diseños en uno, para el verano.",
+      "product_key": "all-over-print-reversible-bucket-hat",
+      "base_price_eur": 35,
       "sizes": [
         "S/M",
-        "M/L"
+        "L/XL"
       ],
-      "placement": "front",
+      "placement": "outside_front",
       "customizable": true,
-      "garment_type": "bolso",
-      "category": "bolsos",
-      "garment_emoji": "👝",
-      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/a5/a5b065fbef259cc4554b04bcad64f006_l"
+      "garment_type": "gorra",
+      "category": "gorras",
+      "garment_emoji": "🎩",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/72/72a8b7e942a8b555350cc241c3fc47db_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fde44ea03f7b0bcbcad3e13b2717b8de/all-over-print-reversible-bucket-hat-white-front-outside-69b2882bb9b8e.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/fde44ea03f7b0bcbcad3e13b2717b8de/all-over-print-reversible-bucket-hat-white-front-outside-69b2882bb9b8e.png"
+      ]
+    },
+    {
+      "slug": "dad-hat",
+      "name": "Dad Hat Bordado",
+      "description": "Gorra dad hat clásica con bordado personalizado. Algodón 100%, cierre ajustable.",
+      "product_key": "yupoong-yupoong-6245cm---unstructured-classic-dad-cap",
+      "base_price_eur": 29,
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Khaki",
+        "Stone",
+        "Pink"
+      ],
+      "sizes": [
+        "One size"
+      ],
+      "placement": "embroidery_front_large",
+      "customizable": true,
+      "garment_type": "gorra",
+      "category": "gorras",
+      "garment_emoji": "🧢",
+      "image_url": "https://files.cdn.printful.com/o/products/206/product_1584101692.jpg",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5568b4ea442eb48789a2b73eb0175d44/classic-dad-hat-black-front-69b288425eb3a.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/5568b4ea442eb48789a2b73eb0175d44/classic-dad-hat-black-front-69b288425eb3a.png"
+      ]
+    },
+    {
+      "slug": "trucker-cap",
+      "name": "Gorra Trucker",
+      "description": "Gorra trucker 5 paneles con bordado personalizado. Malla trasera, cierre snap.",
+      "product_key": "yupoong-6006-five-panel-trucker-cap",
+      "base_price_eur": 29,
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Charcoal",
+        "Black/White",
+        "Navy/White"
+      ],
+      "sizes": [
+        "One size"
+      ],
+      "placement": "embroidery_front_large",
+      "customizable": true,
+      "garment_type": "gorra",
+      "category": "gorras",
+      "garment_emoji": "🧢",
+      "image_url": "https://files.cdn.printful.com/o/products/100/product_1585316568.jpg",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/00e962858f17c945e0b1dd9366a8e5a4/5-panel-trucker-cap-black-front-69b288a7278f4.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/00e962858f17c945e0b1dd9366a8e5a4/5-panel-trucker-cap-black-front-69b288a7278f4.png"
+      ]
+    },
+    {
+      "slug": "funda-iphone",
+      "name": "Funda iPhone",
+      "description": "Funda snap para iPhone con tu diseño. Policarbonato resistente, compatible carga inalámbrica.",
+      "product_key": "snap-case-for-iphone",
+      "base_price_eur": 25,
+      "colors": [
+        "Glossy",
+        "Matte"
+      ],
+      "sizes": [
+        "iPhone 15",
+        "iPhone 15 Pro",
+        "iPhone 15 Pro Max",
+        "iPhone 16",
+        "iPhone 16 Plus",
+        "iPhone 16 Pro",
+        "iPhone 16 Pro Max"
+      ],
+      "placement": "default",
+      "customizable": true,
+      "garment_type": "funda",
+      "category": "accesorios",
+      "garment_emoji": "📱",
+      "image_url": "https://files.cdn.printful.com/o/upload/product-catalog-img/64/6402785e940aaa300f63b2c4b37c73d0_l",
+      "default_mockup_url": "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e9737cd02613533233fe4f003685412/snap-case-for-iphone-glossy-iphone-16-front-69b2889346f48.png",
+      "default_mockup_urls": [
+        "https://printful-upload.s3-accelerate.amazonaws.com/tmp/8e9737cd02613533233fe4f003685412/snap-case-for-iphone-glossy-iphone-16-front-69b2889346f48.png"
+      ]
     },
     {
       "slug": "mochila",
