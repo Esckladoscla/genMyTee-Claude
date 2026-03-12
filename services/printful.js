@@ -184,16 +184,32 @@ export function extractPrintfileDimensions(printfilesPayload, placement) {
     : null;
 }
 
-function buildDefaultPosition(fileSpec = {}) {
+function buildDefaultPosition(fileSpec = {}, { imageAspectRatio = 1 } = {}) {
   const areaWidth = Number(fileSpec.width) || 1800;
   const areaHeight = Number(fileSpec.height) || 2400;
+
+  let width = areaWidth;
+  let height = areaHeight;
+  const areaAspect = areaWidth / areaHeight;
+
+  if (imageAspectRatio > 0 && Math.abs(areaAspect - imageAspectRatio) > 0.001) {
+    if (areaAspect > imageAspectRatio) {
+      width = Math.round(areaHeight * imageAspectRatio);
+    } else {
+      height = Math.round(areaWidth / imageAspectRatio);
+    }
+  }
+
+  const left = Math.round((areaWidth - width) / 2);
+  const top = Math.round((areaHeight - height) / 2);
+
   return {
     area_width: areaWidth,
     area_height: areaHeight,
-    width: areaWidth,
-    height: areaHeight,
-    top: 0,
-    left: 0,
+    width,
+    height,
+    top,
+    left,
   };
 }
 
@@ -222,22 +238,32 @@ export function normalizeMockupLayout(layout) {
   };
 }
 
-export function buildPositionFromLayout(fileSpec = {}, layout = null) {
+export function buildPositionFromLayout(fileSpec = {}, layout = null, { imageAspectRatio = 1 } = {}) {
   if (!layout) {
-    return buildDefaultPosition(fileSpec);
+    return buildDefaultPosition(fileSpec, { imageAspectRatio });
   }
 
   const areaWidth = Number(fileSpec.width) || 1800;
   const areaHeight = Number(fileSpec.height) || 2400;
-  const width = Math.max(1, Math.round(areaWidth * layout.scale));
-  const height = Math.max(1, Math.round(areaHeight * layout.scale));
+
+  let width = Math.max(1, Math.round(areaWidth * layout.scale));
+  let height = Math.max(1, Math.round(areaHeight * layout.scale));
+
+  if (imageAspectRatio > 0) {
+    const scaledAspect = width / height;
+    if (scaledAspect > imageAspectRatio) {
+      width = Math.max(1, Math.round(height * imageAspectRatio));
+    } else if (scaledAspect < imageAspectRatio) {
+      height = Math.max(1, Math.round(width / imageAspectRatio));
+    }
+  }
 
   const leftRange = areaWidth - width;
   const topRange = areaHeight - height;
   const left = Math.round(leftRange * ((layout.offset_x + 100) / 200));
   const top = Math.round(topRange * ((layout.offset_y + 100) / 200));
 
-  const position = {
+  return {
     area_width: areaWidth,
     area_height: areaHeight,
     width,
@@ -245,8 +271,6 @@ export function buildPositionFromLayout(fileSpec = {}, layout = null) {
     top,
     left,
   };
-
-  return position;
 }
 
 function isRetryableMockupPayloadError(error) {
