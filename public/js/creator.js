@@ -624,6 +624,7 @@ function initAddToCartButton() {
       emoji: selectedProduct.garment_emoji || '\uD83D\uDC55',
       mockup_url: currentMockupUrl || null,
       product_image_url: selectedProduct.image_url || null,
+      layout: getLayoutParam() || null,
     });
   });
 }
