@@ -374,10 +374,17 @@ async function requestMockup(productKey) {
       hideMockupLoading();
       showToast('Este producto no soporta ajuste de posici\u00F3n. Prueba con valores por defecto.');
       resetLayout();
+    } else if (mockupData.reason === 'rate_limited' || mockupData.mockup_status === 'rate_limited') {
+      hideMockupLoading();
+      showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
     } else if (mockupData.task_key) {
       pollMockupStatus(mockupData.task_key);
     } else {
       hideMockupLoading();
+      if (mockupData.reason) {
+        console.warn('[creator] mockup failed:', mockupData.reason);
+        showToast('Error generando mockup. Int\u00E9ntalo de nuevo.');
+      }
     }
   } catch (err) {
     console.error('[creator] mockup request failed', err);
@@ -401,6 +408,9 @@ async function pollMockupStatus(taskKey, attempt = 0) {
       displayMockup(data.mockup_url, data.mockup_urls || []);
     } else if (data.mockup_status === 'processing') {
       pollMockupStatus(taskKey, attempt + 1);
+    } else if (data.mockup_status === 'rate_limited') {
+      hideMockupLoading();
+      showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
     } else {
       hideMockupLoading();
     }
@@ -617,8 +627,15 @@ function initLayoutControls() {
     }
   });
 
+  let mockupCooldownUntil = 0;
   updateBtn.addEventListener('click', async () => {
     if (!generatedImageUrl || !selectedProduct) return;
+    const now = Date.now();
+    if (now < mockupCooldownUntil) {
+      const secsLeft = Math.ceil((mockupCooldownUntil - now) / 1000);
+      showToast(`Espera ${secsLeft}s antes de solicitar otro mockup.`);
+      return;
+    }
     updateBtn.disabled = true;
     updateBtn.classList.add('loading');
     updateBtn.textContent = 'Generando\u2026';
@@ -626,6 +643,7 @@ function initLayoutControls() {
     previewMode = 'mockup';
     const clientPreview = document.getElementById('clientPreview');
     if (clientPreview) clientPreview.style.display = 'none';
+    mockupCooldownUntil = Date.now() + 8000; // 8s cooldown between calls
     await requestMockup(selectedProduct.product_key);
     updateBtn.disabled = false;
     updateBtn.classList.remove('loading');
