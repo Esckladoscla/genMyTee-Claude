@@ -384,8 +384,7 @@ async function requestMockup(productKey) {
     } else if (mockupData.reason === 'printful_rate_limited' || mockupData.mockup_status === 'rate_limited') {
       hideMockupLoading();
       const waitSecs = mockupData.retry_after_seconds || 60;
-      showToast(`L\u00EDmite de Printful alcanzado. Espera ${waitSecs}s e int\u00E9ntalo de nuevo.`);
-      return false;
+      return { ok: false, rateLimited: true, waitSeconds: waitSecs };
     } else if (mockupData.task_key) {
       pollMockupStatus(mockupData.task_key, 0, thisGeneration);
       return true; // polling in progress
@@ -424,7 +423,8 @@ async function pollMockupStatus(taskKey, attempt = 0, generation = 0) {
       pollMockupStatus(taskKey, attempt + 1, generation);
     } else if (data.mockup_status === 'rate_limited') {
       hideMockupLoading();
-      showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
+      const cooldownBtn = document.getElementById('layoutUpdateBtn');
+      if (cooldownBtn) startMockupCooldown(cooldownBtn, 55);
     } else {
       hideMockupLoading();
     }
@@ -676,17 +676,41 @@ function initLayoutControls() {
     previewMode = 'mockup';
     const clientPreview = document.getElementById('clientPreview');
     if (clientPreview) clientPreview.style.display = 'none';
-    const success = await requestMockup(selectedProduct.product_key);
-    // If mockup failed (rate limit, error), restore CSS preview so user isn't stuck
+    const result = await requestMockup(selectedProduct.product_key);
+    const success = result === true || (result && result.ok);
+    // If mockup failed, restore CSS preview so user isn't stuck
     if (!success) {
       previewMode = 'adjusting';
       setupClientPreview();
       updateClientPreview();
     }
-    updateBtn.disabled = false;
     updateBtn.classList.remove('loading');
-    updateBtn.textContent = 'Ver mockup real';
+    // Rate limited → start countdown on the button
+    if (result && result.rateLimited) {
+      startMockupCooldown(updateBtn, result.waitSeconds);
+    } else {
+      updateBtn.disabled = false;
+      updateBtn.textContent = 'Ver mockup real';
+    }
   });
+}
+
+function startMockupCooldown(btn, totalSeconds) {
+  let remaining = totalSeconds;
+  btn.disabled = true;
+  btn.classList.add('cooldown');
+  const tick = () => {
+    if (remaining <= 0) {
+      btn.disabled = false;
+      btn.classList.remove('cooldown');
+      btn.textContent = 'Ver mockup real';
+      return;
+    }
+    btn.textContent = `Disponible en ${remaining}s`;
+    remaining--;
+    setTimeout(tick, 1000);
+  };
+  tick();
 }
 
 function resetLayout() {
