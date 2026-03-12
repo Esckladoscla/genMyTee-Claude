@@ -354,8 +354,9 @@
 }
 .client-preview-design{
   width:100%;height:100%;object-fit:contain;
+  transform-origin:0 0;
   transition:transform 0.1s ease-out;
-  opacity:0.85;
+  opacity:0.9;
 }
 .client-preview-label{
   position:absolute;bottom:6px;left:50%;transform:translateX(-50%);

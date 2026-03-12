@@ -639,9 +639,19 @@ function initLayoutControls() {
 
   if (!scaleSlider) return;
 
+  function updateOffsetSlidersState() {
+    // At scale >= 100% offsets have no effect (design fills or exceeds print area)
+    const disabled = layoutScale >= 100;
+    xSlider.disabled = disabled;
+    ySlider.disabled = disabled;
+    xSlider.style.opacity = disabled ? '0.4' : '1';
+    ySlider.style.opacity = disabled ? '0.4' : '1';
+  }
+
   scaleSlider.addEventListener('input', () => {
     layoutScale = parseInt(scaleSlider.value, 10);
     document.getElementById('layoutScaleValue').textContent = layoutScale + '%';
+    updateOffsetSlidersState();
     enterAdjustMode();
     updateClientPreview();
   });
@@ -659,6 +669,8 @@ function initLayoutControls() {
     enterAdjustMode();
     updateClientPreview();
   });
+
+  updateOffsetSlidersState();
 
   resetBtn.addEventListener('click', () => {
     resetLayout();
@@ -722,8 +734,8 @@ function resetLayout() {
   const xSlider = document.getElementById('layoutX');
   const ySlider = document.getElementById('layoutY');
   if (scaleSlider) scaleSlider.value = 100;
-  if (xSlider) xSlider.value = 0;
-  if (ySlider) ySlider.value = 0;
+  if (xSlider) { xSlider.value = 0; xSlider.disabled = true; xSlider.style.opacity = '0.4'; }
+  if (ySlider) { ySlider.value = 0; ySlider.disabled = true; ySlider.style.opacity = '0.4'; }
   document.getElementById('layoutScaleValue').textContent = '100%';
   document.getElementById('layoutXValue').textContent = '0';
   document.getElementById('layoutYValue').textContent = '0';
@@ -818,9 +830,12 @@ function updateClientPreview() {
   const designImg = document.getElementById('clientPreviewDesign');
   if (!designImg) return;
   const scaleVal = layoutScale / 100;
-  const txPct = layoutX * 0.3;
-  const tyPct = layoutY * 0.3;
-  designImg.style.transform = `scale(${scaleVal}) translate(${txPct}%, ${tyPct}%)`;
+  // Mirror Printful's buildPositionFromLayout:
+  // left = (areaWidth - width) * ((offset_x + 100) / 200)
+  // With transform-origin:0 0, translate(%) is relative to element size (= print area)
+  const leftPct = (1 - scaleVal) * ((layoutX + 100) / 200) * 100;
+  const topPct = (1 - scaleVal) * ((layoutY + 100) / 200) * 100;
+  designImg.style.transform = `translate(${leftPct}%, ${topPct}%) scale(${scaleVal})`;
 }
 
 // Expose for catalog.js product card clicks
