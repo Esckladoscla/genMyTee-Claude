@@ -354,6 +354,7 @@ async function requestMockup(productKey) {
       pf_product_key: productKey,
       variant_title: variantTitle,
     };
+    if (selectedProduct?.placement) body.pf_placement = selectedProduct.placement;
     const layout = getLayoutParam();
     if (layout) body.layout = layout;
 
