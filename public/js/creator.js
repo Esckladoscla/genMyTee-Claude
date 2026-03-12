@@ -377,9 +377,10 @@ async function requestMockup(productKey) {
       showToast('Este producto no soporta ajuste de posici\u00F3n. Prueba con valores por defecto.');
       resetLayout();
       return false;
-    } else if (mockupData.reason === 'rate_limited' || mockupData.mockup_status === 'rate_limited') {
+    } else if (mockupData.reason === 'printful_rate_limited' || mockupData.mockup_status === 'rate_limited') {
       hideMockupLoading();
-      showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
+      const waitSecs = mockupData.retry_after_seconds || 60;
+      showToast(`L\u00EDmite de Printful alcanzado. Espera ${waitSecs}s e int\u00E9ntalo de nuevo.`);
       return false;
     } else if (mockupData.task_key) {
       pollMockupStatus(mockupData.task_key);

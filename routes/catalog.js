@@ -16,7 +16,11 @@ function loadProducts() {
 
 function enrichWithLayoutSupport(product, layoutSupportFn) {
   const support = layoutSupportFn(product.product_key);
-  return { ...product, supports_layout: support === true };
+  // null = untested (probe rate-limited) → default to true for customizable products
+  // true = probe confirmed layout works
+  // false = probe confirmed layout does NOT work
+  const supportsLayout = support === true || (support === null && product.customizable === true);
+  return { ...product, supports_layout: supportsLayout };
 }
 
 export function buildCatalogRouter({
