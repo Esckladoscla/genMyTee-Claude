@@ -139,7 +139,7 @@ function collectPlacementCandidates(variantPayload, requestedPlacement) {
   return [first];
 }
 
-function collectVariantFileSpecs(variantPayload) {
+export function collectVariantFileSpecs(variantPayload) {
   const files = Array.isArray(variantPayload?.files)
     ? variantPayload.files
     : Array.isArray(variantPayload?.variant?.files)

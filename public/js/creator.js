@@ -482,11 +482,16 @@ function displayMockup(primaryUrl, allUrls) {
   }
 
   preview.appendChild(container);
-  exitAdjustMode();
-  if (selectedProduct?.supports_layout) {
-    showLayoutControls();
+
+  // If user is adjusting sliders, don't interrupt — keep mockup hidden in DOM
+  if (previewMode === 'adjusting') {
+    container.style.display = 'none';
   } else {
-    hideLayoutControls();
+    if (selectedProduct?.supports_layout) {
+      showLayoutControls();
+    } else {
+      hideLayoutControls();
+    }
   }
 }
 
@@ -615,6 +620,10 @@ function initLayoutControls() {
     updateBtn.disabled = true;
     updateBtn.classList.add('loading');
     updateBtn.textContent = 'Generando\u2026';
+    // Exit adjust mode first so displayMockup() will show the result
+    previewMode = 'mockup';
+    const clientPreview = document.getElementById('clientPreview');
+    if (clientPreview) clientPreview.style.display = 'none';
     await requestMockup(selectedProduct.product_key);
     updateBtn.disabled = false;
     updateBtn.classList.remove('loading');
@@ -679,6 +688,12 @@ function exitAdjustMode() {
   // Restore Printful mockup
   const mockupContainer = document.querySelector('.mockup-container');
   if (mockupContainer) mockupContainer.style.display = '';
+
+  if (selectedProduct?.supports_layout) {
+    showLayoutControls();
+  } else {
+    hideLayoutControls();
+  }
 }
 
 function setupClientPreview() {
