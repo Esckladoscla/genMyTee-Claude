@@ -341,6 +341,7 @@ async function generateDesign() {
   }
 }
 
+// Returns true if mockup was received or is being polled, false if failed
 async function requestMockup(productKey) {
   try {
     showMockupLoading();
@@ -370,25 +371,31 @@ async function requestMockup(productKey) {
 
     if (mockupData.ok && mockupData.mockup_url) {
       displayMockup(mockupData.mockup_url, mockupData.mockup_urls || []);
+      return true;
     } else if (mockupData.reason === 'layout_not_supported') {
       hideMockupLoading();
       showToast('Este producto no soporta ajuste de posici\u00F3n. Prueba con valores por defecto.');
       resetLayout();
+      return false;
     } else if (mockupData.reason === 'rate_limited' || mockupData.mockup_status === 'rate_limited') {
       hideMockupLoading();
       showToast('Demasiadas solicitudes. Espera unos segundos e int\u00E9ntalo de nuevo.');
+      return false;
     } else if (mockupData.task_key) {
       pollMockupStatus(mockupData.task_key);
+      return true; // polling in progress
     } else {
       hideMockupLoading();
       if (mockupData.reason) {
         console.warn('[creator] mockup failed:', mockupData.reason);
         showToast('Error generando mockup. Int\u00E9ntalo de nuevo.');
       }
+      return false;
     }
   } catch (err) {
     console.error('[creator] mockup request failed', err);
     hideMockupLoading();
+    return false;
   }
 }
 
@@ -627,24 +634,23 @@ function initLayoutControls() {
     }
   });
 
-  let mockupCooldownUntil = 0;
   updateBtn.addEventListener('click', async () => {
     if (!generatedImageUrl || !selectedProduct) return;
-    const now = Date.now();
-    if (now < mockupCooldownUntil) {
-      const secsLeft = Math.ceil((mockupCooldownUntil - now) / 1000);
-      showToast(`Espera ${secsLeft}s antes de solicitar otro mockup.`);
-      return;
-    }
+    if (updateBtn.disabled) return;
     updateBtn.disabled = true;
     updateBtn.classList.add('loading');
     updateBtn.textContent = 'Generando\u2026';
-    // Exit adjust mode first so displayMockup() will show the result
+    // Exit adjust mode so displayMockup() will show the result
     previewMode = 'mockup';
     const clientPreview = document.getElementById('clientPreview');
     if (clientPreview) clientPreview.style.display = 'none';
-    mockupCooldownUntil = Date.now() + 8000; // 8s cooldown between calls
-    await requestMockup(selectedProduct.product_key);
+    const success = await requestMockup(selectedProduct.product_key);
+    // If mockup failed (rate limit, error), restore CSS preview so user isn't stuck
+    if (!success) {
+      previewMode = 'adjusting';
+      setupClientPreview();
+      updateClientPreview();
+    }
     updateBtn.disabled = false;
     updateBtn.classList.remove('loading');
     updateBtn.textContent = 'Ver mockup real';
