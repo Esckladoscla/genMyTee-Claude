@@ -14,7 +14,7 @@ import { generateMockupForVariant, getMockupTask } from "../services/printful.js
 
 const DEFAULT_RATE_LIMIT_MAX = 10;
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
-const LAYOUT_SCALE_MIN = 0.75;
+const LAYOUT_SCALE_MIN = 0.30;
 const LAYOUT_SCALE_MAX = 1.35;
 const LAYOUT_OFFSET_MIN = -100;
 const LAYOUT_OFFSET_MAX = 100;
