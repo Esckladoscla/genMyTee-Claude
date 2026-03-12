@@ -3,7 +3,7 @@ import { getBooleanEnv, getEnv, requireEnv } from "./env.js";
 const PRINTFUL_API_BASE = "https://api.printful.com";
 const mockupTaskStrategyCache = new Map();
 const mockupPrintfilesCache = new Map();
-const LAYOUT_SCALE_MIN = 0.75;
+const LAYOUT_SCALE_MIN = 0.30;
 const LAYOUT_SCALE_MAX = 1.35;
 const LAYOUT_OFFSET_MIN = -100;
 const LAYOUT_OFFSET_MAX = 100;
