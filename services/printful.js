@@ -203,7 +203,7 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, parsed));
 }
 
-function normalizeMockupLayout(layout) {
+export function normalizeMockupLayout(layout) {
   if (!layout || typeof layout !== "object") return null;
 
   const scale = clampNumber(layout.scale, LAYOUT_SCALE_MIN, LAYOUT_SCALE_MAX, 1);
@@ -222,7 +222,7 @@ function normalizeMockupLayout(layout) {
   };
 }
 
-function buildPositionFromLayout(fileSpec = {}, layout = null) {
+export function buildPositionFromLayout(fileSpec = {}, layout = null) {
   if (!layout) {
     return buildDefaultPosition(fileSpec);
   }
@@ -245,12 +245,6 @@ function buildPositionFromLayout(fileSpec = {}, layout = null) {
     top,
     left,
   };
-
-  console.log("[mockup] buildPositionFromLayout", {
-    fileSpecDims: { width: fileSpec.width, height: fileSpec.height },
-    layout,
-    position,
-  });
 
   return position;
 }

@@ -33,6 +33,7 @@ export async function createCheckoutSession(items, { successUrl, cancelUrl }) {
           size: item.size || "",
           image_url: item.image_url || "",
           slug: item.slug || "",
+          layout: item.layout ? JSON.stringify(item.layout) : "",
         },
       },
       unit_amount: Math.round((item.price || 0) * 100),
@@ -105,12 +106,17 @@ export async function extractOrderFromSession(session) {
   const items = lineItems.data.map((li) => {
     const product = li.price?.product;
     const meta = (typeof product === "object" && product?.metadata) || {};
+    let layout;
+    if (meta.layout) {
+      try { layout = JSON.parse(meta.layout); } catch { /* ignore corrupted layout */ }
+    }
     return {
       product_key: meta.product_key || "all-over-print-mens-athletic-t-shirt",
       color: meta.color || undefined,
       size: meta.size || undefined,
       quantity: li.quantity || 1,
       image_url: meta.image_url || undefined,
+      layout,
     };
   });
 

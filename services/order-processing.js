@@ -1,5 +1,6 @@
 import { getBooleanEnv, getEnv } from "./env.js";
-import { createOrderSafe } from "./printful.js";
+import { createOrderSafe, normalizeMockupLayout, buildPositionFromLayout } from "./printful.js";
+import { getPrintfileDims } from "./layout-probe.js";
 import {
   inferProductKey,
   normalizeProperties,
@@ -94,10 +95,20 @@ export function buildPrintfulItems(
 
       const quantity = Math.max(1, Number(item.quantity) || 1);
 
+      const fileEntry = { type: "default", placement, url: imageUrl };
+      if (item.layout) {
+        const normalized = normalizeMockupLayout(item.layout);
+        if (normalized) {
+          const dims = getPrintfileDims(productKey);
+          const fileSpec = dims ? { width: dims.width, height: dims.height } : {};
+          fileEntry.position = buildPositionFromLayout(fileSpec, normalized);
+        }
+      }
+
       printfulItems.push({
         variant_id: numericVariantId,
         quantity,
-        files: [{ type: "default", placement, url: imageUrl }],
+        files: [fileEntry],
       });
       continue;
     }
