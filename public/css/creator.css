@@ -386,8 +386,21 @@
 }
 .layout-reset-btn:hover{border-color:var(--accent2);color:var(--accent2)}
 
-.layout-slider-group{margin-bottom:0.5rem}
-.layout-slider-group:last-of-type{margin-bottom:0.8rem}
+.layout-slider-group{
+  margin-bottom:0.5rem;
+  max-height:3rem;overflow:hidden;
+  transition:max-height 0.25s ease,opacity 0.25s ease,margin 0.25s ease;
+  opacity:1;
+}
+.layout-slider-group.hidden{
+  max-height:0;opacity:0;margin-bottom:0;pointer-events:none;
+}
+.layout-hint{
+  font-size:0.55rem;color:rgba(255,255,255,0.3);
+  text-align:center;margin-bottom:0.5rem;
+  min-height:0.8rem;
+  transition:opacity 0.25s ease;
+}
 .layout-label{
   display:flex;justify-content:space-between;align-items:center;
   font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;
