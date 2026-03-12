@@ -96,7 +96,7 @@ export function buildCheckoutRouter({
         const ox = Number(item.layout.offset_x);
         const oy = Number(item.layout.offset_y);
         if (Number.isFinite(s) && Number.isFinite(ox) && Number.isFinite(oy)) {
-          const scale = Math.min(1.35, Math.max(0.75, s));
+          const scale = Math.min(1.35, Math.max(0.30, s));
           const offset_x = Math.min(100, Math.max(-100, ox));
           const offset_y = Math.min(100, Math.max(-100, oy));
           const isDefault = Math.abs(scale - 1) < 0.001 && Math.abs(offset_x) < 0.001 && Math.abs(offset_y) < 0.001;

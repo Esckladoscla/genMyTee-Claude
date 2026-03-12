@@ -283,6 +283,45 @@ test("preview/mockup forwards normalized layout controls to Printful generator",
   });
 });
 
+test("preview/mockup clamps below-minimum scale to 0.30", async () => {
+  let capturedOptions = null;
+
+  const router = buildPreviewRouter({
+    resolveVariantIdFn: () => 9952,
+    generateMockupForVariantFn: async (_variantId, _imageUrl, options) => {
+      capturedOptions = options;
+      return {
+        status: "completed",
+        mockups: ["https://cdn.test/mockups/small.png"],
+      };
+    },
+  });
+
+  await withServer(createPreviewApp(router), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/preview/mockup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        image_url: "https://cdn.test/previews/source.png",
+        pf_product_key: "gildan-5000",
+        variant_title: "S",
+        layout: {
+          scale: 0.10,
+          offset_x: 0,
+          offset_y: 0,
+        },
+      }),
+    });
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(capturedOptions.layout, {
+      scale: 0.3,
+      offset_x: 0,
+      offset_y: 0,
+    });
+  });
+});
+
 test("preview/mockup validates required image_url", async () => {
   const router = buildPreviewRouter();
 
