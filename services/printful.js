@@ -3,7 +3,7 @@ import { getBooleanEnv, getEnv, requireEnv } from "./env.js";
 const PRINTFUL_API_BASE = "https://api.printful.com";
 const mockupTaskStrategyCache = new Map();
 const mockupPrintfilesCache = new Map();
-const LAYOUT_SCALE_MIN = 0.75;
+const LAYOUT_SCALE_MIN = 0.30;
 const LAYOUT_SCALE_MAX = 1.35;
 const LAYOUT_OFFSET_MIN = -100;
 const LAYOUT_OFFSET_MAX = 100;
@@ -184,16 +184,32 @@ export function extractPrintfileDimensions(printfilesPayload, placement) {
     : null;
 }
 
-function buildDefaultPosition(fileSpec = {}) {
+function buildDefaultPosition(fileSpec = {}, { imageAspectRatio = 1 } = {}) {
   const areaWidth = Number(fileSpec.width) || 1800;
   const areaHeight = Number(fileSpec.height) || 2400;
+
+  let width = areaWidth;
+  let height = areaHeight;
+  const areaAspect = areaWidth / areaHeight;
+
+  if (imageAspectRatio > 0 && Math.abs(areaAspect - imageAspectRatio) > 0.001) {
+    if (areaAspect > imageAspectRatio) {
+      width = Math.round(areaHeight * imageAspectRatio);
+    } else {
+      height = Math.round(areaWidth / imageAspectRatio);
+    }
+  }
+
+  const left = Math.round((areaWidth - width) / 2);
+  const top = Math.round((areaHeight - height) / 2);
+
   return {
     area_width: areaWidth,
     area_height: areaHeight,
-    width: areaWidth,
-    height: areaHeight,
-    top: 0,
-    left: 0,
+    width,
+    height,
+    top,
+    left,
   };
 }
 
@@ -203,7 +219,7 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, parsed));
 }
 
-function normalizeMockupLayout(layout) {
+export function normalizeMockupLayout(layout) {
   if (!layout || typeof layout !== "object") return null;
 
   const scale = clampNumber(layout.scale, LAYOUT_SCALE_MIN, LAYOUT_SCALE_MAX, 1);
@@ -222,22 +238,32 @@ function normalizeMockupLayout(layout) {
   };
 }
 
-function buildPositionFromLayout(fileSpec = {}, layout = null) {
+export function buildPositionFromLayout(fileSpec = {}, layout = null, { imageAspectRatio = 1 } = {}) {
   if (!layout) {
-    return buildDefaultPosition(fileSpec);
+    return buildDefaultPosition(fileSpec, { imageAspectRatio });
   }
 
   const areaWidth = Number(fileSpec.width) || 1800;
   const areaHeight = Number(fileSpec.height) || 2400;
-  const width = Math.max(1, Math.round(areaWidth * layout.scale));
-  const height = Math.max(1, Math.round(areaHeight * layout.scale));
+
+  let width = Math.max(1, Math.round(areaWidth * layout.scale));
+  let height = Math.max(1, Math.round(areaHeight * layout.scale));
+
+  if (imageAspectRatio > 0) {
+    const scaledAspect = width / height;
+    if (scaledAspect > imageAspectRatio) {
+      width = Math.max(1, Math.round(height * imageAspectRatio));
+    } else if (scaledAspect < imageAspectRatio) {
+      height = Math.max(1, Math.round(width / imageAspectRatio));
+    }
+  }
 
   const leftRange = areaWidth - width;
   const topRange = areaHeight - height;
   const left = Math.round(leftRange * ((layout.offset_x + 100) / 200));
   const top = Math.round(topRange * ((layout.offset_y + 100) / 200));
 
-  const position = {
+  return {
     area_width: areaWidth,
     area_height: areaHeight,
     width,
@@ -245,14 +271,6 @@ function buildPositionFromLayout(fileSpec = {}, layout = null) {
     top,
     left,
   };
-
-  console.log("[mockup] buildPositionFromLayout", {
-    fileSpecDims: { width: fileSpec.width, height: fileSpec.height },
-    layout,
-    position,
-  });
-
-  return position;
 }
 
 function isRetryableMockupPayloadError(error) {

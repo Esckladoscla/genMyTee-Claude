@@ -15,12 +15,15 @@ function loadProducts() {
 }
 
 function enrichWithLayoutSupport(product, layoutSupportFn) {
-  const support = layoutSupportFn(product.product_key);
+  const entry = layoutSupportFn(product.product_key);
   // null = untested (probe rate-limited) → default to true for customizable products
-  // true = probe confirmed layout works
-  // false = probe confirmed layout does NOT work
-  const supportsLayout = support === true || (support === null && product.customizable === true);
-  return { ...product, supports_layout: supportsLayout };
+  // { supported: true } = probe confirmed layout works
+  // { supported: false } = probe confirmed layout does NOT work
+  // Legacy: boolean value (old cache format)
+  const supported = typeof entry === "boolean" ? entry : entry?.supported ?? null;
+  const supportsLayout = supported === true || (supported === null && product.customizable === true);
+  const printfileDims = entry?.printfile_dims || null;
+  return { ...product, supports_layout: supportsLayout, printfile_dims: printfileDims };
 }
 
 export function buildCatalogRouter({

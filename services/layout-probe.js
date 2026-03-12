@@ -94,6 +94,12 @@ async function probeProduct(product) {
     height: matchingFileSpec.height || printfileDims?.height || null,
   };
 
+  const dims = printfileDims
+    ? { width: printfileDims.width, height: printfileDims.height }
+    : effectiveFileSpec.width && effectiveFileSpec.height
+      ? { width: effectiveFileSpec.width, height: effectiveFileSpec.height }
+      : null;
+
   try {
     await createMockupTask(productId, {
       variantId,
@@ -104,20 +110,12 @@ async function probeProduct(product) {
       layout: testLayout,
       fileSpec: effectiveFileSpec,
     });
-    return true;
+    return { supported: true, printfile_dims: dims };
   } catch (err) {
     if (Number(err?.status) === 429) {
       throw err;
     }
-    const msg = String(err?.message || "").toLowerCase();
-    if (
-      msg.includes("position") ||
-      msg.includes("placement") ||
-      msg.includes("invalid file")
-    ) {
-      return false;
-    }
-    return false;
+    return { supported: false, printfile_dims: dims };
   }
 }
 
@@ -127,11 +125,19 @@ export async function runLayoutProbe() {
   let updated = false;
 
   for (const [key, value] of Object.entries(cache)) {
-    layoutSupportMap.set(key, value);
+    // Support both old format (boolean) and new format ({ supported, printfile_dims })
+    if (typeof value === "object" && value !== null) {
+      layoutSupportMap.set(key, value);
+    } else {
+      layoutSupportMap.set(key, { supported: !!value, printfile_dims: null });
+    }
   }
 
   const untested = products.filter(
-    (p) => p.customizable && !(p.product_key in cache)
+    (p) => p.customizable && (
+      !(p.product_key in cache) ||
+      typeof cache[p.product_key] === 'boolean'  // re-probe old format entries to capture printfile_dims
+    )
   );
 
   if (!untested.length) {
@@ -147,23 +153,26 @@ export async function runLayoutProbe() {
     try {
       const result = await probeProduct(product);
       if (result === null) {
-        cache[product.product_key] = false;
-        layoutSupportMap.set(product.product_key, false);
+        const entry = { supported: false, printfile_dims: null };
+        cache[product.product_key] = entry;
+        layoutSupportMap.set(product.product_key, entry);
       } else {
         cache[product.product_key] = result;
         layoutSupportMap.set(product.product_key, result);
       }
       updated = true;
+      const supported = result?.supported ?? false;
       console.log(
-        `[layout-probe] ${product.product_key}: ${result ? "SUPPORTED" : "NOT SUPPORTED"}`
+        `[layout-probe] ${product.product_key}: ${supported ? "SUPPORTED" : "NOT SUPPORTED"}`
       );
     } catch (err) {
       if (Number(err?.status) === 429) {
         console.warn("[layout-probe] rate limited, stopping probe. Will retry on next startup.");
         break;
       }
-      cache[product.product_key] = false;
-      layoutSupportMap.set(product.product_key, false);
+      const entry = { supported: false, printfile_dims: null };
+      cache[product.product_key] = entry;
+      layoutSupportMap.set(product.product_key, entry);
       updated = true;
       console.warn(`[layout-probe] ${product.product_key}: error — ${err.message}`);
     }
@@ -179,7 +188,17 @@ export async function runLayoutProbe() {
 
 export function getLayoutSupport(productKey) {
   if (layoutSupportMap.has(productKey)) {
-    return layoutSupportMap.get(productKey);
+    const entry = layoutSupportMap.get(productKey);
+    // Normalize old boolean format to new object format
+    if (typeof entry === "boolean") {
+      return { supported: entry, printfile_dims: null };
+    }
+    return entry;
   }
   return null;
+}
+
+export function getPrintfileDims(productKey) {
+  const entry = getLayoutSupport(productKey);
+  return entry?.printfile_dims || null;
 }

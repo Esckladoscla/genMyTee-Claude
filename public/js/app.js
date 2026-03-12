@@ -219,6 +219,7 @@ async function startCheckout() {
       size: item.size,
       quantity: item.quantity,
       image_url: item.image_url,
+      layout: item.layout || null,
     }));
 
     const res = await fetch('/api/checkout/session', {

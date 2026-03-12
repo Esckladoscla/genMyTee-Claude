@@ -7,6 +7,8 @@ const files = [
   "./orders-route.test.js",
   "./catalog-route.test.js",
   "./checkout-route.test.js",
+  "./order-processing.test.js",
+  "./printful-position.test.js",
 ];
 
 for (const file of files) {
