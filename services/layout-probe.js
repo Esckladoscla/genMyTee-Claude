@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveVariantId } from "./variants.js";
-import { getVariant, createMockupTask } from "./printful.js";
+import { getVariant, createMockupTask, collectVariantFileSpecs } from "./printful.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CACHE_PATH = join(__dirname, "..", "data", "layout-support-cache.json");
@@ -73,6 +73,12 @@ async function probeProduct(product) {
   const testLayout = { scale: 0.85, offset_x: 10, offset_y: 10 };
   const placement = product.placement || "front";
 
+  // Extract real file spec from variant data for correct dimensions
+  const variantFileSpecs = collectVariantFileSpecs(variant);
+  const matchingFileSpec = variantFileSpecs.find(
+    (s) => s.type === placement
+  ) || variantFileSpecs[0] || {};
+
   try {
     await createMockupTask(productId, {
       variantId,
@@ -81,7 +87,7 @@ async function probeProduct(product) {
       format: "png",
       field: "position",
       layout: testLayout,
-      fileSpec: {},
+      fileSpec: matchingFileSpec,
     });
     return true;
   } catch (err) {
