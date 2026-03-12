@@ -2050,5 +2050,130 @@
     "XS": {
       "variant_id": 7820
     }
+  },
+  "yupoong-yupoong-6245cm---unstructured-classic-dad-cap": {
+    "Black": {
+      "One size": {
+        "variant_id": 7854
+      }
+    },
+    "White": {
+      "One size": {
+        "variant_id": 7853
+      }
+    },
+    "Navy": {
+      "One size": {
+        "variant_id": 7857
+      }
+    },
+    "Khaki": {
+      "One size": {
+        "variant_id": 7855
+      }
+    },
+    "Stone": {
+      "One size": {
+        "variant_id": 7859
+      }
+    },
+    "Pink": {
+      "One size": {
+        "variant_id": 7858
+      }
+    }
+  },
+  "yupoong-6006-five-panel-trucker-cap": {
+    "Black": {
+      "One size": {
+        "variant_id": 4811
+      }
+    },
+    "White": {
+      "One size": {
+        "variant_id": 4810
+      }
+    },
+    "Navy": {
+      "One size": {
+        "variant_id": 4816
+      }
+    },
+    "Charcoal": {
+      "One size": {
+        "variant_id": 4814
+      }
+    },
+    "Black/White": {
+      "One size": {
+        "variant_id": 4812
+      }
+    },
+    "Navy/White": {
+      "One size": {
+        "variant_id": 4817
+      }
+    }
+  },
+  "snap-case-for-iphone": {
+    "Glossy": {
+      "iPhone 15": {
+        "variant_id": 17722
+      },
+      "iPhone 15 Pro": {
+        "variant_id": 17726
+      },
+      "iPhone 15 Pro Max": {
+        "variant_id": 17728
+      },
+      "iPhone 16": {
+        "variant_id": 20294
+      },
+      "iPhone 16 Plus": {
+        "variant_id": 20295
+      },
+      "iPhone 16 Pro": {
+        "variant_id": 20296
+      },
+      "iPhone 16 Pro Max": {
+        "variant_id": 20297
+      }
+    },
+    "Matte": {
+      "iPhone 15": {
+        "variant_id": 17723
+      },
+      "iPhone 15 Pro": {
+        "variant_id": 17727
+      },
+      "iPhone 15 Pro Max": {
+        "variant_id": 17729
+      },
+      "iPhone 16": {
+        "variant_id": 20298
+      },
+      "iPhone 16 Plus": {
+        "variant_id": 20299
+      },
+      "iPhone 16 Pro": {
+        "variant_id": 20300
+      },
+      "iPhone 16 Pro Max": {
+        "variant_id": 20301
+      }
+    }
+  },
+  "all-over-print-reversible-bucket-hat": {
+    "White": {
+      "S/M": {
+        "variant_id": 16360
+      },
+      "L/XL": {
+        "variant_id": 16361
+      },
+      "XS": {
+        "variant_id": 19255
+      }
+    }
   }
 }

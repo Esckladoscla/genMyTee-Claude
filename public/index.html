@@ -222,6 +222,36 @@
           </div>
         </div>
 
+        <!-- LAYOUT CONTROLS (shown after mockup) -->
+        <div class="layout-controls" id="layoutControls" style="display:none">
+          <div class="layout-header">
+            <span class="layout-title">Ajustar posici&oacute;n</span>
+            <button class="layout-reset-btn" id="layoutResetBtn" title="Restablecer">&#x21BA;</button>
+          </div>
+          <div class="layout-slider-group">
+            <label class="layout-label">
+              <span>Tama&ntilde;o</span>
+              <span class="layout-value" id="layoutScaleValue">100%</span>
+            </label>
+            <input type="range" class="layout-range" id="layoutScale" min="75" max="135" value="100" step="1">
+          </div>
+          <div class="layout-slider-group">
+            <label class="layout-label">
+              <span>Horizontal</span>
+              <span class="layout-value" id="layoutXValue">0</span>
+            </label>
+            <input type="range" class="layout-range" id="layoutX" min="-100" max="100" value="0" step="5">
+          </div>
+          <div class="layout-slider-group">
+            <label class="layout-label">
+              <span>Vertical</span>
+              <span class="layout-value" id="layoutYValue">0</span>
+            </label>
+            <input type="range" class="layout-range" id="layoutY" min="-100" max="100" value="0" step="5">
+          </div>
+          <button class="layout-update-btn" id="layoutUpdateBtn">&#x21BB; Actualizar mockup</button>
+        </div>
+
         <!-- PROMPT -->
         <div class="prompt-area">
           <div class="prompt-label">
