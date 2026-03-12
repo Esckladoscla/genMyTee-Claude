@@ -167,6 +167,23 @@ export function collectVariantFileSpecs(variantPayload) {
   return out;
 }
 
+export function extractPrintfileDimensions(printfilesPayload, placement) {
+  const pfs = Array.isArray(printfilesPayload?.printfiles)
+    ? printfilesPayload.printfiles
+    : [];
+  const normalizedPlacement = String(placement || "").toLowerCase().trim();
+  const match = pfs.find(
+    (pf) => String(pf?.type || "").toLowerCase().trim() === normalizedPlacement
+  );
+  if (match?.width && match?.height) {
+    return { type: match.type, width: Number(match.width), height: Number(match.height) };
+  }
+  const first = pfs.find((pf) => pf?.width && pf?.height);
+  return first
+    ? { type: first.type, width: Number(first.width), height: Number(first.height) }
+    : null;
+}
+
 function buildDefaultPosition(fileSpec = {}) {
   const areaWidth = Number(fileSpec.width) || 1800;
   const areaHeight = Number(fileSpec.height) || 2400;
@@ -220,7 +237,7 @@ function buildPositionFromLayout(fileSpec = {}, layout = null) {
   const left = Math.round(leftRange * ((layout.offset_x + 100) / 200));
   const top = Math.round(topRange * ((layout.offset_y + 100) / 200));
 
-  return {
+  const position = {
     area_width: areaWidth,
     area_height: areaHeight,
     width,
@@ -228,6 +245,14 @@ function buildPositionFromLayout(fileSpec = {}, layout = null) {
     top,
     left,
   };
+
+  console.log("[mockup] buildPositionFromLayout", {
+    fileSpecDims: { width: fileSpec.width, height: fileSpec.height },
+    layout,
+    position,
+  });
+
+  return position;
 }
 
 function isRetryableMockupPayloadError(error) {
@@ -410,7 +435,7 @@ function pickMockupOptions(printfilesPayload, placement) {
   return [];
 }
 
-async function getMockupPrintfiles(productId) {
+export async function getMockupPrintfiles(productId) {
   const cacheKey = String(productId);
   if (mockupPrintfilesCache.has(cacheKey)) {
     return mockupPrintfilesCache.get(cacheKey);
@@ -487,6 +512,7 @@ async function createMockupTaskUsingVariantFiles(
     imageUrl,
     format = "png",
     layout = null,
+    printfileDims = null,
     allowPositionlessFallback = true,
     optionGroups = [],
     options = [],
@@ -501,11 +527,19 @@ async function createMockupTaskUsingVariantFiles(
 
   const limitedSpecs = specs.slice(0, 8);
   const filePayloadAttempts = [
-    limitedSpecs.map((spec) => ({
-      type: spec.type,
-      image_url: imageUrl,
-      position: buildPositionFromLayout(spec, layout),
-    })),
+    limitedSpecs.map((spec) => {
+      // Use printfile dimensions as fallback when variant spec lacks them
+      const effectiveSpec = {
+        ...spec,
+        width: spec.width || printfileDims?.width || null,
+        height: spec.height || printfileDims?.height || null,
+      };
+      return {
+        type: spec.type,
+        image_url: imageUrl,
+        position: buildPositionFromLayout(effectiveSpec, layout),
+      };
+    }),
   ];
   if (allowPositionlessFallback) {
     filePayloadAttempts.push(limitedSpecs.map((spec) => ({ type: spec.type, image_url: imageUrl })));
@@ -549,11 +583,13 @@ async function createMockupTaskWithPlacementFallbacks(
   const layoutCandidates = wantsCustomLayout ? [normalizedLayout] : [null];
   let lastError = null;
   let optionFilterCandidates = [{ optionGroups: [], options: [] }];
+  let printfileDims = null;
 
   try {
     const printfiles = await getMockupPrintfiles(productId);
     const optionGroups = pickMockupOptionGroups(printfiles);
     const options = pickMockupOptions(printfiles, placement);
+    printfileDims = extractPrintfileDimensions(printfiles, placement);
     if (optionGroups.length || options.length) {
       optionFilterCandidates = [
         { optionGroups, options },
@@ -584,6 +620,7 @@ async function createMockupTaskWithPlacementFallbacks(
               imageUrl,
               format,
               layout: layoutCandidate,
+              printfileDims,
               allowPositionlessFallback: !wantsCustomLayout,
               optionGroups: optionFilters.optionGroups,
               options: optionFilters.options,
@@ -609,6 +646,12 @@ async function createMockupTaskWithPlacementFallbacks(
             const matchingFileSpec = variantFileSpecs.find(
               (s) => s.type === candidate
             ) || {};
+            // Use printfile dimensions as fallback when variant spec lacks them
+            const effectiveFileSpec = {
+              ...matchingFileSpec,
+              width: matchingFileSpec.width || printfileDims?.width || null,
+              height: matchingFileSpec.height || printfileDims?.height || null,
+            };
             const result = await createMockupTask(productId, {
               variantId,
               imageUrl,
@@ -616,7 +659,7 @@ async function createMockupTaskWithPlacementFallbacks(
               format,
               field: "position",
               layout: layoutCandidate,
-              fileSpec: matchingFileSpec,
+              fileSpec: effectiveFileSpec,
               optionGroups: optionFilters.optionGroups,
               options: optionFilters.options,
             });
