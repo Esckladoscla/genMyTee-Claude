@@ -16,6 +16,7 @@ let layoutX = 0;
 let layoutY = 0;
 let previewMode = 'mockup'; // 'mockup' | 'adjusting'
 let mockupGeneration = 0; // incremented on each requestMockup to cancel stale polls
+let previewResizeObserver = null;
 
 // ── Color hex map ──
 const COLOR_HEX = {
@@ -687,6 +688,7 @@ function initLayoutControls() {
     updateBtn.textContent = 'Generando\u2026';
     // Exit adjust mode so displayMockup() will show the result
     previewMode = 'mockup';
+    if (previewResizeObserver) previewResizeObserver.disconnect();
     const clientPreview = document.getElementById('clientPreview');
     if (clientPreview) clientPreview.style.display = 'none';
     const result = await requestMockup(selectedProduct.product_key);
@@ -777,6 +779,7 @@ function exitAdjustMode() {
   if (previewMode !== 'adjusting') return;
   previewMode = 'mockup';
 
+  if (previewResizeObserver) previewResizeObserver.disconnect();
   const clientPreview = document.getElementById('clientPreview');
   if (clientPreview) clientPreview.style.display = 'none';
 
@@ -798,31 +801,73 @@ function setupClientPreview() {
   const printArea = document.getElementById('clientPreviewPrintArea');
   if (!clientPreview || !baseImg || !designImg || !printArea) return;
 
-  // Base image: product color photo or catalog image
   const baseUrl = selectedProduct.color_images?.[selectedColor]
     || selectedProduct.image_url
     || selectedProduct.default_mockup_url;
   baseImg.src = baseUrl;
-
-  // Design image: the AI-generated artwork
   designImg.src = generatedImageUrl;
 
-  // Position the print area overlay
-  const area = selectedProduct.preview_print_area;
-  if (area) {
-    printArea.style.top = area.top_pct + '%';
-    printArea.style.left = area.left_pct + '%';
-    printArea.style.width = area.width_pct + '%';
-    printArea.style.height = area.height_pct + '%';
+  // Must show before measuring — getBoundingClientRect returns 0 for hidden elements
+  clientPreview.style.display = '';
+
+  // Position print area with pixel values relative to the actual garment image,
+  // not percentage values relative to the container (which may differ due to
+  // flex centering + aspect ratio differences).
+  const positionPrintArea = () => {
+    const containerRect = clientPreview.getBoundingClientRect();
+    const imgRect = baseImg.getBoundingClientRect();
+    const offLeft = imgRect.left - containerRect.left;
+    const offTop = imgRect.top - containerRect.top;
+    const imgW = imgRect.width;
+    const imgH = imgRect.height;
+
+    const area = selectedProduct.preview_print_area;
+    const t = area ? area.top_pct / 100 : 0.15;
+    const l = area ? area.left_pct / 100 : 0.15;
+    let w = area ? area.width_pct / 100 : 0.70;
+    let h = area ? area.height_pct / 100 : 0.70;
+
+    // Constrain to Printful's actual aspect ratio if available.
+    // Only for large print areas (width > 40%) — small placements like embroidery
+    // have precise positions that shouldn't be adjusted.
+    const dims = selectedProduct.printfile_dims;
+    if (dims?.width && dims?.height && w > 0.40) {
+      const pfAspect = dims.width / dims.height;
+      const areaW = imgW * w;
+      const areaH = imgH * h;
+      const cssAspect = areaW / areaH;
+      if (cssAspect > pfAspect) {
+        w = (areaH * pfAspect) / imgW;
+      } else {
+        h = (areaW / pfAspect) / imgH;
+      }
+    }
+
+    // Center the (possibly adjusted) area within the original bounds
+    const origW = area ? area.width_pct / 100 : 0.70;
+    const origH = area ? area.height_pct / 100 : 0.70;
+    const adjustL = l + (origW - w) / 2;
+    const adjustT = t + (origH - h) / 2;
+
+    printArea.style.top = (offTop + imgH * adjustT) + 'px';
+    printArea.style.left = (offLeft + imgW * adjustL) + 'px';
+    printArea.style.width = (imgW * w) + 'px';
+    printArea.style.height = (imgH * h) + 'px';
+  };
+
+  if (baseImg.complete && baseImg.naturalWidth) {
+    positionPrintArea();
   } else {
-    // Fallback: center area
-    printArea.style.top = '15%';
-    printArea.style.left = '15%';
-    printArea.style.width = '70%';
-    printArea.style.height = '70%';
+    baseImg.onload = positionPrintArea;
   }
 
-  clientPreview.style.display = '';
+  // Re-position on container resize (e.g., window resize)
+  if (previewResizeObserver) previewResizeObserver.disconnect();
+  previewResizeObserver = new ResizeObserver(() => {
+    if (baseImg.complete && baseImg.naturalWidth) positionPrintArea();
+  });
+  previewResizeObserver.observe(clientPreview);
+
   updateClientPreview();
 }
 

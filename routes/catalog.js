@@ -22,7 +22,8 @@ function enrichWithLayoutSupport(product, layoutSupportFn) {
   // Legacy: boolean value (old cache format)
   const supported = typeof entry === "boolean" ? entry : entry?.supported ?? null;
   const supportsLayout = supported === true || (supported === null && product.customizable === true);
-  return { ...product, supports_layout: supportsLayout };
+  const printfileDims = entry?.printfile_dims || null;
+  return { ...product, supports_layout: supportsLayout, printfile_dims: printfileDims };
 }
 
 export function buildCatalogRouter({

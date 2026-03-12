@@ -134,7 +134,10 @@ export async function runLayoutProbe() {
   }
 
   const untested = products.filter(
-    (p) => p.customizable && !(p.product_key in cache)
+    (p) => p.customizable && (
+      !(p.product_key in cache) ||
+      typeof cache[p.product_key] === 'boolean'  // re-probe old format entries to capture printfile_dims
+    )
   );
 
   if (!untested.length) {
