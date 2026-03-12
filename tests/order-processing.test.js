@@ -61,7 +61,8 @@ test("buildPrintfulItems clamps out-of-range layout values", () => {
   assert.equal(items.length, 1);
   const file = items[0].files[0];
   assert.ok(file.position, "should have position even with extreme values");
-  // Scale clamped to 1.35, so width = 1800 * 1.35 = 2430
+  // Scale clamped to 1.35; aspect ratio correction constrains to square (image is 1:1)
+  // width = 1800 * 1.35 = 2430, height constrained to match width for 1:1 AR
   assert.equal(file.position.width, Math.round(1800 * 1.35));
-  assert.equal(file.position.height, Math.round(2400 * 1.35));
+  assert.equal(file.position.height, Math.round(1800 * 1.35));
 });
