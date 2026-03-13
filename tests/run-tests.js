@@ -15,6 +15,8 @@ const files = [
   "./watermark.test.js",
   "./session-limiter.test.js",
   "./brand-filter.test.js",
+  "./gallery-route.test.js",
+  "./referrals.test.js",
 ];
 
 for (const file of files) {

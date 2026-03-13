@@ -4,10 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>genMyTee — Tu imaginación, hecha prenda</title>
-<meta name="description" content="Diseña prendas únicas con tu imaginación. Describe tu diseño, previsualízalo y recíbelo en casa."/>
+<meta name="description" content="Diseña prendas únicas con tu imaginación o elige entre nuestra galería de diseños exclusivos. Describe tu diseño, previsualízalo y recíbelo en casa."/>
+<meta name="keywords" content="camisetas personalizadas, ropa personalizada, diseño único, print on demand, camiseta diseño propio, regalos personalizados, galería diseños"/>
+<link rel="canonical" href="https://genmytee.com/"/>
+<meta property="og:title" content="genMyTee — Tu imaginación, hecha prenda"/>
+<meta property="og:description" content="Crea prendas únicas con tu imaginación o elige de nuestra galería de diseños exclusivos."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://genmytee.com/"/>
+<meta property="og:site_name" content="genMyTee"/>
+<meta property="og:locale" content="es_ES"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="genMyTee — Tu imaginación, hecha prenda"/>
+<meta name="twitter:description" content="Crea prendas únicas con tu imaginación o elige de nuestra galería de diseños exclusivos."/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/creator.css"/>
+<link rel="stylesheet" href="/css/gallery.css"/>
 </head>
 <body>
 
@@ -25,6 +37,7 @@
     </button>
     <a href="/" class="nav-logo">genMyTee</a>
     <ul class="nav-center">
+      <li><a href="/#galeria">Galería</a></li>
       <li class="active"><a href="/#productos">Prendas</a></li>
       <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
     </ul>
@@ -43,6 +56,7 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <ul class="mobile-nav-list">
+    <li><a href="/#galeria">Galería</a></li>
     <li><a href="/#productos">Prendas</a></li>
     <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
   </ul>
@@ -55,12 +69,15 @@
     <h1 class="hero-title">Tu imaginación,<br><em>hecha prenda</em></h1>
     <p class="hero-desc">Describe lo que imaginas. Nosotros lo convertimos en una prenda única que puedes llevar. Sin límites creativos.</p>
     <div class="hero-cta">
-      <a href="#creador" class="btn-primary">Crear mi prenda</a>
-      <a href="#productos" class="btn-outline">Ver prendas</a>
+      <a href="#galeria" class="btn-primary">Ver diseños</a>
+      <a href="#creador" class="btn-outline">Crear mi prenda</a>
     </div>
   </div>
   <div class="hero-visual">
     <img src="/img/hero.png" alt="Tu imaginación, hecha prenda" class="hero-img" loading="eager">
+    <div class="hero-examples" id="heroExamples">
+      <!-- Populated by gallery.js with curated design thumbnails -->
+    </div>
   </div>
 </section>
 
@@ -94,6 +111,21 @@
       <span>Garantía de satisfacción</span>
     </div>
   </div>
+</div>
+
+<!-- GALLERY — Curated designs -->
+<section class="gallery-section animate-on-scroll" id="galeria" aria-label="Galería de diseños exclusivos">
+  <div class="section-header">
+    <h2 class="section-title">Diseños <em>listos para llevar</em></h2>
+    <p class="gallery-subtitle">Diseños exclusivos creados por nuestro equipo. Elige uno, selecciona tu prenda y talla, y lo tendrás en casa en días.</p>
+  </div>
+  <div class="gallery-filters" id="galleryFilters"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</section>
+
+<!-- Gallery modal overlay -->
+<div class="gallery-modal-overlay" id="galleryModalOverlay">
+  <div class="gallery-modal"></div>
 </div>
 
 <!-- PRODUCTS -->
@@ -577,7 +609,31 @@
   </div>
 </div>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "genMyTee",
+  "url": "https://genmytee.com",
+  "description": "Prendas únicas diseñadas desde tu imaginación. Galería de diseños exclusivos y creador de diseños personalizados.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://genmytee.com/#galeria",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "genMyTee",
+  "url": "https://genmytee.com",
+  "description": "Ropa personalizada con diseños exclusivos y generador de diseños únicos."
+}
+</script>
 <script src="/js/app.js"></script>
+<script src="/js/gallery.js"></script>
 <script src="/js/catalog.js"></script>
 <script src="/js/creator.js"></script>
 

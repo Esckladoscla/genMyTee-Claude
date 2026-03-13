@@ -90,6 +90,86 @@ function renderCartItems() {
   list.querySelectorAll('.cart-item-remove').forEach(btn => {
     btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
   });
+
+  renderBundleBanner();
+}
+
+// ── Bundles / Upsells ──
+let activeBundles = [];
+
+async function loadBundles() {
+  try {
+    const res = await fetch('/api/catalog/bundles');
+    const data = await res.json();
+    if (data.ok) activeBundles = data.bundles || [];
+  } catch {}
+}
+
+function checkBundleUpsell(cart) {
+  if (activeBundles.length === 0 || cart.length === 0) return null;
+
+  // Get catalog products to check categories
+  const catalogProducts = window.getCatalogProducts ? window.getCatalogProducts() : [];
+
+  for (const bundle of activeBundles) {
+    // Count items in qualifying categories
+    const qualifyingItems = cart.filter(item => {
+      const catalogProduct = catalogProducts.find(p => p.product_key === item.product_key);
+      return catalogProduct && bundle.categories.includes(catalogProduct.category);
+    });
+
+    const needed = bundle.min_items - qualifyingItems.length;
+
+    if (needed <= 0) {
+      // Bundle is met — show savings
+      const normalTotal = qualifyingItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+      const savings = normalTotal - bundle.bundle_price_eur;
+      if (savings > 0) {
+        return {
+          type: 'applied',
+          bundle,
+          savings: savings.toFixed(2),
+          message: `${bundle.name}: ahorras ${savings.toFixed(2)}\u20AC`,
+        };
+      }
+    } else if (needed <= 2 && qualifyingItems.length > 0) {
+      // Close to qualifying — upsell
+      return {
+        type: 'upsell',
+        bundle,
+        needed,
+        message: `Añade ${needed} ${needed === 1 ? 'prenda' : 'prendas'} más y consigue el ${bundle.name} por solo ${bundle.bundle_price_eur}\u20AC`,
+      };
+    }
+  }
+
+  return null;
+}
+
+function renderBundleBanner() {
+  const existing = document.getElementById('bundleBanner');
+  if (existing) existing.remove();
+
+  const cart = getCart();
+  const result = checkBundleUpsell(cart);
+  if (!result) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'bundleBanner';
+  banner.style.cssText = 'padding:0.6rem 1rem;font-size:0.72rem;text-align:center;border-bottom:1px solid var(--border)';
+
+  if (result.type === 'applied') {
+    banner.style.background = '#e8f5e9';
+    banner.style.color = '#2e7d32';
+    banner.innerHTML = `&#x2705; ${result.message}`;
+  } else {
+    banner.style.background = '#fff3e0';
+    banner.style.color = '#e65100';
+    banner.innerHTML = `&#x1F381; ${result.message}`;
+  }
+
+  const cartList = document.getElementById('cartItemsList');
+  if (cartList) cartList.parentNode.insertBefore(banner, cartList);
 }
 
 // ── Cart drawer ──
@@ -97,6 +177,7 @@ function openCart() {
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('mainOverlay').classList.add('open');
   renderCartItems();
+  renderBundleBanner();
 }
 
 function closeCart() {
@@ -249,11 +330,44 @@ async function startCheckout() {
   }
 }
 
+// ── Referral tracking ──
+function initReferralTracking() {
+  const params = new URLSearchParams(window.location.search);
+  const refCode = params.get('ref');
+  if (!refCode) return;
+
+  // Store in cookie for checkout
+  try { localStorage.setItem('genmytee_ref', refCode); } catch {}
+
+  // Validate and show banner
+  fetch(`/api/referrals/validate?code=${encodeURIComponent(refCode)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.valid) {
+        showReferralBanner(data.discount_pct);
+      }
+    })
+    .catch(() => {});
+}
+
+function showReferralBanner(discountPct) {
+  const banner = document.createElement('div');
+  banner.className = 'referral-banner';
+  banner.innerHTML = `<span>&#x1F381; Te han invitado &mdash; <strong>${discountPct}% de descuento</strong> en tu primera compra</span>`;
+  document.body.prepend(banner);
+}
+
+function getReferralCode() {
+  try { return localStorage.getItem('genmytee_ref') || null; } catch { return null; }
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   initScrollAnimations();
   initCookieBanner();
+  initReferralTracking();
+  loadBundles();
 
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {

@@ -14,6 +14,14 @@ function loadProducts() {
   return JSON.parse(raw).products;
 }
 
+function loadBundles() {
+  const raw = readFileSync(
+    join(__dirname, "..", "data", "bundles.json"),
+    "utf8"
+  );
+  return JSON.parse(raw).bundles;
+}
+
 function enrichWithLayoutSupport(product, layoutSupportFn) {
   const entry = layoutSupportFn(product.product_key);
   // null = untested (probe rate-limited) → default to true for customizable products
@@ -29,6 +37,7 @@ function enrichWithLayoutSupport(product, layoutSupportFn) {
 export function buildCatalogRouter({
   productsFn = loadProducts,
   layoutSupportFn = getLayoutSupport,
+  bundlesFn = loadBundles,
 } = {}) {
   const router = express.Router();
 
@@ -56,6 +65,15 @@ export function buildCatalogRouter({
       });
     } catch (error) {
       return res.status(500).json({ ok: false, error: "catalog_unavailable" });
+    }
+  });
+
+  router.get("/bundles", (_req, res) => {
+    try {
+      const bundles = bundlesFn().filter((b) => b.active);
+      return res.json({ ok: true, bundles });
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: "bundles_unavailable" });
     }
   });
 

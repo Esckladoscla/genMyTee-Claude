@@ -113,3 +113,39 @@ test("session limit is configurable via env vars", () => {
   assert.equal(afterUnlock.limit, 3); // 1 + 2
   assert.equal(afterUnlock.remaining, 2);
 });
+
+test("IP correlation blocks new session from same IP", () => {
+  const ip = "192.168.1.100";
+  const session1 = "session-ip-1";
+  const session2 = "session-ip-2";
+
+  // Exhaust limit on session1 from this IP
+  for (let i = 0; i < 3; i++) {
+    checkGenerationAllowed(session1, ip);
+    recordSessionGeneration(session1);
+  }
+
+  const blocked1 = checkGenerationAllowed(session1, ip);
+  assert.equal(blocked1.allowed, false);
+
+  // New session (cleared cookies) from same IP should also be blocked
+  const blocked2 = checkGenerationAllowed(session2, ip);
+  assert.equal(blocked2.allowed, false, "New session from same IP should be blocked");
+  assert.equal(blocked2.count, 3, "IP-aggregated count should be 3");
+});
+
+test("different IPs are tracked independently", () => {
+  const session1 = "session-diff-ip-1";
+  const session2 = "session-diff-ip-2";
+
+  // Exhaust limit on IP1
+  for (let i = 0; i < 3; i++) {
+    checkGenerationAllowed(session1, "10.0.0.1");
+    recordSessionGeneration(session1);
+  }
+
+  // Different IP should still be allowed
+  const check = checkGenerationAllowed(session2, "10.0.0.2");
+  assert.equal(check.allowed, true, "Different IP should have fresh limits");
+  assert.equal(check.remaining, 3);
+});

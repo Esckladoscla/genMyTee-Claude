@@ -6,6 +6,8 @@ import ordersRouter from "./routes/orders.js";
 import catalogRouter from "./routes/catalog.js";
 import newsletterRouter from "./routes/newsletter.js";
 import adminRouter from "./routes/admin.js";
+import galleryRouter from "./routes/gallery.js";
+import referralsRouter from "./routes/referrals.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 
@@ -78,6 +80,8 @@ export function createApp() {
   app.use("/api/catalog", catalogRouter);
   app.use("/api/newsletter", newsletterRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api/gallery", galleryRouter);
+  app.use("/api/referrals", referralsRouter);
 
   app.use(express.static(join(__dirname, "public")));
 

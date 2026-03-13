@@ -156,3 +156,39 @@ test("admin/stats rejects without auth", async () => {
     assert.equal(response.status, 401);
   });
 });
+
+test("admin/openai/usage returns usage data with auth", async () => {
+  await withServer(createAdminApp(), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/admin/openai/usage`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${TEST_SECRET}` },
+    });
+
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.ok, true);
+    assert.equal(typeof payload.usage, "object");
+    assert.equal(typeof payload.usage.total_calls, "number");
+  });
+});
+
+test("admin/openai/usage rejects without auth", async () => {
+  await withServer(createAdminApp(), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/admin/openai/usage`, {
+      method: "GET",
+    });
+
+    assert.equal(response.status, 401);
+  });
+});
+
+test("admin auth rejects token with different length (timing-safe)", async () => {
+  await withServer(createAdminApp(), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/admin/ai`, {
+      method: "GET",
+      headers: { Authorization: "Bearer x" },
+    });
+
+    assert.equal(response.status, 401);
+  });
+});
