@@ -21,6 +21,8 @@ const files = [
   "./prompt-cache.test.js",
   "./image-provider.test.js",
   "./service-registry.test.js",
+  "./captcha.test.js",
+  "./image-moderator.test.js",
 ];
 
 for (const file of files) {

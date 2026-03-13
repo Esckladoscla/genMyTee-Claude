@@ -23,6 +23,8 @@ import {
   unlockWithEmail,
 } from "../services/session-limiter.js";
 import { checkBrandBlacklist } from "../services/brand-filter.js";
+import { verifyCaptcha, isCaptchaEnabled, getCaptchaSiteKey } from "../services/captcha.js";
+import { moderateImage } from "../services/image-moderator.js";
 import {
   enqueueGeneration,
   getJobStatus,
@@ -182,6 +184,7 @@ export function buildPreviewRouter({
   const router = express.Router();
   const taskMockupSelectionByKey = new Map();
   const mockupSelectionTtlMs = 6 * 60 * 60 * 1000;
+  const MOCKUP_MAP_MAX_SIZE = 500;
 
   const rememberTaskSelection = (taskKey, selection) => {
     const key = String(taskKey || "").trim();
@@ -192,6 +195,17 @@ export function buildPreviewRouter({
     const limit = Number(selection?.mockupResultLimit);
     const hasLimit = Number.isFinite(limit) && limit > 0;
     if (!indexes.length && !hasLimit) return;
+
+    // Evict oldest entries if map exceeds cap
+    if (taskMockupSelectionByKey.size >= MOCKUP_MAP_MAX_SIZE) {
+      const cutoff = now() - mockupSelectionTtlMs;
+      for (const [k, v] of taskMockupSelectionByKey) {
+        if (v.updatedAt < cutoff || taskMockupSelectionByKey.size >= MOCKUP_MAP_MAX_SIZE) {
+          taskMockupSelectionByKey.delete(k);
+        }
+        if (taskMockupSelectionByKey.size < MOCKUP_MAP_MAX_SIZE * 0.8) break;
+      }
+    }
 
     taskMockupSelectionByKey.set(key, {
       mockupResultIndexes: indexes,
@@ -221,6 +235,15 @@ export function buildPreviewRouter({
 
   // NOTE: /openai/usage moved to routes/admin.js (requires admin auth)
 
+  // Expose captcha config so frontend knows whether to load Turnstile
+  router.get("/captcha-config", (_req, res) => {
+    res.json({
+      ok: true,
+      enabled: isCaptchaEnabled(),
+      site_key: getCaptchaSiteKey(),
+    });
+  });
+
   router.post("/unlock", (req, res) => {
     const { email } = req.body || {};
     let sessionId = parseSessionCookie(req.headers.cookie);
@@ -241,6 +264,16 @@ export function buildPreviewRouter({
     if (rate.limited) {
       res.setHeader("Retry-After", String(rate.retryAfterSeconds));
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
+    }
+
+    // CAPTCHA verification (Cloudflare Turnstile)
+    const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
+    if (!captchaResult.ok) {
+      return res.status(403).json({
+        ok: false,
+        error: "captcha_failed",
+        message: "Verificación anti-bot fallida. Recarga la página e inténtalo de nuevo.",
+      });
     }
 
     // Session-based generation limit
@@ -315,6 +348,20 @@ export function buildPreviewRouter({
       const productionUrl = await uploadImageBufferFn(imageBuffer, {
         folder: "production",
       });
+
+      // Post-generation image moderation (checks the actual image content)
+      const imageModResult = await moderateImage(productionUrl);
+      if (imageModResult.flagged) {
+        logger.warn("[preview] generated image flagged by post-moderation", {
+          categories: imageModResult.categories,
+        });
+        return res.status(422).json({
+          ok: false,
+          error: "image_content_violation",
+          message: "La imagen generada ha sido rechazada por nuestro sistema de moderación. Prueba con otra descripción.",
+          categories: imageModResult.categories,
+        });
+      }
 
       // Apply watermark and upload preview version
       let previewUrl;
@@ -408,6 +455,16 @@ export function buildPreviewRouter({
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
     }
 
+    // CAPTCHA verification (Cloudflare Turnstile)
+    const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
+    if (!captchaResult.ok) {
+      return res.status(403).json({
+        ok: false,
+        error: "captcha_failed",
+        message: "Verificación anti-bot fallida. Recarga la página e inténtalo de nuevo.",
+      });
+    }
+
     let sessionId = parseSessionCookie(req.headers.cookie);
     if (!sessionId) {
       sessionId = generateSessionId();
@@ -499,6 +556,15 @@ export function buildPreviewRouter({
     });
 
     const productionUrl = await uploadImageBufferFn(imageBuffer, { folder: "production" });
+
+    // Post-generation image moderation
+    const imageModResult = await moderateImage(productionUrl);
+    if (imageModResult.flagged) {
+      throw Object.assign(
+        new Error("Generated image flagged by moderation: " + (imageModResult.categories || []).join(", ")),
+        { code: "IMAGE_MODERATION_FLAGGED" }
+      );
+    }
 
     let previewUrl;
     try {

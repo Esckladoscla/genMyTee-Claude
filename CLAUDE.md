@@ -65,6 +65,7 @@ Infrastructure:
 - Cloudflare R2 for image storage
 - Stripe for payments (Checkout Sessions + webhooks)
 - SQLite for order idempotency and newsletter subscribers
+- Plausible for privacy-friendly web analytics
 
 ## Commands
 
@@ -114,6 +115,8 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `prompt-cache.js` — SQLite-backed prompt→image cache with TTL and hit tracking
 - `image-provider.js` — Provider abstraction for image generation (OpenAI default, register fallbacks)
 - `registry.js` — Service registry for all external dependencies (storage, image, fulfillment, payments)
+- `captcha.js` — Cloudflare Turnstile CAPTCHA verification (invisible, configurable via `CAPTCHA_ENABLED`)
+- `image-moderator.js` — Post-generation image moderation using OpenAI omni-moderation (configurable via `IMAGE_MODERATION_ENABLED`)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)

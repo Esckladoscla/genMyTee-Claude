@@ -1,8 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 import express from "express";
-import { getBooleanEnv, getEnv } from "../services/env.js";
+import { getBooleanEnv, getEnv, getDbPath } from "../services/env.js";
 import { getOpenAiUsageSnapshot } from "../services/openai.js";
 import { getHourlyStats } from "../services/generation-tracker.js";
+import { DatabaseSync } from "node:sqlite";
 
 function verifyAdminSecret(req) {
   const secret = getEnv("ADMIN_SECRET");
@@ -85,6 +86,77 @@ export function buildAdminRouter({ logger = console } = {}) {
         failed_calls: usage.failed_calls,
       },
     });
+  });
+
+  // ── Order review panel (F1-15) ──
+
+  router.get("/orders", (_req, res) => {
+    try {
+      const db = new DatabaseSync(getDbPath());
+      const rows = db.prepare(
+        `SELECT * FROM processed_orders ORDER BY created_at DESC LIMIT 100`
+      ).all();
+      db.close();
+      return res.json({ ok: true, orders: rows });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  router.get("/orders/:orderId", (req, res) => {
+    try {
+      const db = new DatabaseSync(getDbPath());
+      const row = db.prepare(
+        `SELECT * FROM processed_orders WHERE order_id = ? LIMIT 1`
+      ).get(req.params.orderId);
+      db.close();
+      if (!row) return res.status(404).json({ ok: false, error: "not_found" });
+      return res.json({ ok: true, order: row });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  router.post("/orders/:orderId/hold", (req, res) => {
+    try {
+      const db = new DatabaseSync(getDbPath());
+      const row = db.prepare(
+        `SELECT * FROM processed_orders WHERE order_id = ? LIMIT 1`
+      ).get(req.params.orderId);
+      if (!row) {
+        db.close();
+        return res.status(404).json({ ok: false, error: "not_found" });
+      }
+      db.prepare(
+        `UPDATE processed_orders SET status = 'held', updated_at = ? WHERE order_id = ?`
+      ).run(new Date().toISOString(), req.params.orderId);
+      db.close();
+      logger.warn(`[admin] Order ${req.params.orderId} put on hold`);
+      return res.json({ ok: true, status: "held" });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  router.post("/orders/:orderId/approve", (req, res) => {
+    try {
+      const db = new DatabaseSync(getDbPath());
+      const row = db.prepare(
+        `SELECT * FROM processed_orders WHERE order_id = ? LIMIT 1`
+      ).get(req.params.orderId);
+      if (!row) {
+        db.close();
+        return res.status(404).json({ ok: false, error: "not_found" });
+      }
+      db.prepare(
+        `UPDATE processed_orders SET status = 'completed', updated_at = ? WHERE order_id = ?`
+      ).run(new Date().toISOString(), req.params.orderId);
+      db.close();
+      logger.warn(`[admin] Order ${req.params.orderId} approved`);
+      return res.json({ ok: true, status: "completed" });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
   });
 
   return router;
