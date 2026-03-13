@@ -199,7 +199,7 @@ function renderGalleryGrid() {
       <div class="gallery-card-img">
         ${design.featured ? '<span class="gallery-card-featured">Destacado</span>' : ''}
         ${design.image_url
-          ? `<img src="${design.image_url}" alt="${escapeHtml(design.title)}" loading="lazy"
+          ? `<img src="${escapeHtml(design.image_url)}" alt="${escapeHtml(design.title)}" loading="lazy"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
           : ''}
         <span class="gallery-placeholder" ${design.image_url ? 'style="display:none"' : ''}>&#x1F3A8;</span>
@@ -242,7 +242,7 @@ async function openDesignModal(design) {
     <button class="gallery-modal-close" id="galleryModalClose">&times;</button>
     <div class="gallery-modal-image">
       ${design.image_url
-        ? `<img src="${design.image_url}" alt="${escapeHtml(design.title)}"
+        ? `<img src="${escapeHtml(design.image_url)}" alt="${escapeHtml(design.title)}"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         : ''}
       <span class="gallery-placeholder" ${design.image_url ? 'style="display:none"' : ''}>&#x1F3A8;</span>
@@ -436,7 +436,7 @@ function renderHeroExamples() {
     tile.className = 'hero-example-tile';
     tile.innerHTML = `
       ${design.image_url
-        ? `<img src="${design.image_url}" alt="${escapeHtml(design.title)}" loading="lazy"
+        ? `<img src="${escapeHtml(design.image_url)}" alt="${escapeHtml(design.title)}" loading="lazy"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         : ''}
       <span class="hero-example-placeholder" ${design.image_url ? 'style="display:none"' : ''}>
