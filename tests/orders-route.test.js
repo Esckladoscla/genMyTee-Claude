@@ -194,7 +194,7 @@ test("orders route processes generic order with direct color/size", async () => 
     assert.equal(receivedPayloads[0].external_id, "genmytee-001");
     assert.equal(receivedPayloads[0].items[0].variant_id, 9960);
     assert.equal(receivedPayloads[0].items[0].quantity, 2);
-    assert.equal(receivedPayloads[0].items[0].files[0].url, "https://cdn.test/previews/design-123.png");
+    assert.equal(receivedPayloads[0].items[0].files[0].url, "https://cdn.test/production/design-123.png");
     assert.equal(receivedPayloads[0].items[0].files[0].placement, "front");
     assert.equal(receivedPayloads[0].recipient.name, "Maria Garcia");
     assert.equal(receivedPayloads[0].recipient.city, "Madrid");

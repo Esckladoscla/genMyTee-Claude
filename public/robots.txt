@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /galeria/
+Allow: /galeria/coleccion/
+
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://genmytee.com/sitemap.xml

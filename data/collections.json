@@ -1,0 +1,103 @@
+{
+  "collections": [
+    {
+      "id": "animales",
+      "name": "Animales",
+      "slug": "animales",
+      "description": "Lobos, tigres, águilas y más. Diseños que capturan la esencia de la naturaleza salvaje.",
+      "emoji": "🐺",
+      "featured": true,
+      "sort_order": 1
+    },
+    {
+      "id": "naturaleza",
+      "name": "Naturaleza",
+      "slug": "naturaleza",
+      "description": "Montañas, bosques y paisajes que inspiran. La belleza del mundo natural en tu prenda.",
+      "emoji": "🏔️",
+      "featured": true,
+      "sort_order": 2
+    },
+    {
+      "id": "arte-oriental",
+      "name": "Arte Oriental",
+      "slug": "arte-oriental",
+      "description": "Samurais, dragones y olas. El arte milenario japonés y oriental en diseños únicos.",
+      "emoji": "🏯",
+      "featured": true,
+      "sort_order": 3
+    },
+    {
+      "id": "cosmos",
+      "name": "Cosmos",
+      "slug": "cosmos",
+      "description": "Galaxias, planetas y constelaciones. Explora el universo desde tu prenda.",
+      "emoji": "🌌",
+      "featured": true,
+      "sort_order": 4
+    },
+    {
+      "id": "botanico",
+      "name": "Botánico",
+      "slug": "botanico",
+      "description": "Flores, plantas y jardines. Diseños florales que nunca pasan de moda.",
+      "emoji": "🌺",
+      "featured": true,
+      "sort_order": 5
+    },
+    {
+      "id": "cultural",
+      "name": "Cultural",
+      "slug": "cultural",
+      "description": "Calaveras mexicanas, patrones africanos y más. El arte de las culturas del mundo.",
+      "emoji": "🎭",
+      "featured": false,
+      "sort_order": 6
+    },
+    {
+      "id": "urbano",
+      "name": "Urbano",
+      "slug": "urbano",
+      "description": "Ciudades, graffiti y neón. El pulso de la vida urbana en diseños modernos.",
+      "emoji": "🌃",
+      "featured": false,
+      "sort_order": 7
+    },
+    {
+      "id": "geometrico",
+      "name": "Geométrico",
+      "slug": "geometrico",
+      "description": "Mandalas, patrones y formas. La belleza de la geometría en diseños hipnóticos.",
+      "emoji": "🔷",
+      "featured": false,
+      "sort_order": 8
+    },
+    {
+      "id": "oceano",
+      "name": "Océano",
+      "slug": "oceano",
+      "description": "Medusas, corales y tortugas. La vida marina en diseños envolventes.",
+      "emoji": "🐠",
+      "featured": false,
+      "sort_order": 9
+    },
+    {
+      "id": "retro",
+      "name": "Retro",
+      "slug": "retro",
+      "description": "Vinilos, motos vintage y más. Nostalgia con estilo propio.",
+      "emoji": "🎸",
+      "featured": false,
+      "sort_order": 10
+    },
+    {
+      "id": "steampunk",
+      "name": "Steampunk",
+      "slug": "steampunk",
+      "description": "Engranajes, robots y máquinas victorianas. El futuro según el pasado.",
+      "emoji": "⚙️",
+      "featured": false,
+      "sort_order": 11
+    }
+  ]
+}

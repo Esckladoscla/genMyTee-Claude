@@ -90,6 +90,86 @@ function renderCartItems() {
   list.querySelectorAll('.cart-item-remove').forEach(btn => {
     btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
   });
+
+  renderBundleBanner();
+}
+
+// ── Bundles / Upsells ──
+let activeBundles = [];
+
+async function loadBundles() {
+  try {
+    const res = await fetch('/api/catalog/bundles');
+    const data = await res.json();
+    if (data.ok) activeBundles = data.bundles || [];
+  } catch {}
+}
+
+function checkBundleUpsell(cart) {
+  if (activeBundles.length === 0 || cart.length === 0) return null;
+
+  // Get catalog products to check categories
+  const catalogProducts = window.getCatalogProducts ? window.getCatalogProducts() : [];
+
+  for (const bundle of activeBundles) {
+    // Count items in qualifying categories
+    const qualifyingItems = cart.filter(item => {
+      const catalogProduct = catalogProducts.find(p => p.product_key === item.product_key);
+      return catalogProduct && bundle.categories.includes(catalogProduct.category);
+    });
+
+    const needed = bundle.min_items - qualifyingItems.length;
+
+    if (needed <= 0) {
+      // Bundle is met — show savings
+      const normalTotal = qualifyingItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+      const savings = normalTotal - bundle.bundle_price_eur;
+      if (savings > 0) {
+        return {
+          type: 'applied',
+          bundle,
+          savings: savings.toFixed(2),
+          message: `${bundle.name}: ahorras ${savings.toFixed(2)}\u20AC`,
+        };
+      }
+    } else if (needed <= 2 && qualifyingItems.length > 0) {
+      // Close to qualifying — upsell
+      return {
+        type: 'upsell',
+        bundle,
+        needed,
+        message: `Añade ${needed} ${needed === 1 ? 'prenda' : 'prendas'} más y consigue el ${bundle.name} por solo ${bundle.bundle_price_eur}\u20AC`,
+      };
+    }
+  }
+
+  return null;
+}
+
+function renderBundleBanner() {
+  const existing = document.getElementById('bundleBanner');
+  if (existing) existing.remove();
+
+  const cart = getCart();
+  const result = checkBundleUpsell(cart);
+  if (!result) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'bundleBanner';
+  banner.style.cssText = 'padding:0.6rem 1rem;font-size:0.72rem;text-align:center;border-bottom:1px solid var(--border)';
+
+  if (result.type === 'applied') {
+    banner.style.background = '#e8f5e9';
+    banner.style.color = '#2e7d32';
+    banner.innerHTML = `&#x2705; ${result.message}`;
+  } else {
+    banner.style.background = '#fff3e0';
+    banner.style.color = '#e65100';
+    banner.innerHTML = `&#x1F381; ${result.message}`;
+  }
+
+  const cartList = document.getElementById('cartItemsList');
+  if (cartList) cartList.parentNode.insertBefore(banner, cartList);
 }
 
 // ── Cart drawer ──
@@ -97,6 +177,7 @@ function openCart() {
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('mainOverlay').classList.add('open');
   renderCartItems();
+  renderBundleBanner();
 }
 
 function closeCart() {
@@ -249,11 +330,163 @@ async function startCheckout() {
   }
 }
 
+// ── Referral tracking ──
+function initReferralTracking() {
+  const params = new URLSearchParams(window.location.search);
+  const refCode = params.get('ref');
+  if (!refCode) return;
+
+  // Store in cookie for checkout
+  try { localStorage.setItem('genmytee_ref', refCode); } catch {}
+
+  // Validate and show banner
+  fetch(`/api/referrals/validate?code=${encodeURIComponent(refCode)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.valid) {
+        showReferralBanner(data.discount_pct);
+      }
+    })
+    .catch(() => {});
+}
+
+function showReferralBanner(discountPct) {
+  const banner = document.createElement('div');
+  banner.className = 'referral-banner';
+  banner.innerHTML = `<span>&#x1F381; Te han invitado &mdash; <strong>${discountPct}% de descuento</strong> en tu primera compra</span>`;
+  document.body.prepend(banner);
+}
+
+function getReferralCode() {
+  try { return localStorage.getItem('genmytee_ref') || null; } catch { return null; }
+}
+
+// ── Gift Cards ──
+let selectedGiftAmount = 75;
+
+function initGiftCards() {
+  const amountBtns = document.querySelectorAll('.gift-amount-btn');
+  const buyBtn = document.getElementById('giftBuyBtn');
+  const valueDisplay = document.getElementById('giftCardValue');
+
+  if (!buyBtn) return;
+
+  amountBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      amountBtns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGiftAmount = parseInt(btn.dataset.amount, 10);
+      if (valueDisplay) valueDisplay.textContent = `\u20AC${selectedGiftAmount}`;
+    });
+  });
+
+  buyBtn.addEventListener('click', async () => {
+    const recipientEmail = document.getElementById('giftRecipientEmail')?.value.trim();
+    const recipientName = document.getElementById('giftRecipientName')?.value.trim();
+    const message = document.getElementById('giftMessage')?.value.trim();
+
+    if (!recipientEmail || !recipientEmail.includes('@')) {
+      showToast('Introduce el email del destinatario');
+      return;
+    }
+
+    buyBtn.disabled = true;
+    buyBtn.textContent = 'Procesando...';
+
+    try {
+      // Create checkout session for gift card
+      const res = await fetch('/api/checkout/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            name: `Tarjeta regalo genMyTee \u20AC${selectedGiftAmount}`,
+            product_key: 'gift-card',
+            size: '',
+            color: '',
+            quantity: 1,
+            price: selectedGiftAmount,
+            image_url: '',
+            slug: 'tarjeta-regalo',
+            is_gift_card: true,
+            gift_card_data: { recipient_email: recipientEmail, recipient_name: recipientName, message },
+          }],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok && data.url) {
+        // Store gift card data for post-purchase processing
+        try {
+          localStorage.setItem('genmytee_gift_pending', JSON.stringify({
+            amount: selectedGiftAmount,
+            recipient_email: recipientEmail,
+            recipient_name: recipientName,
+            message,
+          }));
+        } catch {}
+        window.location.href = data.url;
+      } else {
+        showToast(data.error || 'Error al procesar el pago');
+        buyBtn.disabled = false;
+        buyBtn.textContent = 'Comprar tarjeta regalo';
+      }
+    } catch {
+      showToast('Error de conexión. Inténtalo de nuevo.');
+      buyBtn.disabled = false;
+      buyBtn.textContent = 'Comprar tarjeta regalo';
+    }
+  });
+}
+
+// ── Gift Card Redemption (in cart) ──
+function initGiftCardRedemption() {
+  // Add redemption UI to cart footer if it exists
+  const cartFooter = document.getElementById('cartFooter');
+  if (!cartFooter || document.getElementById('giftCodeRow')) return;
+
+  const row = document.createElement('div');
+  row.id = 'giftCodeRow';
+  row.style.cssText = 'display:flex;gap:0.4rem;margin-bottom:0.6rem;';
+  row.innerHTML = `
+    <input type="text" id="giftCodeInput" placeholder="Código regalo" style="flex:1;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff;font-size:0.75rem;font-family:inherit;" />
+    <button id="giftCodeApply" style="padding:0.4rem 0.8rem;border-radius:6px;border:none;background:var(--accent,#7c5cff);color:#fff;font-size:0.72rem;cursor:pointer;font-family:inherit;">Aplicar</button>
+  `;
+  const shippingNote = cartFooter.querySelector('.cart-shipping-note');
+  if (shippingNote) {
+    cartFooter.insertBefore(row, shippingNote);
+  } else {
+    cartFooter.prepend(row);
+  }
+
+  document.getElementById('giftCodeApply')?.addEventListener('click', async () => {
+    const code = document.getElementById('giftCodeInput')?.value.trim();
+    if (!code) { showToast('Introduce un código de regalo'); return; }
+    try {
+      const res = await fetch(`/api/gift-cards/validate?code=${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if (data.ok && data.valid) {
+        showToast(`Tarjeta válida: ${data.amount_eur}\u20AC de descuento`);
+        try { localStorage.setItem('genmytee_gift_code', code); } catch {}
+      } else {
+        const msgs = { not_found: 'Código no válido', already_redeemed: 'Ya ha sido canjeada', expired: 'Código caducado' };
+        showToast(msgs[data.error] || 'Código no válido');
+      }
+    } catch {
+      showToast('Error al validar el código');
+    }
+  });
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   initScrollAnimations();
   initCookieBanner();
+  initReferralTracking();
+  initGiftCards();
+  initGiftCardRedemption();
+  loadBundles();
 
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {

@@ -4,10 +4,23 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>genMyTee — Tu imaginación, hecha prenda</title>
-<meta name="description" content="Diseña prendas únicas con tu imaginación. Describe tu diseño, previsualízalo y recíbelo en casa."/>
+<meta name="description" content="Diseña prendas únicas con tu imaginación o elige entre nuestra galería de diseños exclusivos. Describe tu diseño, previsualízalo y recíbelo en casa."/>
+<meta name="keywords" content="camisetas personalizadas, ropa personalizada, diseño único, print on demand, camiseta diseño propio, regalos personalizados, galería diseños"/>
+<link rel="canonical" href="https://genmytee.com/"/>
+<meta property="og:title" content="genMyTee — Tu imaginación, hecha prenda"/>
+<meta property="og:description" content="Crea prendas únicas con tu imaginación o elige de nuestra galería de diseños exclusivos."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://genmytee.com/"/>
+<meta property="og:site_name" content="genMyTee"/>
+<meta property="og:locale" content="es_ES"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="genMyTee — Tu imaginación, hecha prenda"/>
+<meta name="twitter:description" content="Crea prendas únicas con tu imaginación o elige de nuestra galería de diseños exclusivos."/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/creator.css"/>
+<link rel="stylesheet" href="/css/gallery.css"/>
+<link rel="stylesheet" href="/css/auth.css"/>
 </head>
 <body>
 
@@ -25,7 +38,9 @@
     </button>
     <a href="/" class="nav-logo">genMyTee</a>
     <ul class="nav-center">
+      <li><a href="/#galeria">Galería</a></li>
       <li class="active"><a href="/#productos">Prendas</a></li>
+      <li><a href="/#tarjetas-regalo">Regalos</a></li>
       <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
     </ul>
     <div class="nav-actions">
@@ -43,7 +58,9 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <ul class="mobile-nav-list">
+    <li><a href="/#galeria">Galería</a></li>
     <li><a href="/#productos">Prendas</a></li>
+    <li><a href="/#tarjetas-regalo">Regalos</a></li>
     <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
   </ul>
 </div>
@@ -55,12 +72,15 @@
     <h1 class="hero-title">Tu imaginación,<br><em>hecha prenda</em></h1>
     <p class="hero-desc">Describe lo que imaginas. Nosotros lo convertimos en una prenda única que puedes llevar. Sin límites creativos.</p>
     <div class="hero-cta">
-      <a href="#creador" class="btn-primary">Crear mi prenda</a>
-      <a href="#productos" class="btn-outline">Ver prendas</a>
+      <a href="#galeria" class="btn-primary">Ver diseños</a>
+      <a href="#creador" class="btn-outline">Crear mi prenda</a>
     </div>
   </div>
   <div class="hero-visual">
     <img src="/img/hero.png" alt="Tu imaginación, hecha prenda" class="hero-img" loading="eager">
+    <div class="hero-examples" id="heroExamples">
+      <!-- Populated by gallery.js with curated design thumbnails -->
+    </div>
   </div>
 </section>
 
@@ -94,6 +114,21 @@
       <span>Garantía de satisfacción</span>
     </div>
   </div>
+</div>
+
+<!-- GALLERY — Curated designs -->
+<section class="gallery-section animate-on-scroll" id="galeria" aria-label="Galería de diseños exclusivos">
+  <div class="section-header">
+    <h2 class="section-title">Diseños <em>listos para llevar</em></h2>
+    <p class="gallery-subtitle">Diseños exclusivos creados por nuestro equipo. Elige uno, selecciona tu prenda y talla, y lo tendrás en casa en días.</p>
+  </div>
+  <div class="gallery-filters" id="galleryFilters"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</section>
+
+<!-- Gallery modal overlay -->
+<div class="gallery-modal-overlay" id="galleryModalOverlay">
+  <div class="gallery-modal"></div>
 </div>
 
 <!-- PRODUCTS -->
@@ -269,6 +304,10 @@
           <textarea class="prompt-input" id="promptInput"
             placeholder="Ej: Un zorro geométrico mirando la luna llena, colores tierra, estilo minimalista nórdico..."
             maxlength="200"></textarea>
+          <div class="prompt-tips">
+            <span class="prompt-tip-icon">&#x1F4A1;</span>
+            <span>Describe el estilo, colores y composici&#243;n. Evita pedir texto en la imagen (la IA no lo reproduce bien).</span>
+          </div>
         </div>
 
         <!-- PROMPT CHIPS -->
@@ -279,9 +318,22 @@
           <button class="prompt-chip" data-prompt="Constelaciones y luna, estilo grabado celestial">&#x1F319; Constelaciones</button>
           <button class="prompt-chip" data-prompt="Ola oceánica, estilo ukiyo-e japonés moderno">&#x1F30A; Ola japonesa</button>
           <button class="prompt-chip" data-prompt="Lobo geométrico en triángulos, estilo low poly">&#x1F43A; Lobo geométrico</button>
+          <button class="prompt-chip" data-prompt="Cactus y desierto al atardecer, paleta cálida minimalista">&#x1F335; Desierto c&#225;lido</button>
+          <button class="prompt-chip" data-prompt="Astronauta flotando entre planetas, estilo retro sci-fi">&#x1F680; Astronauta retro</button>
+          <button class="prompt-chip" data-prompt="Calavera mexicana con flores, estilo d&#237;a de muertos colorido">&#x1F480; Calavera mexicana</button>
+          <button class="prompt-chip" data-prompt="Gato siamés durmiendo, línea fina estilo tattoo">&#x1F408; Gato tattoo</button>
+          <button class="prompt-chip" data-prompt="Skyline de ciudad futurista, neón y lluvia, estilo cyberpunk">&#x1F303; Ciudad cyberpunk</button>
+          <button class="prompt-chip" data-prompt="Mandala geométrico sagrado, líneas doradas sobre negro">&#x2728; Mandala dorado</button>
+        </div>
+
+        <!-- PRICE HINT (visible before generating) -->
+        <div class="price-hint" id="priceHint">
+          <span class="price-hint-label">Precio de tu prenda:</span>
+          <span class="price-hint-value" id="priceHintValue">€39.00</span>
         </div>
 
         <!-- GENERATE BUTTON -->
+        <div id="turnstile-container" style="display:none"></div>
         <button class="generate-btn" id="generateBtn" disabled>
           <span class="btn-text" id="generateBtnText">&#x2726; Generar mi diseño único</span>
           <span class="spinner"></span>
@@ -355,6 +407,11 @@
           <span class="creator-price" id="creatorPrice">&#x20AC;39.00</span>
         </div>
 
+        <div class="delivery-info">
+          <span class="delivery-info-icon">&#x1F4E6;</span>
+          <span>Env&#237;o en 10-15 d&#237;as laborables. Producci&#243;n bajo demanda.</span>
+        </div>
+
         <div class="panel-add-row">
           <div class="panel-qty">
             <button class="panel-qty-btn" id="qtyMinus">&#x2212;</button>
@@ -365,8 +422,8 @@
             Añadir al carrito
           </button>
         </div>
-        <p style="font-size:0.62rem;color:rgba(255,255,255,0.2);margin-top:0.6rem;text-align:center">
-          Diseño generado con inteligencia artificial - Impresión artesanal
+        <p class="print-disclaimer">
+          Los colores y detalles del producto impreso pueden variar ligeramente respecto a la vista previa digital.
         </p>
       </div>
     </div>
@@ -474,6 +531,37 @@
   </div>
 </section>
 
+<!-- GIFT CARDS -->
+<section class="gift-card-section animate-on-scroll" id="tarjetas-regalo">
+  <div class="gift-card-inner">
+    <div class="gift-card-info">
+      <div class="gift-card-eyebrow">El regalo perfecto</div>
+      <h2 class="section-title">Tarjetas <em>regalo</em></h2>
+      <p class="gift-card-desc">Regala creatividad. El destinatario podrá elegir su prenda y diseño favorito, o crear uno completamente personalizado.</p>
+      <div class="gift-card-amounts" id="giftCardAmounts">
+        <button class="gift-amount-btn" data-amount="25">&euro;25</button>
+        <button class="gift-amount-btn" data-amount="50">&euro;50</button>
+        <button class="gift-amount-btn selected" data-amount="75">&euro;75</button>
+        <button class="gift-amount-btn" data-amount="100">&euro;100</button>
+      </div>
+      <div class="gift-card-form">
+        <input class="gift-input" id="giftRecipientEmail" type="email" placeholder="Email del destinatario" />
+        <input class="gift-input" id="giftRecipientName" type="text" placeholder="Nombre del destinatario (opcional)" />
+        <textarea class="gift-input gift-message" id="giftMessage" placeholder="Tu mensaje personal (opcional)" maxlength="500"></textarea>
+      </div>
+      <button class="gift-buy-btn" id="giftBuyBtn">Comprar tarjeta regalo</button>
+      <p class="gift-note">Válida durante 1 año. Se envía por email al instante.</p>
+    </div>
+    <div class="gift-card-visual">
+      <div class="gift-card-preview">
+        <div class="gift-card-brand">genMyTee</div>
+        <div class="gift-card-value" id="giftCardValue">&euro;75</div>
+        <div class="gift-card-subtitle">Tarjeta regalo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- NEWSLETTER -->
 <section class="newsletter animate-on-scroll">
   <p class="nl-eyebrow">Únete a genMyTee</p>
@@ -488,7 +576,7 @@
 
 <!-- COOKIE BANNER -->
 <div class="cookie-banner" id="cookieBanner">
-  <p class="cookie-text">Usamos cookies para mejorar tu experiencia. <a href="#">Más información</a>.</p>
+  <p class="cookie-text">Usamos cookies para mejorar tu experiencia. <a href="/cookies.html">Más información</a>.</p>
   <div class="cookie-actions">
     <button class="cookie-decline" onclick="dismissCookie()">Solo esenciales</button>
     <button class="cookie-accept" onclick="dismissCookie()">Aceptar</button>
@@ -508,15 +596,17 @@
         <li><a href="/order-status.html">Seguir pedido</a></li>
         <li><a href="#">Devoluciones</a></li>
         <li><a href="#">Guía de tallas</a></li>
+        <li><a href="/#tarjetas-regalo">Tarjetas regalo</a></li>
+        <li><a href="/mi-cuenta.html">Mi cuenta</a></li>
         <li><a href="#">Contacto</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h4>Legal</h4>
       <ul>
-        <li><a href="#">Privacidad</a></li>
-        <li><a href="#">Cookies</a></li>
-        <li><a href="#">Términos</a></li>
+        <li><a href="/terminos.html">Términos y Condiciones</a></li>
+        <li><a href="/privacidad.html">Privacidad</a></li>
+        <li><a href="/cookies.html">Cookies</a></li>
       </ul>
     </div>
   </div>
@@ -550,12 +640,38 @@
       <span class="cart-subtotal-label">Subtotal</span>
       <span class="cart-subtotal-value" id="cartTotal">&#x20AC;0.00</span>
     </div>
-    <div class="cart-shipping-note">Envío calculado en el checkout</div>
+    <div class="cart-shipping-note">Env&#237;o calculado en el checkout</div>
+    <div class="cart-delivery-note">&#x1F4E6; Entrega estimada: 10-15 d&#237;as laborables</div>
     <button class="checkout-btn" id="checkoutBtn">Finalizar compra</button>
   </div>
 </div>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "genMyTee",
+  "url": "https://genmytee.com",
+  "description": "Prendas únicas diseñadas desde tu imaginación. Galería de diseños exclusivos y creador de diseños personalizados.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://genmytee.com/#galeria",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "genMyTee",
+  "url": "https://genmytee.com",
+  "description": "Ropa personalizada con diseños exclusivos y generador de diseños únicos."
+}
+</script>
 <script src="/js/app.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/gallery.js"></script>
 <script src="/js/catalog.js"></script>
 <script src="/js/creator.js"></script>
 

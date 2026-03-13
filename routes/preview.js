@@ -11,9 +11,29 @@ import { uploadImageBuffer } from "../services/storage.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
 import { resolveVariantId } from "../services/variants.js";
 import { generateMockupForVariant, getMockupTask } from "../services/printful.js";
-
-const DEFAULT_RATE_LIMIT_MAX = 10;
-const DEFAULT_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+import { consumeRateLimit } from "../services/rate-limiter.js";
+import { recordGeneration } from "../services/generation-tracker.js";
+import { applyWatermark } from "../services/watermark.js";
+import {
+  parseSessionCookie,
+  generateSessionId,
+  buildSessionCookie,
+  checkGenerationAllowed,
+  recordSessionGeneration,
+  unlockWithEmail,
+} from "../services/session-limiter.js";
+import { checkBrandBlacklist } from "../services/brand-filter.js";
+import { verifyCaptcha, isCaptchaEnabled, getCaptchaSiteKey } from "../services/captcha.js";
+import { moderateImage } from "../services/image-moderator.js";
+import { validateSession, parseAuthCookie, getAuthGenerationLimit, getUserGenerationCount, incrementUserGenerationCount } from "../services/auth.js";
+import { saveDesign } from "../services/design-history.js";
+import {
+  enqueueGeneration,
+  getJobStatus,
+  getQueueStats,
+  registerProcessor,
+} from "../services/generation-queue.js";
+import { getCachedImage, cacheImage } from "../services/prompt-cache.js";
 const LAYOUT_SCALE_MIN = 0.30;
 const LAYOUT_SCALE_MAX = 1.35;
 const LAYOUT_OFFSET_MIN = -100;
@@ -123,28 +143,26 @@ function parseOptionalPositiveInteger(input) {
   return Math.floor(parsed);
 }
 
-function buildRateLimiter({ maxRequests, windowMs, now }) {
+export function buildInMemoryRateLimiter({ maxRequests = 10, windowMs = 300000, now = () => Date.now() } = {}) {
   const buckets = new Map();
 
-  return {
-    consume(ip) {
-      const nowMs = now();
-      const cutoff = nowMs - windowMs;
-      const current = (buckets.get(ip) || []).filter((timestamp) => timestamp > cutoff);
+  return (ip) => {
+    const nowMs = now();
+    const cutoff = nowMs - windowMs;
+    const current = (buckets.get(ip) || []).filter((timestamp) => timestamp > cutoff);
 
-      if (current.length >= maxRequests) {
-        buckets.set(ip, current);
-        const retryAfterMs = Math.max(1, windowMs - (nowMs - current[0]));
-        return {
-          limited: true,
-          retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
-        };
-      }
-
-      current.push(nowMs);
+    if (current.length >= maxRequests) {
       buckets.set(ip, current);
-      return { limited: false, retryAfterSeconds: 0 };
-    },
+      const retryAfterMs = Math.max(1, windowMs - (nowMs - current[0]));
+      return {
+        limited: true,
+        retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
+      };
+    }
+
+    current.push(nowMs);
+    buckets.set(ip, current);
+    return { limited: false, retryAfterSeconds: 0 };
   };
 }
 
@@ -155,15 +173,20 @@ export function buildPreviewRouter({
   resolveVariantIdFn = resolveVariantId,
   generateMockupForVariantFn = generateMockupForVariant,
   getMockupTaskFn = getMockupTask,
+  consumeRateLimitFn = consumeRateLimit,
+  recordGenerationFn = recordGeneration,
+  applyWatermarkFn = applyWatermark,
+  checkGenerationAllowedFn = checkGenerationAllowed,
+  recordSessionGenerationFn = recordSessionGeneration,
+  unlockWithEmailFn = unlockWithEmail,
+  checkBrandBlacklistFn = checkBrandBlacklist,
   now = () => Date.now(),
-  maxRequests = DEFAULT_RATE_LIMIT_MAX,
-  windowMs = DEFAULT_RATE_LIMIT_WINDOW_MS,
   logger = console,
 } = {}) {
   const router = express.Router();
-  const limiter = buildRateLimiter({ maxRequests, windowMs, now });
   const taskMockupSelectionByKey = new Map();
   const mockupSelectionTtlMs = 6 * 60 * 60 * 1000;
+  const MOCKUP_MAP_MAX_SIZE = 500;
 
   const rememberTaskSelection = (taskKey, selection) => {
     const key = String(taskKey || "").trim();
@@ -174,6 +197,17 @@ export function buildPreviewRouter({
     const limit = Number(selection?.mockupResultLimit);
     const hasLimit = Number.isFinite(limit) && limit > 0;
     if (!indexes.length && !hasLimit) return;
+
+    // Evict oldest entries if map exceeds cap
+    if (taskMockupSelectionByKey.size >= MOCKUP_MAP_MAX_SIZE) {
+      const cutoff = now() - mockupSelectionTtlMs;
+      for (const [k, v] of taskMockupSelectionByKey) {
+        if (v.updatedAt < cutoff || taskMockupSelectionByKey.size >= MOCKUP_MAP_MAX_SIZE) {
+          taskMockupSelectionByKey.delete(k);
+        }
+        if (taskMockupSelectionByKey.size < MOCKUP_MAP_MAX_SIZE * 0.8) break;
+      }
+    }
 
     taskMockupSelectionByKey.set(key, {
       mockupResultIndexes: indexes,
@@ -201,21 +235,84 @@ export function buildPreviewRouter({
     };
   };
 
-  router.get("/openai/usage", (req, res) => {
-    const rawLimit = Number(req.query?.limit);
-    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(500, Math.floor(rawLimit))) : 100;
-    return res.json({
+  // NOTE: /openai/usage moved to routes/admin.js (requires admin auth)
+
+  // Expose captcha config so frontend knows whether to load Turnstile
+  router.get("/captcha-config", (_req, res) => {
+    res.json({
       ok: true,
-      usage: getOpenAiUsageSnapshot({ limit }),
+      enabled: isCaptchaEnabled(),
+      site_key: getCaptchaSiteKey(),
     });
+  });
+
+  router.post("/unlock", (req, res) => {
+    const { email } = req.body || {};
+    let sessionId = parseSessionCookie(req.headers.cookie);
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
+    }
+    const result = unlockWithEmailFn(sessionId, email);
+    if (!result.ok) {
+      return res.status(422).json({ ok: false, error: result.error });
+    }
+    return res.json({ ok: true, remaining: result.remaining, limit: result.limit });
   });
 
   router.post("/image", async (req, res) => {
     const clientIp = getClientIp(req);
-    const rate = limiter.consume(clientIp);
+    const rate = consumeRateLimitFn(clientIp);
     if (rate.limited) {
       res.setHeader("Retry-After", String(rate.retryAfterSeconds));
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
+    }
+
+    // CAPTCHA verification (Cloudflare Turnstile)
+    const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
+    if (!captchaResult.ok) {
+      return res.status(403).json({
+        ok: false,
+        error: "captcha_failed",
+        message: "Verificación anti-bot fallida. Recarga la página e inténtalo de nuevo.",
+      });
+    }
+
+    // Session-based generation limit
+    let sessionId = parseSessionCookie(req.headers.cookie);
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
+    }
+
+    // Auth-aware generation limit: logged-in users get a higher cap
+    const authToken = parseAuthCookie(req.headers.cookie);
+    const authUser = authToken ? validateSession(authToken) : null;
+
+    if (authUser) {
+      const authLimit = getAuthGenerationLimit();
+      const userCount = getUserGenerationCount(authUser.id);
+      if (userCount >= authLimit) {
+        return res.status(403).json({
+          ok: false,
+          error: "generation_limit_reached",
+          remaining: 0,
+          limit: authLimit,
+          authenticated: true,
+        });
+      }
+    } else {
+      const sessionCheck = checkGenerationAllowedFn(sessionId, clientIp);
+      if (!sessionCheck.allowed) {
+        return res.status(403).json({
+          ok: false,
+          error: "generation_limit_reached",
+          remaining: 0,
+          limit: sessionCheck.limit,
+          needs_email: sessionCheck.needs_email,
+          needs_login: true,
+        });
+      }
     }
 
     try {
@@ -228,6 +325,30 @@ export function buildPreviewRouter({
           ok: false,
           error: "ai_disabled",
           message: "AI generation is disabled (AI_ENABLED=false)",
+        });
+      }
+
+      // Brand/IP blacklist check (before OpenAI call to save API cost)
+      const brandCheck = checkBrandBlacklistFn(normalizedPrompt);
+      if (brandCheck.blocked) {
+        logger.log("[preview] prompt blocked by brand filter", { brand: brandCheck.brand });
+        return res.status(422).json({
+          ok: false,
+          error: "brand_blocked",
+          message: "Tu diseño no puede incluir marcas registradas o personajes con copyright. Prueba con una descripción original.",
+        });
+      }
+
+      // Check prompt cache before calling OpenAI
+      const cached = getCachedImage(normalizedPrompt);
+      if (cached.hit) {
+        recordGenerationFn({ logger });
+        recordSessionGenerationFn(sessionId);
+        return res.json({
+          ok: true,
+          image_url: cached.image_url,
+          moderation: { flagged: false },
+          cached: true,
         });
       }
 
@@ -244,13 +365,68 @@ export function buildPreviewRouter({
         size: getEnv("AI_IMAGE_SIZE", { defaultValue: "auto" }),
       });
 
-      const imageUrl = await uploadImageBufferFn(imageBuffer, {
-        folder: "previews",
+      // Upload clean image for production use (Printful orders)
+      const productionUrl = await uploadImageBufferFn(imageBuffer, {
+        folder: "production",
       });
+
+      // Post-generation image moderation (checks the actual image content)
+      const imageModResult = await moderateImage(productionUrl);
+      if (imageModResult.flagged) {
+        logger.warn("[preview] generated image flagged by post-moderation", {
+          categories: imageModResult.categories,
+        });
+        return res.status(422).json({
+          ok: false,
+          error: "image_content_violation",
+          message: "La imagen generada ha sido rechazada por nuestro sistema de moderación. Prueba con otra descripción.",
+          categories: imageModResult.categories,
+        });
+      }
+
+      // Apply watermark and upload preview version
+      let previewUrl;
+      try {
+        const watermarkedBuffer = await applyWatermarkFn(imageBuffer);
+        previewUrl = await uploadImageBufferFn(watermarkedBuffer, {
+          folder: "previews",
+          filename: productionUrl.split("/").pop(),
+        });
+      } catch (wmError) {
+        logger.warn("[preview] watermark failed, using clean image as preview", {
+          message: wmError?.message,
+        });
+        previewUrl = await uploadImageBufferFn(imageBuffer, {
+          folder: "previews",
+          filename: productionUrl.split("/").pop(),
+        });
+      }
+
+      recordGenerationFn({ logger });
+      recordSessionGenerationFn(sessionId);
+
+      // Track generation for authenticated user
+      if (authUser) {
+        incrementUserGenerationCount(authUser.id);
+      }
+
+      // Save design to history
+      try {
+        saveDesign({
+          userId: authUser?.id || null,
+          sessionId,
+          prompt: normalizedPrompt,
+          previewUrl,
+          productionUrl,
+        });
+      } catch (_) { /* best-effort */ }
+
+      // Cache the result for future identical prompts
+      cacheImage(normalizedPrompt, previewUrl);
 
       return res.json({
         ok: true,
-        image_url: imageUrl,
+        image_url: previewUrl,
         moderation: { flagged: false },
       });
     } catch (error) {
@@ -305,6 +481,143 @@ export function buildPreviewRouter({
       });
       return res.status(500).json({ ok: false, error: "Internal error" });
     }
+  });
+
+  // Async generation — enqueue job and return immediately
+  router.post("/image/async", async (req, res) => {
+    const clientIp = getClientIp(req);
+    const rate = consumeRateLimitFn(clientIp);
+    if (rate.limited) {
+      res.setHeader("Retry-After", String(rate.retryAfterSeconds));
+      return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
+    }
+
+    // CAPTCHA verification (Cloudflare Turnstile)
+    const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
+    if (!captchaResult.ok) {
+      return res.status(403).json({
+        ok: false,
+        error: "captcha_failed",
+        message: "Verificación anti-bot fallida. Recarga la página e inténtalo de nuevo.",
+      });
+    }
+
+    let sessionId = parseSessionCookie(req.headers.cookie);
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
+    }
+
+    const sessionCheck = checkGenerationAllowedFn(sessionId, clientIp);
+    if (!sessionCheck.allowed) {
+      return res.status(403).json({
+        ok: false,
+        error: "generation_limit_reached",
+        remaining: 0,
+        limit: sessionCheck.limit,
+        needs_email: sessionCheck.needs_email,
+      });
+    }
+
+    try {
+      const { prompt } = req.body || {};
+      const normalizedPrompt = normalizePrompt(prompt);
+
+      const aiEnabled = getBooleanEnv("AI_ENABLED", { defaultValue: true });
+      if (!aiEnabled) {
+        return res.status(503).json({ ok: false, error: "ai_disabled" });
+      }
+
+      const brandCheck = checkBrandBlacklistFn(normalizedPrompt);
+      if (brandCheck.blocked) {
+        return res.status(422).json({
+          ok: false,
+          error: "brand_blocked",
+          message: "Tu diseño no puede incluir marcas registradas o personajes con copyright.",
+        });
+      }
+
+      // Enqueue — moderation + generation happens in the background processor
+      const job = enqueueGeneration({
+        prompt: normalizedPrompt,
+        sessionId,
+        clientIp,
+      });
+
+      recordSessionGenerationFn(sessionId);
+      recordGenerationFn({ logger });
+
+      return res.json({
+        ok: true,
+        job_id: job.job_id,
+        status: job.status,
+        position: job.position,
+      });
+    } catch (error) {
+      if (error?.code === "INVALID_PROMPT") {
+        return res.status(422).json({
+          ok: false,
+          error: error.message,
+          constraints: { min_length: PROMPT_MIN_LENGTH, max_length: PROMPT_MAX_LENGTH },
+        });
+      }
+      logger.error("[preview] async enqueue failed", { message: error?.message });
+      return res.status(500).json({ ok: false, error: "Internal error" });
+    }
+  });
+
+  // Poll job status
+  router.get("/image/status", (req, res) => {
+    const jobId = String(req.query?.job_id || "").trim();
+    if (!jobId) {
+      return res.status(422).json({ ok: false, error: "job_id is required" });
+    }
+
+    const job = getJobStatus(jobId);
+    if (!job) {
+      return res.status(404).json({ ok: false, error: "job_not_found" });
+    }
+
+    return res.json({ ok: true, ...job });
+  });
+
+  // Register the async processor (moderation + generation + upload)
+  registerProcessor(async (prompt) => {
+    const moderation = await moderatePromptFn(prompt);
+    if (moderation.flagged) {
+      throw Object.assign(new Error("Prompt rejected by moderation"), { code: "MODERATION_FLAGGED" });
+    }
+
+    const imageBuffer = await generateImageFromPromptFn(prompt, {
+      size: getEnv("AI_IMAGE_SIZE", { defaultValue: "auto" }),
+    });
+
+    const productionUrl = await uploadImageBufferFn(imageBuffer, { folder: "production" });
+
+    // Post-generation image moderation
+    const imageModResult = await moderateImage(productionUrl);
+    if (imageModResult.flagged) {
+      throw Object.assign(
+        new Error("Generated image flagged by moderation: " + (imageModResult.categories || []).join(", ")),
+        { code: "IMAGE_MODERATION_FLAGGED" }
+      );
+    }
+
+    let previewUrl;
+    try {
+      const watermarkedBuffer = await applyWatermarkFn(imageBuffer);
+      previewUrl = await uploadImageBufferFn(watermarkedBuffer, {
+        folder: "previews",
+        filename: productionUrl.split("/").pop(),
+      });
+    } catch (_) {
+      previewUrl = await uploadImageBufferFn(imageBuffer, {
+        folder: "previews",
+        filename: productionUrl.split("/").pop(),
+      });
+    }
+
+    return { image_url: previewUrl };
   });
 
   router.post("/mockup", async (req, res) => {

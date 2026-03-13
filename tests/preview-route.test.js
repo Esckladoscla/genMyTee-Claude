@@ -1,8 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import express from "express";
-import { buildPreviewRouter } from "../routes/preview.js";
+import { buildPreviewRouter, buildInMemoryRateLimiter } from "../routes/preview.js";
 import { withServer } from "./helpers/http.js";
+
+function testRouter(overrides = {}) {
+  return buildPreviewRouter({
+    consumeRateLimitFn: buildInMemoryRateLimiter(),
+    recordGenerationFn: () => {},
+    applyWatermarkFn: async (buf) => buf,
+    checkGenerationAllowedFn: () => ({ allowed: true, count: 0, limit: 99, remaining: 99, needs_email: false }),
+    recordSessionGenerationFn: () => {},
+    unlockWithEmailFn: (_, email) => (email?.includes("@") ? { ok: true, remaining: 5, limit: 8 } : { ok: false, error: "email_invalid" }),
+    checkBrandBlacklistFn: () => ({ blocked: false }),
+    ...overrides,
+  });
+}
 
 function createPreviewApp(router) {
   const app = express();
@@ -12,7 +25,7 @@ function createPreviewApp(router) {
 }
 
 test("preview/image returns image url for valid prompt", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => Buffer.from("png"),
     uploadImageBufferFn: async () => "https://cdn.test/previews/sample.png",
@@ -40,7 +53,7 @@ test("preview/image returns image url for valid prompt", async () => {
 test("preview/image blocks moderated prompt", async () => {
   let generateCalls = 0;
 
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: true }),
     generateImageFromPromptFn: async () => {
       generateCalls += 1;
@@ -67,7 +80,7 @@ test("preview/image blocks moderated prompt", async () => {
 });
 
 test("preview/image enforces rate limit", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => Buffer.from("png"),
     uploadImageBufferFn: async () => "https://cdn.test/previews/rate.png",
@@ -97,7 +110,7 @@ test("preview/image enforces rate limit", async () => {
 });
 
 test("preview/image returns 429 when OpenAI is rate-limited", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => {
       const error = new Error("429 Too Many Requests");
@@ -124,7 +137,7 @@ test("preview/image returns 429 when OpenAI is rate-limited", async () => {
 });
 
 test("preview/image returns 503 when OpenAI fails with transient terminated error", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => {
       throw new Error("terminated");
@@ -149,7 +162,7 @@ test("preview/image returns 503 when OpenAI fails with transient terminated erro
 });
 
 test("preview/image returns 422 with policy message for OpenAI safety rejection", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => {
       const error = new Error(
@@ -181,7 +194,7 @@ test("preview/image returns 422 with policy message for OpenAI safety rejection"
 });
 
 test("preview/image returns 422 with copyright message for IP policy rejection", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => ({ flagged: false }),
     generateImageFromPromptFn: async () => {
       const error = new Error(
@@ -212,7 +225,7 @@ test("preview/image returns 422 with copyright message for IP policy rejection",
 });
 
 test("preview/mockup returns completed status with mockup url", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async () => ({
       status: "completed",
@@ -245,7 +258,7 @@ test("preview/mockup returns completed status with mockup url", async () => {
 test("preview/mockup forwards normalized layout controls to Printful generator", async () => {
   let capturedOptions = null;
 
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async (_variantId, _imageUrl, options) => {
       capturedOptions = options;
@@ -286,7 +299,7 @@ test("preview/mockup forwards normalized layout controls to Printful generator",
 test("preview/mockup clamps below-minimum scale to 0.30", async () => {
   let capturedOptions = null;
 
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async (_variantId, _imageUrl, options) => {
       capturedOptions = options;
@@ -323,7 +336,7 @@ test("preview/mockup clamps below-minimum scale to 0.30", async () => {
 });
 
 test("preview/mockup validates required image_url", async () => {
-  const router = buildPreviewRouter();
+  const router = testRouter();
 
   await withServer(createPreviewApp(router), async (baseUrl) => {
     const response = await fetch(`${baseUrl}/api/preview/mockup`, {
@@ -342,7 +355,7 @@ test("preview/mockup validates required image_url", async () => {
 });
 
 test("preview/mockup returns skipped when variant cannot be resolved", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => null,
     generateMockupForVariantFn: async () => {
       throw new Error("Should not be called when variant is unresolved");
@@ -371,7 +384,7 @@ test("preview/mockup returns skipped when variant cannot be resolved", async () 
 });
 
 test("preview/mockup returns failed status when mockup service errors", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async () => {
       throw new Error("Printful timeout");
@@ -400,7 +413,7 @@ test("preview/mockup returns failed status when mockup service errors", async ()
 });
 
 test("preview/mockup returns layout_not_supported when Printful cannot apply manual layout", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async () => {
       const error = new Error(
@@ -434,7 +447,7 @@ test("preview/mockup returns layout_not_supported when Printful cannot apply man
 });
 
 test("preview/mockup returns rate_limited status when Printful throttles", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     resolveVariantIdFn: () => 9952,
     generateMockupForVariantFn: async () => {
       const error = new Error("You've recently sent too many requests. Please try again after 60 seconds.");
@@ -466,7 +479,7 @@ test("preview/mockup returns rate_limited status when Printful throttles", async
 });
 
 test("preview/mockup/status returns completed status", async () => {
-  const router = buildPreviewRouter({
+  const router = testRouter({
     getMockupTaskFn: async () => ({
       status: "completed",
       mockups: ["https://cdn.test/mockups/status.png"],
@@ -490,7 +503,7 @@ test("preview/mockup/status returns completed status", async () => {
 });
 
 test("preview/mockup/status validates required task_key", async () => {
-  const router = buildPreviewRouter();
+  const router = testRouter();
 
   await withServer(createPreviewApp(router), async (baseUrl) => {
     const response = await fetch(`${baseUrl}/api/preview/mockup/status`, {
@@ -510,7 +523,7 @@ test("preview/image returns 503 when AI is disabled and does not call moderation
 
   let moderationCalls = 0;
 
-  const router = buildPreviewRouter({
+  const router = testRouter({
     moderatePromptFn: async () => {
       moderationCalls += 1;
       return { flagged: false };

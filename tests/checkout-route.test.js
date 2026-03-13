@@ -65,6 +65,28 @@ function createIdempotencyDouble() {
       const existing = records.get(orderId) || { order_id: orderId, attempts: 1 };
       records.set(orderId, { ...existing, status: "failed", last_error: String(error?.message || error) });
     },
+    getTracking(orderId) {
+      const existing = records.get(orderId);
+      if (!existing) return null;
+      return {
+        printful_order_id: existing.printful_order_id || null,
+        printful_status: existing.printful_status || null,
+        tracking_number: existing.tracking_number || null,
+        tracking_url: existing.tracking_url || null,
+        shipping_carrier: existing.shipping_carrier || null,
+        tracking_updated_at: existing.tracking_updated_at || null,
+      };
+    },
+    updateTracking(orderId, { printfulStatus, trackingNumber, trackingUrl, shippingCarrier } = {}) {
+      const existing = records.get(orderId);
+      if (!existing) return;
+      if (printfulStatus) existing.printful_status = printfulStatus;
+      if (trackingNumber) existing.tracking_number = trackingNumber;
+      if (trackingUrl) existing.tracking_url = trackingUrl;
+      if (shippingCarrier) existing.shipping_carrier = shippingCarrier;
+      existing.tracking_updated_at = new Date().toISOString();
+      records.set(orderId, existing);
+    },
   };
 }
 
@@ -387,5 +409,137 @@ test("checkout status rejects missing session_id", async () => {
     assert.equal(res.status, 422);
     const data = await res.json();
     assert.equal(data.error, "session_id is required");
+  });
+});
+
+test("checkout status returns tracking data from Printful", async () => {
+  const idempotency = createIdempotencyDouble();
+  // Simulate a completed order with a printful_order_id
+  idempotency.startProcessing("cs_track_1", { externalId: "gmt-pi_track" });
+  idempotency.markCompleted("cs_track_1", { externalId: "gmt-pi_track", printfulOrderId: "12345" });
+
+  const router = buildCheckoutRouter({
+    retrieveSessionFn: async (sessionId) => ({
+      session_id: sessionId,
+      payment_status: "paid",
+      email: "buyer@test.com",
+      fulfillment_status: "processing",
+    }),
+    getPrintfulOrderFn: async (orderId) => ({
+      id: 12345,
+      status: "fulfilled",
+      shipments: [
+        {
+          tracking_number: "LX123456789ES",
+          tracking_url: "https://tracking.example.com/LX123456789ES",
+          carrier: "DHL",
+        },
+      ],
+    }),
+    idempotency,
+    logger: silentLogger,
+  });
+
+  await withServer(createCheckoutApp(router), async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/checkout/status?session_id=cs_track_1`);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.printful_status, "fulfilled");
+    assert.equal(data.tracking_number, "LX123456789ES");
+    assert.equal(data.tracking_url, "https://tracking.example.com/LX123456789ES");
+    assert.equal(data.shipping_carrier, "DHL");
+  });
+});
+
+test("checkout status returns cached tracking without calling Printful", async () => {
+  const idempotency = createIdempotencyDouble();
+  idempotency.startProcessing("cs_cached_1", { externalId: "gmt-pi_cached" });
+  idempotency.markCompleted("cs_cached_1", { externalId: "gmt-pi_cached", printfulOrderId: "67890" });
+  // Pre-populate cached tracking (fresh timestamp)
+  idempotency.updateTracking("cs_cached_1", {
+    printfulStatus: "fulfilled",
+    trackingNumber: "CACHED123",
+    trackingUrl: "https://tracking.example.com/CACHED123",
+    shippingCarrier: "FedEx",
+  });
+
+  let printfulCalled = false;
+  const router = buildCheckoutRouter({
+    retrieveSessionFn: async (sessionId) => ({
+      session_id: sessionId,
+      payment_status: "paid",
+      email: "cached@test.com",
+      fulfillment_status: "processing",
+    }),
+    getPrintfulOrderFn: async () => {
+      printfulCalled = true;
+      return { id: 67890, status: "fulfilled", shipments: [] };
+    },
+    idempotency,
+    logger: silentLogger,
+  });
+
+  await withServer(createCheckoutApp(router), async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/checkout/status?session_id=cs_cached_1`);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.tracking_number, "CACHED123");
+    assert.equal(data.shipping_carrier, "FedEx");
+    // fulfilled is terminal — should NOT call Printful again
+    assert.equal(printfulCalled, false);
+  });
+});
+
+test("checkout status works without tracking data", async () => {
+  const idempotency = createIdempotencyDouble();
+
+  const router = buildCheckoutRouter({
+    retrieveSessionFn: async (sessionId) => ({
+      session_id: sessionId,
+      payment_status: "paid",
+      email: "no-track@test.com",
+      fulfillment_status: "processing",
+    }),
+    idempotency,
+    logger: silentLogger,
+  });
+
+  await withServer(createCheckoutApp(router), async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/checkout/status?session_id=cs_notrack`);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.payment_status, "paid");
+    // No tracking fields when no order in DB
+    assert.equal(data.tracking_number, undefined);
+  });
+});
+
+test("checkout status handles Printful API failure gracefully", async () => {
+  const idempotency = createIdempotencyDouble();
+  idempotency.startProcessing("cs_fail_pf", { externalId: "gmt-fail" });
+  idempotency.markCompleted("cs_fail_pf", { externalId: "gmt-fail", printfulOrderId: "99999" });
+
+  const router = buildCheckoutRouter({
+    retrieveSessionFn: async (sessionId) => ({
+      session_id: sessionId,
+      payment_status: "paid",
+      email: "fail@test.com",
+      fulfillment_status: "processing",
+    }),
+    getPrintfulOrderFn: async () => {
+      throw new Error("Printful API down");
+    },
+    idempotency,
+    logger: silentLogger,
+  });
+
+  await withServer(createCheckoutApp(router), async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/checkout/status?session_id=cs_fail_pf`);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    // Still returns basic info even if Printful fails
+    assert.equal(data.payment_status, "paid");
   });
 });

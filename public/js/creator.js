@@ -2,6 +2,12 @@
    CREATOR — 4-step design flow
 ══════════════════════════════ */
 
+// ── CAPTCHA state ──
+let captchaEnabled = false;
+let captchaSiteKey = null;
+let turnstileWidgetId = null;
+let turnstileReady = false;
+
 // ── State ──
 let selectedProduct = null;
 let selectedColor = null;
@@ -42,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initCreator, 300);
 });
 
-function initCreator() {
+async function initCreator() {
   initPanelTabs();
   initPromptInput();
   initPromptChips();
@@ -52,6 +58,57 @@ function initCreator() {
   initAddToCartButton();
   initGarmentTypes();
   initLayoutControls();
+  await initCaptcha();
+}
+
+// ── CAPTCHA (Cloudflare Turnstile) ──
+async function initCaptcha() {
+  try {
+    const res = await fetch('/api/preview/captcha-config');
+    const data = await res.json();
+    if (!data.ok || !data.enabled || !data.site_key) return;
+
+    captchaEnabled = true;
+    captchaSiteKey = data.site_key;
+
+    // Load Turnstile script
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
+    script.async = true;
+    document.head.appendChild(script);
+
+    // Global callback when Turnstile is ready
+    window.onTurnstileLoad = () => {
+      turnstileReady = true;
+    };
+  } catch (e) {
+    console.warn('[creator] captcha config fetch failed, proceeding without captcha', e);
+  }
+}
+
+function getCaptchaToken() {
+  return new Promise((resolve) => {
+    if (!captchaEnabled || !turnstileReady || !window.turnstile) {
+      resolve(null);
+      return;
+    }
+
+    // Remove previous widget if exists
+    const container = document.getElementById('turnstile-container');
+    if (!container) {
+      resolve(null);
+      return;
+    }
+    container.innerHTML = '';
+
+    window.turnstile.render(container, {
+      sitekey: captchaSiteKey,
+      callback: (token) => resolve(token),
+      'error-callback': () => resolve(null),
+      'expired-callback': () => resolve(null),
+      size: 'invisible',
+    });
+  });
 }
 
 // ── Garment types from catalog ──
@@ -192,6 +249,13 @@ function updatePrice() {
   if (!priceEl || !selectedProduct) return;
   const total = (selectedProduct.base_price_eur || 39) * panelQty;
   priceEl.textContent = `\u20AC${total.toFixed(2)}`;
+
+  // Also update the price hint near the generate button
+  const hintEl = document.getElementById('priceHintValue');
+  if (hintEl) {
+    const base = selectedProduct.base_price_eur || 39;
+    hintEl.textContent = `\u20AC${base.toFixed(2)}`;
+  }
 }
 
 // ── Panel tabs ──
@@ -294,15 +358,26 @@ async function generateDesign() {
   try {
     const productKey = selectedProduct ? selectedProduct.product_key : 'all-over-print-mens-athletic-t-shirt';
 
+    // Get CAPTCHA token (invisible, no user interaction)
+    const captchaToken = await getCaptchaToken();
+
     // Step 1: Generate AI image
     const imageRes = await fetch('/api/preview/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: input.value.trim() }),
+      body: JSON.stringify({ prompt: input.value.trim(), captcha_token: captchaToken }),
     });
     const imageData = await imageRes.json();
 
     if (!imageData.ok || !imageData.image_url) {
+      if (imageData.error === 'generation_limit_reached') {
+        showEmailGateModal(imageData.needs_email);
+        return;
+      }
+      if (imageData.error === 'brand_blocked') {
+        showGenerationError(imageData.message || 'Tu dise\u00f1o no puede incluir marcas registradas o personajes con copyright.');
+        return;
+      }
       const errorMsg = imageData.error || imageData.message || 'Error al generar el dise\u00f1o';
       showGenerationError(typeof errorMsg === 'string' ? errorMsg : 'Error al generar el dise\u00f1o');
       return;
@@ -322,6 +397,9 @@ async function generateDesign() {
     }
 
     advanceStep(3);
+
+    // Show instant CSS composite preview while mockup loads
+    showInstantPreview();
 
     // Step 2: Request mockup (non-blocking)
     requestMockup(productKey);
@@ -472,13 +550,37 @@ function escapeHtmlLocal(str) {
   return div.innerHTML;
 }
 
+// ── Instant CSS preview (shown immediately after AI generation) ──
+function showInstantPreview() {
+  if (!generatedImageUrl || !selectedProduct) return;
+
+  const preview = document.querySelector('.garment-preview');
+  if (!preview) return;
+
+  // Hide garment photo and small design overlay — replaced by full composite
+  const garmentBg = preview.querySelector('.garment-bg');
+  const garmentCanvas = preview.querySelector('.garment-canvas');
+  if (garmentBg) garmentBg.style.display = 'none';
+  if (garmentCanvas) garmentCanvas.style.display = 'none';
+
+  // Set up and show the CSS composite preview
+  setupClientPreview();
+}
+
 // ── Mockup display ──
 function showMockupLoading() {
   const preview = document.querySelector('.garment-preview');
   if (!preview || preview.querySelector('.mockup-loading')) return;
+
+  // If instant CSS preview is showing, use a subtle bottom label
+  const clientPreview = document.getElementById('clientPreview');
+  const hasInstantPreview = clientPreview && clientPreview.style.display !== 'none';
+
   const loader = document.createElement('div');
-  loader.className = 'mockup-loading';
-  loader.innerHTML = '<div class="mockup-loading-text">Aplicando dise\u00F1o a la prenda\u2026</div>';
+  loader.className = 'mockup-loading' + (hasInstantPreview ? ' instant-preview-loading' : '');
+  loader.innerHTML = hasInstantPreview
+    ? '<div class="mockup-loading-text">Generando mockup profesional\u2026</div>'
+    : '<div class="mockup-loading-text">Aplicando dise\u00F1o a la prenda\u2026</div>';
   preview.appendChild(loader);
 }
 
@@ -493,6 +595,10 @@ function displayMockup(primaryUrl, allUrls) {
   const preview = document.querySelector('.garment-preview');
   if (!preview) return;
 
+  // Check if we're transitioning from instant CSS preview
+  const clientPreview = document.getElementById('clientPreview');
+  const fromInstantPreview = clientPreview && clientPreview.style.display !== 'none';
+
   // Hide the garment photo and design overlay — the mockup replaces everything
   const garmentBg = preview.querySelector('.garment-bg');
   const garmentCanvas = preview.querySelector('.garment-canvas');
@@ -504,7 +610,7 @@ function displayMockup(primaryUrl, allUrls) {
   if (existing) existing.remove();
 
   const container = document.createElement('div');
-  container.className = 'mockup-container';
+  container.className = 'mockup-container' + (fromInstantPreview ? ' fade-in' : '');
 
   const mainImg = document.createElement('img');
   mainImg.className = 'mockup-img';
@@ -535,6 +641,12 @@ function displayMockup(primaryUrl, allUrls) {
 
   preview.appendChild(container);
 
+  // Hide instant CSS preview now that real mockup is showing
+  if (fromInstantPreview && clientPreview) {
+    clientPreview.style.display = 'none';
+    if (previewResizeObserver) previewResizeObserver.disconnect();
+  }
+
   // If user is adjusting sliders, don't interrupt — keep mockup hidden in DOM
   if (previewMode === 'adjusting') {
     container.style.display = 'none';
@@ -553,6 +665,11 @@ function hideMockup() {
   exitAdjustMode();
   hideMockupLoading();
   document.querySelectorAll('.mockup-container').forEach(el => el.remove());
+
+  // Hide instant CSS preview if showing
+  const clientPreview = document.getElementById('clientPreview');
+  if (clientPreview) clientPreview.style.display = 'none';
+  if (previewResizeObserver) previewResizeObserver.disconnect();
 
   // Restore garment photo and design overlay
   const preview = document.querySelector('.garment-preview');
@@ -944,6 +1061,73 @@ function updateClientPreview() {
   if (!designImg) return;
   const { scaleVal, leftPct, topPct } = getLayoutPreview();
   designImg.style.transform = `translate(${leftPct}%, ${topPct}%) scale(${scaleVal})`;
+}
+
+// ── Email gate modal ──
+function showEmailGateModal(needsEmail) {
+  document.querySelectorAll('.email-gate-overlay').forEach(el => el.remove());
+
+  const message = needsEmail
+    ? 'Has alcanzado el límite de diseños gratuitos. Introduce tu email para desbloquear más generaciones.'
+    : 'Has alcanzado el límite de generaciones. Vuelve más tarde o compra uno de nuestros diseños.';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'email-gate-overlay';
+  overlay.innerHTML = `
+    <div class="email-gate-card">
+      <div class="email-gate-icon">&#9993;</div>
+      <h3 class="email-gate-title">${needsEmail ? 'Desbloquea más diseños' : 'Límite alcanzado'}</h3>
+      <p class="email-gate-msg">${escapeHtmlLocal(message)}</p>
+      ${needsEmail ? `
+        <form class="email-gate-form" id="emailGateForm">
+          <input type="email" class="email-gate-input" placeholder="tu@email.com" required autofocus />
+          <button type="submit" class="email-gate-submit">Desbloquear</button>
+        </form>
+        <p class="email-gate-privacy">Solo usaremos tu email para novedades de genMyTee. Sin spam.</p>
+      ` : ''}
+      <button class="email-gate-close">Cerrar</button>
+    </div>
+  `;
+
+  overlay.querySelector('.email-gate-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  if (needsEmail) {
+    const form = overlay.querySelector('#emailGateForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = form.querySelector('.email-gate-input');
+      const submitBtn = form.querySelector('.email-gate-submit');
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Desbloqueando...';
+
+      try {
+        const res = await fetch('/api/preview/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          overlay.remove();
+          showToast(`¡Desbloqueado! Tienes ${data.remaining} generaciones más.`);
+        } else {
+          showToast(data.error === 'email_invalid' ? 'Introduce un email válido.' : 'Error. Inténtalo de nuevo.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Desbloquear';
+        }
+      } catch (_) {
+        showToast('Error de conexión. Inténtalo de nuevo.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Desbloquear';
+      }
+    });
+  }
+
+  document.body.appendChild(overlay);
 }
 
 // Expose for catalog.js product card clicks

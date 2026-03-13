@@ -1,0 +1,24 @@
+{
+  "bundles": [
+    {
+      "id": "pack-3-camisetas",
+      "name": "Pack 3 Camisetas",
+      "description": "3 camisetas por 79€ (ahorras hasta 38€)",
+      "min_items": 3,
+      "categories": ["camisetas"],
+      "bundle_price_eur": 79,
+      "active": true,
+      "badge": "Más vendido"
+    },
+    {
+      "id": "pack-2-sudaderas",
+      "name": "Pack 2 Sudaderas",
+      "description": "2 sudaderas por 89€",
+      "min_items": 2,
+      "categories": ["sudaderas"],
+      "bundle_price_eur": 89,
+      "active": true,
+      "badge": null
+    }
+  ]
+}

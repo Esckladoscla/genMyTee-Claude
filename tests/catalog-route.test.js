@@ -70,6 +70,28 @@ test("catalog returns 404 for unknown slug", async () => {
   });
 });
 
+const sampleBundles = [
+  { id: "pack-3", name: "Pack 3", min_items: 3, categories: ["camisetas"], bundle_price_eur: 79, active: true },
+  { id: "pack-inactive", name: "Inactive", min_items: 2, categories: ["gorras"], bundle_price_eur: 40, active: false },
+];
+
+test("catalog bundles returns only active bundles", async () => {
+  const router = buildCatalogRouter({
+    productsFn: () => sampleProducts,
+    layoutSupportFn: stubLayoutSupport,
+    bundlesFn: () => sampleBundles,
+  });
+
+  await withServer(createCatalogApp(router), async (baseUrl) => {
+    const res = await fetch(`${baseUrl}/api/catalog/bundles`);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.bundles.length, 1);
+    assert.equal(data.bundles[0].id, "pack-3");
+  });
+});
+
 test("catalog loads from real products.json", async () => {
   const router = buildCatalogRouter({ layoutSupportFn: stubLayoutSupport });
 

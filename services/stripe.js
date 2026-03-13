@@ -44,6 +44,9 @@ export async function createCheckoutSession(items, { successUrl, cancelUrl }) {
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: lineItems,
+    // Dynamic payment methods: cards, Apple Pay, Google Pay, Link, etc.
+    // Enabled wallets are configured in Stripe Dashboard → Settings → Payment methods
+    payment_method_types: undefined,
     success_url: successUrl,
     cancel_url: cancelUrl,
     shipping_address_collection: {
@@ -52,6 +55,7 @@ export async function createCheckoutSession(items, { successUrl, cancelUrl }) {
         "GB", "US", "CA", "MX",
       ],
     },
+    phone_number_collection: { enabled: true },
     metadata: {
       source: "genmytee_web",
       item_count: String(items.length),

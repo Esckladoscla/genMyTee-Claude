@@ -65,6 +65,7 @@ Infrastructure:
 - Cloudflare R2 for image storage
 - Stripe for payments (Checkout Sessions + webhooks)
 - SQLite for order idempotency and newsletter subscribers
+- Plausible for privacy-friendly web analytics
 
 ## Commands
 
@@ -89,11 +90,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `app.js` — `createApp()` assembles middleware, routes, CORS, error handler
 
 ### Route layer (`routes/`)
-- `preview.js` — `POST /api/preview/image` (AI generation), `POST /api/preview/mockup` (Printful mockup), `GET /api/preview/mockup/status`, `GET /api/preview/openai/usage`
+- `preview.js` — `POST /api/preview/image` (AI generation), `POST /api/preview/mockup` (Printful mockup), `GET /api/preview/mockup/status`
 - `orders.js` — `POST /api/orders` (generic order creation)
 - `catalog.js` — `GET /api/catalog/products`, `GET /api/catalog/products/:slug` (product catalog from `data/products.json`)
 - `checkout.js` — `POST /api/checkout/session` (creates Stripe Checkout Session from cart items), `POST /api/checkout/webhook` (handles Stripe `checkout.session.completed` → Printful order via `order-processing.js`), `GET /api/checkout/status`
 - `newsletter.js` — `POST /api/newsletter` (email subscription, stored in SQLite)
+- `gallery.js` — `GET /api/gallery/designs` (curated designs with tag/featured/collection filters), `GET /api/gallery/designs/:id` (design detail), `GET /api/gallery/collections` (collections with design counts), SSR pages: `/galeria/:id` (design page), `/galeria/coleccion/:slug` (collection page), `/sitemap.xml`
+- `gift-cards.js` — `GET /api/gift-cards/amounts`, `POST /api/gift-cards/purchase`, `GET /api/gift-cards/validate`, `POST /api/gift-cards/redeem`
+- `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
+- `preview.js` also exposes: `POST /api/preview/image/async` (enqueue async generation), `GET /api/preview/image/status` (poll job status)
+- `admin.js` — Admin panel: `GET /api/admin/dashboard` (business metrics), `POST /api/admin/ai` (toggle AI), `GET /api/admin/orders` (order review), `GET /api/admin/experiments` (A/B testing), `GET /api/admin/gift-cards` (gift card list), `POST /api/admin/gallery/batch-generate` (batch image generation)
+- `auth.js` — User authentication: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/verify-email/send`, `POST /api/auth/verify-email/confirm`, `GET /api/auth/google` (OAuth redirect), `GET /api/auth/google/callback`, `GET /api/auth/config`
+- `profile.js` — User profile (auth required): `GET /api/profile/designs` (design history), `GET /api/profile/orders` (order history placeholder), `GET /api/profile/summary`
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -107,12 +115,26 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `stripe.js` — Stripe SDK wrapper: `createCheckoutSession()`, `verifyWebhookSignature()`, `extractOrderFromSession()`
 - `newsletter.js` — SQLite-backed email subscription storage
 - `env.js` — typed env getters (`getEnv`, `requireEnv`, `getBooleanEnv`, `getNumberEnv`) with legacy alias support and deprecation warnings
+- `generation-queue.js` — SQLite-backed async generation queue with retry logic and FIFO processing
+- `prompt-cache.js` — SQLite-backed prompt→image cache with TTL and hit tracking
+- `image-provider.js` — Provider abstraction for image generation (OpenAI default, register fallbacks)
+- `registry.js` — Service registry for all external dependencies (storage, image, fulfillment, payments)
+- `captcha.js` — Cloudflare Turnstile CAPTCHA verification (invisible, configurable via `CAPTCHA_ENABLED`)
+- `image-moderator.js` — Post-generation image moderation using OpenAI omni-moderation (configurable via `IMAGE_MODERATION_ENABLED`)
+- `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests, gift cards (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
+- `ab-testing.js` — A/B testing framework: experiments, deterministic variant assignment, event tracking, results aggregation (configurable via `AB_TESTING_ENABLED`)
+- `gift-cards.js` — SQLite-backed digital gift cards: create, validate, redeem (codes: `GMT-XXXX-XXXX-XXXX`, amounts: €25/50/75/100, 1-year expiry)
+- `auth.js` — User authentication service: SQLite-backed users, sessions, email verification (scrypt hashing, timing-safe comparison, Google OAuth2, generation quota per user, configurable via `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
+- `design-history.js` — SQLite-backed design history per user/session (tracks prompts + preview URLs, supports linking anonymous sessions to users on registration)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
 - `color-alias.json` — color name normalization
 - `printful_product_ids.json` — Printful product metadata
 - `products.json` — product catalog (slug, name, product_key, base_price_eur, sizes, colors, placement)
+- `curated-designs.json` — gallery of 55 pre-made designs (id, title, image_url, tags, compatible_products, collection)
+- `collections.json` — 11 thematic collections (id, name, slug, description, emoji, sort_order)
+- `bundles.json` — pack/bundle pricing rules (min_items, categories, bundle_price_eur)
 - `app.db` — SQLite database for idempotency and newsletter subscribers
 
 ### Frontend (`public/`)
@@ -124,6 +146,9 @@ Standalone vanilla HTML/CSS/JS frontend served by Express.
 - `js/app.js` — global UI (cart with localStorage, nav, toast, newsletter, checkout via `/api/checkout/session`)
 - `js/catalog.js` — fetches products from `/api/catalog/products`, renders product grid
 - `js/creator.js` — 4-step design flow: garment → prompt → generate → size/add-to-cart. Calls `/api/preview/image` and `/api/preview/mockup`.
+- `js/auth.js` — auth state management, login/register modal, Google OAuth, email verification UI
+- `css/auth.css` — auth modal, profile page, nav user button styles
+- `mi-cuenta.html` — user profile page (design history, account info)
 - `checkout-success.html` — post-payment success page (clears cart, shows confirmation)
 - `checkout-cancel.html` — payment cancelled page
 - `order-status.html` — consulta de estado de pedido por session ID

@@ -1,0 +1,720 @@
+{
+  "designs": [
+    {
+      "id": "tigre-retro",
+      "title": "Tigre Geométrico Retro",
+      "description": "Tigre en estilo geométrico retro con naranjas y azules vibrantes",
+      "tags": [
+        "animal",
+        "geometrico",
+        "retro"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "A retro geometric tiger in orange and blue",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/A%20retro%20geometric%20tiger%20in%20orange%20and%20blue.png"
+    },
+    {
+      "id": "madrid-artistica",
+      "title": "Madrid Artística",
+      "description": "La esencia de Madrid capturada en un estilo artístico único",
+      "tags": [
+        "urbano",
+        "cultural",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Madrid artística",
+      "collection": "urbano",
+      "image_url": "https://assets.genmytee.com/images/Madrid%20art%C3%ADstica.png"
+    },
+    {
+      "id": "egipto-dali",
+      "title": "Egipto Surrealista",
+      "description": "Las pirámides y misterios de Egipto en estilo hiperrealista de Dalí",
+      "tags": [
+        "cultural",
+        "dorado",
+        "vintage"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "Egipto estilo hiperrealismo de Dalí",
+      "collection": "cultural",
+      "image_url": "https://assets.genmytee.com/images/egipto%20estilo%20hiperrealismo%20de%20Dal%C3%AD.png"
+    },
+    {
+      "id": "guernica-ghibli",
+      "title": "Guernica Reimaginado",
+      "description": "El Guernica de Picasso reinterpretado con estilo Ghibli",
+      "tags": [
+        "cultural",
+        "clasico",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "El Guernica de Picasso estilo Ghibli",
+      "collection": "cultural",
+      "image_url": "https://assets.genmytee.com/images/el%20guernica%20de%20picasso%20estilo%20gibhi.png"
+    },
+    {
+      "id": "sol-naciente",
+      "title": "Sol Naciente",
+      "description": "El país del sol naciente en un estilo artístico y esperanzador",
+      "tags": [
+        "japones",
+        "naturaleza",
+        "clasico"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "El país del sol naciente en un estilo artístico y esperanzador",
+      "collection": "arte-oriental",
+      "image_url": "https://assets.genmytee.com/images/el%20pa%C3%ADs%20del%20sol%20naciente%20en%20un%20estilo%20art%C3%ADstico%20y%20esperanzador.png"
+    },
+    {
+      "id": "furgoneta-hippie",
+      "title": "Furgoneta Hippie",
+      "description": "Volkswagen hippie con colorines en grafiti en la playa",
+      "tags": [
+        "retro",
+        "colorido",
+        "urbano"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Furgoneta hippie Volkswagen con colorines en grafiti en la playa",
+      "collection": "retro",
+      "image_url": "https://assets.genmytee.com/images/estilo%20dibujo%20hippie%20una%20furgoneta%20estilo%20hippie%20t%C3%ADcipa%20volkswagen%20con%20colorines%20en%20grafiti%20en%20la%20playa%20del%20chill.png"
+    },
+    {
+      "id": "le-mans-retro",
+      "title": "Le Mans Retro",
+      "description": "Homenaje retro a las míticas 24 horas de Le Mans del WEC",
+      "tags": [
+        "retro",
+        "vintage",
+        "urbano"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Estilo retro conmemorativo de las 24 horas de Le Mans del WEC",
+      "collection": "retro",
+      "image_url": "https://assets.genmytee.com/images/estilo%20retro%20conmemorativo%20de%20las%2024%20horas%20de%20le%20mans%20del%20wec.png"
+    },
+    {
+      "id": "futuro-humanidad",
+      "title": "El Futuro de la Humanidad",
+      "description": "Silueta contemplando el futuro desde la cima de una montaña al atardecer",
+      "tags": [
+        "minimalista",
+        "celestial",
+        "abstracto"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "La IA representando el futuro de la humanidad, silueta sobre una montaña con el sol cayendo",
+      "collection": "cosmos",
+      "image_url": "https://assets.genmytee.com/images/la%20IA%20representando%20el%20futuro%20de%20la%20humanidad,%20s%C3%B3lo%20se%20ve%20su%20silueta%20sobre%20una%20monta%C3%B1a%20con%20el%20sol%20cayendo%20de%20fondo,%20mientras%20a%20los%20pies%20de%20la%20monta%C3%B1a%20est%C3%A1%20toda%20la%20humanidad.png"
+    },
+    {
+      "id": "new-york-vangogh",
+      "title": "New York Van Gogh",
+      "description": "El skyline de Nueva York pintado al estilo de Van Gogh",
+      "tags": [
+        "urbano",
+        "clasico",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "New York estilo Van Gogh",
+      "collection": "urbano",
+      "image_url": "https://assets.genmytee.com/images/new%20york%20estilo%20van%20gogh.png"
+    },
+    {
+      "id": "astronauta-ghibli",
+      "title": "Astronauta entre Galaxias",
+      "description": "Astronauta conquistando las estrellas en estilo Ghibli",
+      "tags": [
+        "espacio",
+        "retro",
+        "scifi"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "Un astronauta estilo Ghibli conquistando el mundo tras las estrellas y las galaxias",
+      "collection": "cosmos",
+      "image_url": "https://assets.genmytee.com/images/un%20astronauta%20estilo%20gibi%20conquistando%20el%20mundo%20tras%20las%20estrellas%20y%20las%20galaxiaspng.png"
+    },
+    {
+      "id": "oso-geometrico",
+      "title": "Oso Geométrico",
+      "description": "Oso en estilo geométrico retro mezclando super realismo y Ghibli",
+      "tags": [
+        "animal",
+        "geometrico",
+        "retro"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Un oso retro geométrico de estilo super realismo en un mix con estilo Ghibli",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/un%20oso%20retro%20geom%C3%A9trico%20de%20estilo%20super%20realismo%20en%20un%20mix%20con%20estilo%20gibi.png"
+    },
+    {
+      "id": "viaje-interestelar",
+      "title": "Viaje Interestelar",
+      "description": "Un viaje interestelar al estilo impresionista de Van Gogh",
+      "tags": [
+        "espacio",
+        "clasico",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Un viaje interestelar estilo Van Gogh",
+      "collection": "cosmos",
+      "image_url": "https://assets.genmytee.com/images/un%20viaje%20interestelar%20estilo%20van%20gogh.png"
+    },
+    {
+      "id": "rosa-cristal",
+      "title": "Rosa en Cristal",
+      "description": "Rosa geométrica encerrada en un cristal brillante",
+      "tags": [
+        "floral",
+        "geometrico",
+        "minimalista"
+      ],
+      "compatible_products": [
+        "all-over-print-womens-crop-top",
+        "all-over-print-dress",
+        "all-over-print-womens-racerback-tank-top",
+        "all-over-print-mens-athletic-t-shirt"
+      ],
+      "featured": true,
+      "prompt_used": "Una rosa geométrica encerrada en un cristal",
+      "collection": "botanico",
+      "image_url": "https://assets.genmytee.com/images/una%20rosa%20geom%C3%A9trica%20encerrada%20en%20un%20cristal.png"
+    },
+    {
+      "id": "espacio-dali",
+      "title": "Cosmos de Dalí",
+      "description": "Viaje al espacio en el estilo hiperrealista surrealista de Dalí",
+      "tags": [
+        "espacio",
+        "clasico",
+        "celestial"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Viaje al espacio estilo hiperrealismo de Dalí",
+      "collection": "cosmos",
+      "image_url": "https://assets.genmytee.com/images/viaje%20al%20espacio%20estilo%20hiperrealismo%20de%20Dal%C3%AD.png"
+    },
+    {
+      "id": "despedida-soltera",
+      "title": "Fiesta Desenfrenada",
+      "description": "El diseño perfecto para una despedida de soltera inolvidable",
+      "tags": [
+        "colorido",
+        "cultural",
+        "neon"
+      ],
+      "compatible_products": [
+        "all-over-print-womens-crop-top",
+        "all-over-print-dress",
+        "all-over-print-womens-racerback-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "La imagen perfecta para una camiseta de despedida de soltera desenfrenada",
+      "collection": "cultural",
+      "image_url": "https://assets.genmytee.com/images/la%20imagen%20perfecta%20para%20una%20camiseta%20de%20despedida%20de%20soltera%20desenfrenada.png"
+    },
+    {
+      "id": "tres-en-raya",
+      "title": "3 en Raya Friki",
+      "description": "Un clásico tres en raya con estilo friki y geek",
+      "tags": [
+        "retro",
+        "colorido",
+        "abstracto"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "3 en raya friki",
+      "collection": "retro",
+      "image_url": "https://assets.genmytee.com/images/3%20en%20raya%20friki.png"
+    },
+    {
+      "id": "gamba-bjj",
+      "title": "Gamba Peleona BJJ",
+      "description": "La mítica gamba peleona del jiu-jitsu brasileño",
+      "tags": [
+        "animal",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Gamba BJJ peleona",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gamba%20bjj%20peleona.png"
+    },
+    {
+      "id": "gamba-bjj-2",
+      "title": "Gamba BJJ Combate",
+      "description": "Gamba de jiu-jitsu brasileño en posición de combate",
+      "tags": [
+        "animal",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Gamba BJJ peleona variante 2",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gamba%20bjj%20peleona2.png"
+    },
+    {
+      "id": "gamba-enfurecida",
+      "title": "Gamba Enfurecida",
+      "description": "Gamba enfurecida de BJJ lista para el tatami",
+      "tags": [
+        "animal",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Gamba peleona enfurecida de BJJ",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gamba%20peleona%20enfurecida%20de%20bjj.png"
+    },
+    {
+      "id": "gamba-peleona",
+      "title": "La Gamba del Tatami",
+      "description": "La gamba peleona de jiu-jitsu brasileño, ícono del tatami",
+      "tags": [
+        "animal",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "La gamba peleona de BJJ",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/la%20gamba%20peleona%20de%20bjj.png"
+    },
+    {
+      "id": "barbie-600",
+      "title": "Barbie en 600 Rosa",
+      "description": "Barbie en un SEAT 600 rosa de despedida de soltera",
+      "tags": [
+        "retro",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-womens-crop-top",
+        "all-over-print-dress",
+        "all-over-print-womens-racerback-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Una Barbie en un 600 rosa de despedida de soltera",
+      "collection": "retro",
+      "image_url": "https://assets.genmytee.com/images/una%20barbie%20en%20un%20600%20rosa%20de%20despedida%20de%20soltera.png"
+    },
+    {
+      "id": "barbie-600-real",
+      "title": "Barbie Real en 600",
+      "description": "Barbie hiperrealista en un SEAT 600 rosa para despedida",
+      "tags": [
+        "retro",
+        "colorido",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-womens-crop-top",
+        "all-over-print-dress",
+        "all-over-print-womens-racerback-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Una Barbie de carne y hueso en un 600 rosa de despedida de soltera",
+      "collection": "retro",
+      "image_url": "https://assets.genmytee.com/images/una%20barbie%20de%20carne%20y%20hueso%20en%20un%20600%20rosa%20de%20despedida%20de%20soltera.png"
+    },
+    {
+      "id": "lobo-geometrico",
+      "title": "Lobo Geométrico",
+      "description": "Lobo majestuoso en triángulos degradados, estilo low poly moderno",
+      "tags": [
+        "animal",
+        "geometrico",
+        "minimalista"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-womens-crop-top",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "Lobo geométrico majestuoso en triángulos degradados azules y morados, estilo low poly sobre fondo oscuro",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gallery-lobo-geometrico.png"
+    },
+    {
+      "id": "ola-japonesa",
+      "title": "Ola Japonesa",
+      "description": "La gran ola en estilo ukiyo-e japonés moderno y vibrante",
+      "tags": [
+        "japones",
+        "oceano",
+        "clasico"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Gran ola oceánica estilo ukiyo-e japonés moderno con espuma blanca detallada y cielo dramático, colores azul profundo y blanco",
+      "collection": "arte-oriental",
+      "image_url": "https://assets.genmytee.com/images/gallery-ola-japonesa.png"
+    },
+    {
+      "id": "flores-botanicas",
+      "title": "Flores Botánicas",
+      "description": "Flores silvestres en acuarela delicada sobre fondo claro",
+      "tags": [
+        "floral",
+        "acuarela",
+        "botanico"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-womens-crop-top",
+        "all-over-print-womens-racerback-tank-top",
+        "all-over-print-dress"
+      ],
+      "featured": true,
+      "prompt_used": "Composición de flores silvestres botánicas en acuarela delicada, lavanda, amapolas y margaritas sobre fondo blanco crema",
+      "collection": "botanico",
+      "image_url": "https://assets.genmytee.com/images/gallery-flores-botanicas.png"
+    },
+    {
+      "id": "dragon-chino",
+      "title": "Dragón Chino",
+      "description": "Dragón serpenteante majestuoso en tinta china tradicional",
+      "tags": [
+        "animal",
+        "japones",
+        "cultural"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "Dragón chino serpenteante majestuoso en tinta china negra sobre fondo de pergamino dorado, estilo tradicional con nubes",
+      "collection": "arte-oriental",
+      "image_url": "https://assets.genmytee.com/images/gallery-dragon-chino.png"
+    },
+    {
+      "id": "leon-corona",
+      "title": "León con Corona",
+      "description": "León majestuoso con corona dorada en retrato renacentista",
+      "tags": [
+        "animal",
+        "dorado",
+        "clasico"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Retrato majestuoso de león con corona dorada y melena espectacular, estilo pintura renacentista sobre fondo oscuro dramático",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gallery-leon-corona.png"
+    },
+    {
+      "id": "fenix-fuego",
+      "title": "Fénix en Llamas",
+      "description": "Ave fénix renaciendo entre llamas doradas y naranjas",
+      "tags": [
+        "animal",
+        "dorado",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": true,
+      "prompt_used": "Ave fénix majestuosa renaciendo entre llamas doradas y naranjas con alas extendidas, fondo oscuro con chispas",
+      "collection": "animales",
+      "image_url": "https://assets.genmytee.com/images/gallery-fenix-fuego.png"
+    },
+    {
+      "id": "samurai-cerezo",
+      "title": "Samurái y Cerezo",
+      "description": "Samurái bajo lluvia de pétalos de cerezo, estilo ukiyo-e",
+      "tags": [
+        "japones",
+        "cultural",
+        "clasico"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": true,
+      "prompt_used": "Samurái de espaldas con katana bajo lluvia de pétalos de cerezo rosa, estilo ukiyo-e japonés con luna llena",
+      "collection": "arte-oriental",
+      "image_url": "https://assets.genmytee.com/images/gallery-samurai-cerezo.png"
+    },
+    {
+      "id": "mandala-dorado",
+      "title": "Mandala Dorado",
+      "description": "Mandala geométrico sagrado con líneas doradas sobre negro",
+      "tags": [
+        "geometrico",
+        "mandala",
+        "dorado"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-womens-crop-top",
+        "all-over-print-dress"
+      ],
+      "featured": false,
+      "prompt_used": "Mandala geométrico sagrado intrincado con líneas doradas brillantes sobre fondo negro profundo, estilo ornamental",
+      "collection": "geometrico",
+      "image_url": "https://assets.genmytee.com/images/gallery-mandala-dorado.png"
+    },
+    {
+      "id": "medusa-neon",
+      "title": "Medusa Neón",
+      "description": "Medusa bioluminiscente con tentáculos en colores neón",
+      "tags": [
+        "animal",
+        "neon",
+        "oceano"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-womens-crop-top"
+      ],
+      "featured": false,
+      "prompt_used": "Medusa bioluminiscente con tentáculos brillantes en colores neón rosa, azul y violeta, fondo oscuro oceánico profundo",
+      "collection": "oceano",
+      "image_url": "https://assets.genmytee.com/images/gallery-medusa-neon.png"
+    },
+    {
+      "id": "ciudad-cyberpunk",
+      "title": "Ciudad Cyberpunk",
+      "description": "Skyline futurista con neón y lluvia estilo cyberpunk",
+      "tags": [
+        "urbano",
+        "cyberpunk",
+        "neon"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Skyline de ciudad futurista cyberpunk con carteles neón vibrantes reflejados en calles mojadas por la lluvia nocturna",
+      "collection": "urbano",
+      "image_url": "https://assets.genmytee.com/images/gallery-ciudad-cyberpunk.png"
+    },
+    {
+      "id": "ballena-cosmica",
+      "title": "Ballena Cósmica",
+      "description": "Ballena jorobada nadando entre estrellas y nebulosas",
+      "tags": [
+        "animal",
+        "espacio",
+        "celestial"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Ballena jorobada majestuosa nadando entre estrellas y nebulosas coloridas en el espacio profundo, estilo surrealista",
+      "collection": "cosmos",
+      "image_url": "https://assets.genmytee.com/images/gallery-ballena-cosmica.png"
+    },
+    {
+      "id": "pulpo-steampunk",
+      "title": "Pulpo Steampunk",
+      "description": "Pulpo mecánico con engranajes y tentáculos de cobre",
+      "tags": [
+        "animal",
+        "steampunk",
+        "retro"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Pulpo mecánico steampunk detallado con engranajes dorados y tentáculos de cobre, fondo de pergamino antiguo con planos técnicos",
+      "collection": "steampunk",
+      "image_url": "https://assets.genmytee.com/images/gallery-pulpo-steampunk.png"
+    },
+    {
+      "id": "calavera-mexicana",
+      "title": "Calavera Mexicana",
+      "description": "Calavera con flores estilo Día de Muertos vibrante y colorido",
+      "tags": [
+        "cultural",
+        "colorido",
+        "mexicano"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-womens-crop-top",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Calavera mexicana decorada con flores coloridas de cempasúchil, rosas y patrones ornamentales, estilo Día de Muertos vibrante",
+      "collection": "cultural",
+      "image_url": "https://assets.genmytee.com/images/gallery-calavera-mexicana.png"
+    },
+    {
+      "id": "aurora-boreal",
+      "title": "Aurora Boreal",
+      "description": "Aurora boreal verde y violeta reflejada en lago de montaña",
+      "tags": [
+        "naturaleza",
+        "celestial",
+        "colorido"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-unisex-hoodie"
+      ],
+      "featured": false,
+      "prompt_used": "Aurora boreal espectacular en tonos verde y violeta reflejada en lago de montaña cristalino, cielo estrellado",
+      "collection": "naturaleza",
+      "image_url": "https://assets.genmytee.com/images/gallery-aurora-boreal.png"
+    },
+    {
+      "id": "koi-japones",
+      "title": "Koi Japonés",
+      "description": "Pez koi rojo y dorado nadando entre ondas y flores de loto",
+      "tags": [
+        "japones",
+        "animal",
+        "dorado"
+      ],
+      "compatible_products": [
+        "all-over-print-mens-athletic-t-shirt",
+        "all-over-print-mens-crew-neck-t-shirt",
+        "all-over-print-mens-tank-top"
+      ],
+      "featured": false,
+      "prompt_used": "Pez koi rojo y dorado nadando entre ondas y flores de loto blancas, estilo tinta japonesa tradicional",
+      "collection": "arte-oriental",
+      "image_url": "https://assets.genmytee.com/images/gallery-koi-japones.png"
+    }
+  ]
+}
