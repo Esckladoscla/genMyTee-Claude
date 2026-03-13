@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mi cuenta - genMyTee</title>
+<meta name="description" content="Tu perfil en genMyTee. Historial de diseños y pedidos."/>
+<meta name="robots" content="noindex"/>
+<link rel="canonical" href="https://genmytee.com/mi-cuenta.html"/>
+<link rel="stylesheet" href="/css/base.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<link rel="stylesheet" href="/css/auth.css"/>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-top">
+    <a href="/" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li><a href="/#galeria">Galería</a></li>
+      <li><a href="/#productos">Prendas</a></li>
+      <li><a href="/#creador">Crear mi prenda</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="window.location.href='/'" title="Inicio">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- PROFILE PAGE -->
+<div class="profile-page" id="profilePage">
+  <div id="profileLoading" style="text-align:center;padding:4rem;color:var(--muted)">
+    Cargando...
+  </div>
+
+  <div id="profileContent" style="display:none">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">U</div>
+      <div class="profile-info">
+        <h1 id="profileName">Usuario</h1>
+        <p id="profileEmail">email@example.com</p>
+      </div>
+    </div>
+
+    <div class="profile-stats" id="profileStats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statDesigns">0</div>
+        <div class="profile-stat-label">Diseños creados</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="statOrders">--</div>
+        <div class="profile-stat-label">Pedidos</div>
+      </div>
+    </div>
+
+    <div id="verificationBanner" style="display:none">
+      <div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.2);border-radius:10px;padding:1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.2rem;">&#x26A0;&#xFE0F;</span>
+        <div>
+          <p style="color:var(--text);font-size:0.85rem;margin:0;">Tu email no está verificado.</p>
+          <button onclick="requestVerification()" style="background:none;border:none;color:var(--accent);font-size:0.8rem;cursor:pointer;padding:0;margin-top:0.25rem;text-decoration:underline;">
+            Enviar código de verificación
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="profile-section-title">Mis diseños</h3>
+    <div class="profile-designs-grid" id="designsGrid"></div>
+    <div class="profile-empty" id="designsEmpty" style="display:none">
+      <p>Aún no has creado ningún diseño.</p>
+      <a href="/#creador" class="profile-btn" style="display:inline-block;text-decoration:none;">Crear mi primer diseño</a>
+    </div>
+
+    <div class="profile-actions" style="margin-top:3rem;">
+      <button class="profile-btn danger" onclick="handleLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div id="profileNotAuth" style="display:none;text-align:center;padding:4rem;">
+    <h2 style="color:var(--text);margin-bottom:1rem;">Inicia sesión para ver tu perfil</h2>
+    <button class="profile-btn" onclick="openAuthModal('login')" style="background:var(--accent);color:#fff;border:none;">Iniciar sesión</button>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+async function loadProfile() {
+  try {
+    const res = await fetch("/api/auth/me", { credentials: "include" });
+    const data = await res.json();
+
+    document.getElementById("profileLoading").style.display = "none";
+
+    if (!data.authenticated || !data.user) {
+      document.getElementById("profileNotAuth").style.display = "";
+      return;
+    }
+
+    document.getElementById("profileContent").style.display = "";
+
+    const user = data.user;
+    const nameEl = document.getElementById("profileName");
+    const emailEl = document.getElementById("profileEmail");
+    const avatarEl = document.getElementById("profileAvatar");
+
+    nameEl.textContent = user.name || "Usuario";
+    if (user.email_verified) {
+      nameEl.innerHTML += ' <span class="profile-badge verified">Verificado</span>';
+    } else {
+      nameEl.innerHTML += ' <span class="profile-badge unverified">Sin verificar</span>';
+      document.getElementById("verificationBanner").style.display = "";
+    }
+    emailEl.textContent = user.email;
+
+    if (user.avatar_url) {
+      avatarEl.innerHTML = `<img src="${user.avatar_url}" alt="" />`;
+    } else {
+      avatarEl.textContent = (user.name || user.email || "U")[0].toUpperCase();
+    }
+
+    // Load designs
+    const designsRes = await fetch("/api/profile/designs?limit=50", { credentials: "include" });
+    const designsData = await designsRes.json();
+
+    document.getElementById("statDesigns").textContent = designsData.total || 0;
+
+    const grid = document.getElementById("designsGrid");
+    if (designsData.designs && designsData.designs.length > 0) {
+      grid.innerHTML = designsData.designs.map(d => `
+        <div class="profile-design-card">
+          ${d.preview_url ? `<img src="${d.preview_url}" alt="${d.prompt}" loading="lazy" />` : '<div style="aspect-ratio:1;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--muted);">Sin imagen</div>'}
+          <div class="design-prompt">${d.prompt}</div>
+        </div>
+      `).join("");
+    } else {
+      document.getElementById("designsEmpty").style.display = "";
+    }
+  } catch (err) {
+    document.getElementById("profileLoading").innerHTML = "Error al cargar el perfil.";
+  }
+}
+
+async function requestVerification() {
+  try {
+    const res = await fetch("/api/auth/verify-email/send", { method: "POST", credentials: "include" });
+    const data = await res.json();
+    if (data.ok) {
+      if (typeof showToast === "function") showToast("Código de verificación enviado a tu email");
+    }
+  } catch (_) { /* ignore */ }
+}
+
+document.addEventListener("DOMContentLoaded", loadProfile);
+</script>
+</body>
+</html>

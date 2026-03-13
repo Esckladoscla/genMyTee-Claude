@@ -25,6 +25,8 @@ import {
 import { checkBrandBlacklist } from "../services/brand-filter.js";
 import { verifyCaptcha, isCaptchaEnabled, getCaptchaSiteKey } from "../services/captcha.js";
 import { moderateImage } from "../services/image-moderator.js";
+import { validateSession, parseAuthCookie, getAuthGenerationLimit, getUserGenerationCount, incrementUserGenerationCount } from "../services/auth.js";
+import { saveDesign } from "../services/design-history.js";
 import {
   enqueueGeneration,
   getJobStatus,
@@ -283,15 +285,34 @@ export function buildPreviewRouter({
       res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
     }
 
-    const sessionCheck = checkGenerationAllowedFn(sessionId, clientIp);
-    if (!sessionCheck.allowed) {
-      return res.status(403).json({
-        ok: false,
-        error: "generation_limit_reached",
-        remaining: 0,
-        limit: sessionCheck.limit,
-        needs_email: sessionCheck.needs_email,
-      });
+    // Auth-aware generation limit: logged-in users get a higher cap
+    const authToken = parseAuthCookie(req.headers.cookie);
+    const authUser = authToken ? validateSession(authToken) : null;
+
+    if (authUser) {
+      const authLimit = getAuthGenerationLimit();
+      const userCount = getUserGenerationCount(authUser.id);
+      if (userCount >= authLimit) {
+        return res.status(403).json({
+          ok: false,
+          error: "generation_limit_reached",
+          remaining: 0,
+          limit: authLimit,
+          authenticated: true,
+        });
+      }
+    } else {
+      const sessionCheck = checkGenerationAllowedFn(sessionId, clientIp);
+      if (!sessionCheck.allowed) {
+        return res.status(403).json({
+          ok: false,
+          error: "generation_limit_reached",
+          remaining: 0,
+          limit: sessionCheck.limit,
+          needs_email: sessionCheck.needs_email,
+          needs_login: true,
+        });
+      }
     }
 
     try {
@@ -383,6 +404,22 @@ export function buildPreviewRouter({
 
       recordGenerationFn({ logger });
       recordSessionGenerationFn(sessionId);
+
+      // Track generation for authenticated user
+      if (authUser) {
+        incrementUserGenerationCount(authUser.id);
+      }
+
+      // Save design to history
+      try {
+        saveDesign({
+          userId: authUser?.id || null,
+          sessionId,
+          prompt: normalizedPrompt,
+          previewUrl,
+          productionUrl,
+        });
+      } catch (_) { /* best-effort */ }
 
       // Cache the result for future identical prompts
       cacheImage(normalizedPrompt, previewUrl);

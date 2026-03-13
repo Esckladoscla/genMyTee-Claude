@@ -1,0 +1,346 @@
+import { describe, it, beforeEach, afterEach } from "node:test";
+import assert from "node:assert/strict";
+import express from "express";
+
+// Set test DB path before importing services
+process.env.DB_PATH = ":memory:";
+
+import {
+  registerUser,
+  loginUser,
+  logoutSession,
+  validateSession,
+  buildAuthCookie,
+  buildClearAuthCookie,
+  parseAuthCookie,
+  generateVerificationCode,
+  verifyEmailCode,
+  getAuthGenerationLimit,
+  getUserGenerationCount,
+  incrementUserGenerationCount,
+  getUserStats,
+  _resetAuthForTests,
+} from "../services/auth.js";
+
+import { buildAuthRouter } from "../routes/auth.js";
+
+describe("services/auth — user registration", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("registers a new user", () => {
+    const result = registerUser("test@example.com", "password123", "Test User");
+    assert.equal(result.ok, true);
+    assert.equal(result.user.email, "test@example.com");
+    assert.equal(result.user.name, "Test User");
+    assert.ok(result.session.token);
+  });
+
+  it("rejects duplicate email", () => {
+    registerUser("test@example.com", "password123");
+    const result = registerUser("test@example.com", "password456");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "email_exists");
+  });
+
+  it("rejects invalid email", () => {
+    const result = registerUser("not-an-email", "password123");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "email_invalid");
+  });
+
+  it("rejects short password", () => {
+    const result = registerUser("test@example.com", "short");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "password_too_short");
+  });
+
+  it("normalizes email to lowercase", () => {
+    const result = registerUser("Test@Example.COM", "password123");
+    assert.equal(result.ok, true);
+    assert.equal(result.user.email, "test@example.com");
+  });
+});
+
+describe("services/auth — login", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("logs in with valid credentials", () => {
+    registerUser("user@example.com", "password123", "User");
+    const result = loginUser("user@example.com", "password123");
+    assert.equal(result.ok, true);
+    assert.equal(result.user.email, "user@example.com");
+    assert.ok(result.session.token);
+  });
+
+  it("rejects wrong password", () => {
+    registerUser("user@example.com", "password123");
+    const result = loginUser("user@example.com", "wrongpass");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "invalid_credentials");
+  });
+
+  it("rejects unknown email", () => {
+    const result = loginUser("nobody@example.com", "password123");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "invalid_credentials");
+  });
+
+  it("rejects empty credentials", () => {
+    const result = loginUser("", "");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "credentials_required");
+  });
+});
+
+describe("services/auth — sessions", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("validates a valid session token", () => {
+    const reg = registerUser("session@example.com", "password123");
+    const user = validateSession(reg.session.token);
+    assert.ok(user);
+    assert.equal(user.email, "session@example.com");
+  });
+
+  it("returns null for invalid token", () => {
+    const user = validateSession("invalid-token");
+    assert.equal(user, null);
+  });
+
+  it("returns null after logout", () => {
+    const reg = registerUser("logout@example.com", "password123");
+    logoutSession(reg.session.token);
+    const user = validateSession(reg.session.token);
+    assert.equal(user, null);
+  });
+});
+
+describe("services/auth — cookie helpers", () => {
+  it("builds auth cookie", () => {
+    const cookie = buildAuthCookie("test-token-123");
+    assert.ok(cookie.includes("gmt_auth=test-token-123"));
+    assert.ok(cookie.includes("HttpOnly"));
+    assert.ok(cookie.includes("Secure"));
+  });
+
+  it("builds clear cookie", () => {
+    const cookie = buildClearAuthCookie();
+    assert.ok(cookie.includes("gmt_auth="));
+    assert.ok(cookie.includes("Max-Age=0"));
+  });
+
+  it("parses auth cookie from header", () => {
+    const token = parseAuthCookie("gmt_session=abc; gmt_auth=my-token-xyz; other=val");
+    assert.equal(token, "my-token-xyz");
+  });
+
+  it("returns null for missing cookie", () => {
+    assert.equal(parseAuthCookie("gmt_session=abc"), null);
+    assert.equal(parseAuthCookie(null), null);
+  });
+});
+
+describe("services/auth — email verification", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("generates and verifies a code", () => {
+    registerUser("verify@example.com", "password123");
+    const gen = generateVerificationCode("verify@example.com");
+    assert.equal(gen.ok, true);
+    assert.ok(gen.code);
+    assert.equal(gen.code.length, 6);
+
+    const verify = verifyEmailCode("verify@example.com", gen.code);
+    assert.equal(verify.ok, true);
+
+    // User should now be verified
+    const login = loginUser("verify@example.com", "password123");
+    assert.equal(login.user.email_verified, true);
+  });
+
+  it("rejects wrong code", () => {
+    registerUser("verify2@example.com", "password123");
+    generateVerificationCode("verify2@example.com");
+    const verify = verifyEmailCode("verify2@example.com", "000000");
+    assert.equal(verify.ok, false);
+    assert.equal(verify.error, "invalid_or_expired_code");
+  });
+});
+
+describe("services/auth — generation tracking", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("tracks user generation count", () => {
+    const reg = registerUser("gen@example.com", "password123");
+    assert.equal(getUserGenerationCount(reg.user.id), 0);
+    incrementUserGenerationCount(reg.user.id);
+    incrementUserGenerationCount(reg.user.id);
+    assert.equal(getUserGenerationCount(reg.user.id), 2);
+  });
+
+  it("returns default auth generation limit", () => {
+    const limit = getAuthGenerationLimit();
+    assert.equal(typeof limit, "number");
+    assert.ok(limit > 0);
+  });
+});
+
+describe("services/auth — user stats", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("returns aggregate user stats", () => {
+    registerUser("stats1@example.com", "password123");
+    registerUser("stats2@example.com", "password123");
+    const stats = getUserStats();
+    assert.equal(stats.total_users, 2);
+    assert.equal(stats.verified_users, 0);
+  });
+});
+
+describe("routes/auth — API endpoints", () => {
+  let app;
+
+  beforeEach(() => {
+    _resetAuthForTests();
+    app = express();
+    app.use(express.json());
+  });
+  afterEach(() => _resetAuthForTests());
+
+  it("POST /register creates user and returns session", async () => {
+    const router = buildAuthRouter({
+      sendEmailFn: async () => ({ ok: true }),
+      linkSessionToUserFn: () => {},
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/register", {
+      email: "new@example.com",
+      password: "password123",
+      name: "New User",
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.user.email, "new@example.com");
+    assert.equal(res.body.needs_verification, true);
+  });
+
+  it("POST /register rejects duplicate", async () => {
+    registerUser("dup@example.com", "password123");
+    const router = buildAuthRouter({
+      sendEmailFn: async () => ({ ok: true }),
+      linkSessionToUserFn: () => {},
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/register", {
+      email: "dup@example.com",
+      password: "password456",
+    });
+
+    assert.equal(res.status, 409);
+    assert.equal(res.body.error, "email_exists");
+  });
+
+  it("POST /login authenticates user", async () => {
+    registerUser("login@example.com", "password123");
+    const router = buildAuthRouter({
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/login", {
+      email: "login@example.com",
+      password: "password123",
+    });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.user.email, "login@example.com");
+  });
+
+  it("POST /login rejects bad password", async () => {
+    registerUser("bad@example.com", "password123");
+    const router = buildAuthRouter({
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/login", {
+      email: "bad@example.com",
+      password: "wrong",
+    });
+
+    assert.equal(res.status, 401);
+    assert.equal(res.body.error, "invalid_credentials");
+  });
+
+  it("GET /me returns null when unauthenticated", async () => {
+    const router = buildAuthRouter();
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "GET", "/api/auth/me");
+    assert.equal(res.body.authenticated, false);
+    assert.equal(res.body.user, null);
+  });
+
+  it("GET /config returns google status", async () => {
+    const router = buildAuthRouter();
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "GET", "/api/auth/config");
+    assert.equal(res.body.ok, true);
+    assert.equal(typeof res.body.google_enabled, "boolean");
+  });
+
+  it("POST /logout clears session", async () => {
+    const router = buildAuthRouter();
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/logout");
+    assert.equal(res.body.ok, true);
+  });
+});
+
+import http from "node:http";
+
+// Helper to inject HTTP requests into Express app
+async function injectRequest(app, method, urlPath, body) {
+  return new Promise((resolve) => {
+    const server = app.listen(0, () => {
+      const port = server.address().port;
+      const options = {
+        hostname: "127.0.0.1",
+        port,
+        path: urlPath,
+        method,
+        headers: { "Content-Type": "application/json" },
+      };
+
+      const req = http.request(options, (res) => {
+        let data = "";
+        res.on("data", (chunk) => { data += chunk; });
+        res.on("end", () => {
+          server.close();
+          resolve({
+            status: res.statusCode,
+            headers: res.headers,
+            body: JSON.parse(data || "{}"),
+          });
+        });
+      });
+
+      if (body) req.write(JSON.stringify(body));
+      req.end();
+    });
+  });
+}
