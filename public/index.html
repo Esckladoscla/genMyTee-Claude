@@ -39,6 +39,7 @@
     <ul class="nav-center">
       <li><a href="/#galeria">Galería</a></li>
       <li class="active"><a href="/#productos">Prendas</a></li>
+      <li><a href="/#tarjetas-regalo">Regalos</a></li>
       <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
     </ul>
     <div class="nav-actions">
@@ -58,6 +59,7 @@
   <ul class="mobile-nav-list">
     <li><a href="/#galeria">Galería</a></li>
     <li><a href="/#productos">Prendas</a></li>
+    <li><a href="/#tarjetas-regalo">Regalos</a></li>
     <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
   </ul>
 </div>
@@ -528,6 +530,37 @@
   </div>
 </section>
 
+<!-- GIFT CARDS -->
+<section class="gift-card-section animate-on-scroll" id="tarjetas-regalo">
+  <div class="gift-card-inner">
+    <div class="gift-card-info">
+      <div class="gift-card-eyebrow">El regalo perfecto</div>
+      <h2 class="section-title">Tarjetas <em>regalo</em></h2>
+      <p class="gift-card-desc">Regala creatividad. El destinatario podrá elegir su prenda y diseño favorito, o crear uno completamente personalizado.</p>
+      <div class="gift-card-amounts" id="giftCardAmounts">
+        <button class="gift-amount-btn" data-amount="25">&euro;25</button>
+        <button class="gift-amount-btn" data-amount="50">&euro;50</button>
+        <button class="gift-amount-btn selected" data-amount="75">&euro;75</button>
+        <button class="gift-amount-btn" data-amount="100">&euro;100</button>
+      </div>
+      <div class="gift-card-form">
+        <input class="gift-input" id="giftRecipientEmail" type="email" placeholder="Email del destinatario" />
+        <input class="gift-input" id="giftRecipientName" type="text" placeholder="Nombre del destinatario (opcional)" />
+        <textarea class="gift-input gift-message" id="giftMessage" placeholder="Tu mensaje personal (opcional)" maxlength="500"></textarea>
+      </div>
+      <button class="gift-buy-btn" id="giftBuyBtn">Comprar tarjeta regalo</button>
+      <p class="gift-note">Válida durante 1 año. Se envía por email al instante.</p>
+    </div>
+    <div class="gift-card-visual">
+      <div class="gift-card-preview">
+        <div class="gift-card-brand">genMyTee</div>
+        <div class="gift-card-value" id="giftCardValue">&euro;75</div>
+        <div class="gift-card-subtitle">Tarjeta regalo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- NEWSLETTER -->
 <section class="newsletter animate-on-scroll">
   <p class="nl-eyebrow">Únete a genMyTee</p>
@@ -562,6 +595,7 @@
         <li><a href="/order-status.html">Seguir pedido</a></li>
         <li><a href="#">Devoluciones</a></li>
         <li><a href="#">Guía de tallas</a></li>
+        <li><a href="/#tarjetas-regalo">Tarjetas regalo</a></li>
         <li><a href="#">Contacto</a></li>
       </ul>
     </div>

@@ -47,6 +47,36 @@ const EMAIL_TEMPLATES = {
     `,
   },
 
+  gift_card: {
+    subject: "Te han regalado una tarjeta regalo genMyTee de {amount}€",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+        <h1 style="color:#1e293b;font-size:24px;">Tienes una tarjeta regalo</h1>
+        <p style="color:#475569;font-size:16px;line-height:1.6;">
+          Hola <strong>{recipient_name}</strong>, {sender_name} te ha regalado una tarjeta regalo de <strong>{amount}€</strong> para genMyTee.
+        </p>
+        <div style="background:linear-gradient(135deg,#818cf8,#7c5cff);border-radius:12px;padding:24px;margin:16px 0;text-align:center;">
+          <p style="margin:0;color:#fff;font-size:14px;">Tu codigo de regalo</p>
+          <p style="margin:8px 0;color:#fff;font-size:28px;font-weight:700;letter-spacing:2px;">{code}</p>
+          <p style="margin:0;color:rgba(255,255,255,0.8);font-size:14px;">Valor: {amount}€</p>
+        </div>
+        <p style="color:#475569;font-size:16px;line-height:1.6;">
+          {message}
+        </p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="{shop_url}" style="display:inline-block;padding:12px 32px;background:#818cf8;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
+            Canjear en genMyTee
+          </a>
+        </div>
+        <p style="color:#94a3b8;font-size:12px;">
+          Introduce el codigo en el carrito para aplicar tu descuento. Valido durante 1 ano.
+        </p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+        <p style="color:#94a3b8;font-size:12px;">genMyTee - Tu diseno, tu estilo</p>
+      </div>
+    `,
+  },
+
   review_request: {
     subject: "Como quedo tu prenda? - genMyTee",
     html: `

@@ -448,4 +448,71 @@ footer{border-top:1px solid var(--border);padding:4rem 2.5rem 2rem}
   .cookie-banner{flex-direction:column;text-align:center}
   .nl-form{flex-direction:column}
   .nl-input{border-right:1px solid rgba(255,255,255,0.15);border-bottom:none}
+  .gift-card-inner{grid-template-columns:1fr}
+  .gift-card-visual{order:-1}
 }
+
+/* ── GIFT CARDS ── */
+.gift-card-section{
+  padding:4rem 2rem;max-width:1100px;margin:0 auto;
+}
+.gift-card-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+}
+.gift-card-eyebrow{
+  font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--accent,#7c5cff);margin-bottom:0.5rem;
+}
+.gift-card-desc{
+  color:rgba(255,255,255,0.6);font-size:0.9rem;line-height:1.6;margin:0.75rem 0 1.5rem;
+}
+.gift-card-amounts{
+  display:flex;gap:0.5rem;margin-bottom:1.2rem;
+}
+.gift-amount-btn{
+  padding:0.5rem 1.2rem;border-radius:8px;font-size:0.9rem;font-weight:600;
+  border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.8);cursor:pointer;transition:all 0.2s;
+  font-family:inherit;
+}
+.gift-amount-btn:hover{
+  border-color:var(--accent,#7c5cff);color:#fff;
+}
+.gift-amount-btn.selected{
+  background:var(--accent,#7c5cff);border-color:var(--accent,#7c5cff);color:#fff;
+}
+.gift-card-form{
+  display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.2rem;
+}
+.gift-input{
+  padding:0.6rem 0.8rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);color:#fff;font-size:0.85rem;
+  font-family:inherit;outline:none;
+}
+.gift-input:focus{border-color:var(--accent,#7c5cff)}
+.gift-message{resize:vertical;min-height:60px;max-height:120px}
+.gift-buy-btn{
+  padding:0.75rem 2rem;border:none;border-radius:8px;
+  background:var(--accent,#7c5cff);color:#fff;font-weight:600;
+  font-size:0.9rem;cursor:pointer;transition:transform 0.2s;
+  font-family:inherit;
+}
+.gift-buy-btn:hover{transform:translateY(-2px)}
+.gift-buy-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.gift-note{
+  font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:0.5rem;
+}
+.gift-card-visual{display:flex;justify-content:center;align-items:center}
+.gift-card-preview{
+  width:320px;height:200px;border-radius:16px;
+  background:linear-gradient(135deg,#7c5cff 0%,#818cf8 50%,#a78bfa 100%);
+  padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:0 20px 40px rgba(124,92,255,0.3);position:relative;overflow:hidden;
+}
+.gift-card-preview::before{
+  content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;
+  background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 60%);
+}
+.gift-card-brand{font-size:1rem;font-weight:700;color:#fff;position:relative}
+.gift-card-value{font-size:2.5rem;font-weight:800;color:#fff;position:relative;text-align:center;flex:1;display:flex;align-items:center;justify-content:center}
+.gift-card-subtitle{font-size:0.75rem;color:rgba(255,255,255,0.8);text-align:right;position:relative}

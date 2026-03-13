@@ -26,6 +26,7 @@ const files = [
   "./dashboard.test.js",
   "./email.test.js",
   "./ab-testing.test.js",
+  "./gift-cards.test.js",
 ];
 
 for (const file of files) {

@@ -8,6 +8,7 @@ import newsletterRouter from "./routes/newsletter.js";
 import adminRouter from "./routes/admin.js";
 import galleryRouter from "./routes/gallery.js";
 import referralsRouter from "./routes/referrals.js";
+import giftCardRouter from "./routes/gift-cards.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 import { assignVariant, trackEvent, isAbTestingEnabled } from "./services/ab-testing.js";
@@ -84,6 +85,24 @@ export function createApp() {
   app.use("/api/admin", adminRouter);
   app.use("/api/gallery", galleryRouter);
   app.use("/api/referrals", referralsRouter);
+  app.use("/api/gift-cards", giftCardRouter);
+
+  // SSR design pages (SEO-indexable)
+  // /galeria/:id → gallery SSR page
+  app.get("/galeria/coleccion/:slug", (req, res, next) => {
+    req.url = `/coleccion/${req.params.slug}`;
+    galleryRouter(req, res, next);
+  });
+  app.get("/galeria/:id", (req, res, next) => {
+    req.url = `/page/${req.params.id}`;
+    galleryRouter(req, res, next);
+  });
+
+  // Dynamic sitemap
+  app.get("/sitemap.xml", (req, res, next) => {
+    req.url = "/sitemap.xml";
+    galleryRouter(req, res, next);
+  });
 
   // A/B testing public endpoints (F2-08)
   app.get("/api/ab/assign", (req, res) => {

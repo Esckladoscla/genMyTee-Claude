@@ -361,12 +361,131 @@ function getReferralCode() {
   try { return localStorage.getItem('genmytee_ref') || null; } catch { return null; }
 }
 
+// ── Gift Cards ──
+let selectedGiftAmount = 75;
+
+function initGiftCards() {
+  const amountBtns = document.querySelectorAll('.gift-amount-btn');
+  const buyBtn = document.getElementById('giftBuyBtn');
+  const valueDisplay = document.getElementById('giftCardValue');
+
+  if (!buyBtn) return;
+
+  amountBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      amountBtns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedGiftAmount = parseInt(btn.dataset.amount, 10);
+      if (valueDisplay) valueDisplay.textContent = `\u20AC${selectedGiftAmount}`;
+    });
+  });
+
+  buyBtn.addEventListener('click', async () => {
+    const recipientEmail = document.getElementById('giftRecipientEmail')?.value.trim();
+    const recipientName = document.getElementById('giftRecipientName')?.value.trim();
+    const message = document.getElementById('giftMessage')?.value.trim();
+
+    if (!recipientEmail || !recipientEmail.includes('@')) {
+      showToast('Introduce el email del destinatario');
+      return;
+    }
+
+    buyBtn.disabled = true;
+    buyBtn.textContent = 'Procesando...';
+
+    try {
+      // Create checkout session for gift card
+      const res = await fetch('/api/checkout/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            name: `Tarjeta regalo genMyTee \u20AC${selectedGiftAmount}`,
+            product_key: 'gift-card',
+            size: '',
+            color: '',
+            quantity: 1,
+            price: selectedGiftAmount,
+            image_url: '',
+            slug: 'tarjeta-regalo',
+            is_gift_card: true,
+            gift_card_data: { recipient_email: recipientEmail, recipient_name: recipientName, message },
+          }],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok && data.url) {
+        // Store gift card data for post-purchase processing
+        try {
+          localStorage.setItem('genmytee_gift_pending', JSON.stringify({
+            amount: selectedGiftAmount,
+            recipient_email: recipientEmail,
+            recipient_name: recipientName,
+            message,
+          }));
+        } catch {}
+        window.location.href = data.url;
+      } else {
+        showToast(data.error || 'Error al procesar el pago');
+        buyBtn.disabled = false;
+        buyBtn.textContent = 'Comprar tarjeta regalo';
+      }
+    } catch {
+      showToast('Error de conexión. Inténtalo de nuevo.');
+      buyBtn.disabled = false;
+      buyBtn.textContent = 'Comprar tarjeta regalo';
+    }
+  });
+}
+
+// ── Gift Card Redemption (in cart) ──
+function initGiftCardRedemption() {
+  // Add redemption UI to cart footer if it exists
+  const cartFooter = document.getElementById('cartFooter');
+  if (!cartFooter || document.getElementById('giftCodeRow')) return;
+
+  const row = document.createElement('div');
+  row.id = 'giftCodeRow';
+  row.style.cssText = 'display:flex;gap:0.4rem;margin-bottom:0.6rem;';
+  row.innerHTML = `
+    <input type="text" id="giftCodeInput" placeholder="Código regalo" style="flex:1;padding:0.4rem 0.6rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:#fff;font-size:0.75rem;font-family:inherit;" />
+    <button id="giftCodeApply" style="padding:0.4rem 0.8rem;border-radius:6px;border:none;background:var(--accent,#7c5cff);color:#fff;font-size:0.72rem;cursor:pointer;font-family:inherit;">Aplicar</button>
+  `;
+  const shippingNote = cartFooter.querySelector('.cart-shipping-note');
+  if (shippingNote) {
+    cartFooter.insertBefore(row, shippingNote);
+  } else {
+    cartFooter.prepend(row);
+  }
+
+  document.getElementById('giftCodeApply')?.addEventListener('click', async () => {
+    const code = document.getElementById('giftCodeInput')?.value.trim();
+    if (!code) { showToast('Introduce un código de regalo'); return; }
+    try {
+      const res = await fetch(`/api/gift-cards/validate?code=${encodeURIComponent(code)}`);
+      const data = await res.json();
+      if (data.ok && data.valid) {
+        showToast(`Tarjeta válida: ${data.amount_eur}\u20AC de descuento`);
+        try { localStorage.setItem('genmytee_gift_code', code); } catch {}
+      } else {
+        const msgs = { not_found: 'Código no válido', already_redeemed: 'Ya ha sido canjeada', expired: 'Código caducado' };
+        showToast(msgs[data.error] || 'Código no válido');
+      }
+    } catch {
+      showToast('Error al validar el código');
+    }
+  });
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   initScrollAnimations();
   initCookieBanner();
   initReferralTracking();
+  initGiftCards();
+  initGiftCardRedemption();
   loadBundles();
 
   const checkoutBtn = document.getElementById('checkoutBtn');

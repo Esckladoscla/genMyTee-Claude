@@ -95,10 +95,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `catalog.js` — `GET /api/catalog/products`, `GET /api/catalog/products/:slug` (product catalog from `data/products.json`)
 - `checkout.js` — `POST /api/checkout/session` (creates Stripe Checkout Session from cart items), `POST /api/checkout/webhook` (handles Stripe `checkout.session.completed` → Printful order via `order-processing.js`), `GET /api/checkout/status`
 - `newsletter.js` — `POST /api/newsletter` (email subscription, stored in SQLite)
-- `gallery.js` — `GET /api/gallery/designs` (curated designs listing with tag/featured filters), `GET /api/gallery/designs/:id` (design detail with compatible products)
+- `gallery.js` — `GET /api/gallery/designs` (curated designs with tag/featured/collection filters), `GET /api/gallery/designs/:id` (design detail), `GET /api/gallery/collections` (collections with design counts), SSR pages: `/galeria/:id` (design page), `/galeria/coleccion/:slug` (collection page), `/sitemap.xml`
+- `gift-cards.js` — `GET /api/gift-cards/amounts`, `POST /api/gift-cards/purchase`, `GET /api/gift-cards/validate`, `POST /api/gift-cards/redeem`
 - `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
 - `preview.js` also exposes: `POST /api/preview/image/async` (enqueue async generation), `GET /api/preview/image/status` (poll job status)
-- `admin.js` — Admin panel: `GET /api/admin/dashboard` (business metrics), `POST /api/admin/ai` (toggle AI), `GET /api/admin/orders` (order review), `GET /api/admin/experiments` (A/B testing)
+- `admin.js` — Admin panel: `GET /api/admin/dashboard` (business metrics), `POST /api/admin/ai` (toggle AI), `GET /api/admin/orders` (order review), `GET /api/admin/experiments` (A/B testing), `GET /api/admin/gift-cards` (gift card list), `POST /api/admin/gallery/batch-generate` (batch image generation)
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -118,15 +119,17 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `registry.js` — Service registry for all external dependencies (storage, image, fulfillment, payments)
 - `captcha.js` — Cloudflare Turnstile CAPTCHA verification (invisible, configurable via `CAPTCHA_ENABLED`)
 - `image-moderator.js` — Post-generation image moderation using OpenAI omni-moderation (configurable via `IMAGE_MODERATION_ENABLED`)
-- `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
+- `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests, gift cards (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
 - `ab-testing.js` — A/B testing framework: experiments, deterministic variant assignment, event tracking, results aggregation (configurable via `AB_TESTING_ENABLED`)
+- `gift-cards.js` — SQLite-backed digital gift cards: create, validate, redeem (codes: `GMT-XXXX-XXXX-XXXX`, amounts: €25/50/75/100, 1-year expiry)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
 - `color-alias.json` — color name normalization
 - `printful_product_ids.json` — Printful product metadata
 - `products.json` — product catalog (slug, name, product_key, base_price_eur, sizes, colors, placement)
-- `curated-designs.json` — gallery of pre-made designs (id, title, image_url, tags, compatible_products)
+- `curated-designs.json` — gallery of 55 pre-made designs (id, title, image_url, tags, compatible_products, collection)
+- `collections.json` — 11 thematic collections (id, name, slug, description, emoji, sort_order)
 - `bundles.json` — pack/bundle pricing rules (min_items, categories, bundle_price_eur)
 - `app.db` — SQLite database for idempotency and newsletter subscribers
 
