@@ -134,6 +134,18 @@ export function getHourlyStats() {
   };
 }
 
+export function getGenerationHistory({ limit = 168 } = {}) {
+  try {
+    const database = ensureDb();
+    const rows = database
+      .prepare("SELECT hour_key, count FROM generation_tracker ORDER BY hour_key DESC LIMIT ?")
+      .all(Math.max(1, Math.min(500, limit)));
+    return rows.map((r) => ({ hour: r.hour_key, count: Number(r.count) })).reverse();
+  } catch {
+    return [];
+  }
+}
+
 export function _resetTrackerForTests() {
   if (db) {
     try { db.close(); } catch (_) { /* ignore */ }

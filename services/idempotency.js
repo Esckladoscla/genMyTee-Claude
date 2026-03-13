@@ -43,6 +43,8 @@ function ensureDb() {
     addColumnSafe("tracking_url", "TEXT");
     addColumnSafe("shipping_carrier", "TEXT");
     addColumnSafe("tracking_updated_at", "TEXT");
+    addColumnSafe("amount_cents", "INTEGER");
+    addColumnSafe("currency", "TEXT");
   };
 
   try {
@@ -205,6 +207,91 @@ export function getTracking(orderId) {
     tracking_url: record.tracking_url || null,
     shipping_carrier: record.shipping_carrier || null,
     tracking_updated_at: record.tracking_updated_at || null,
+  };
+}
+
+export function recordOrderAmount(orderId, { amountCents, currency } = {}) {
+  if (!orderId || !amountCents) return;
+  const database = ensureDb();
+  database
+    .prepare(`
+      UPDATE processed_orders
+      SET amount_cents = ?, currency = ?
+      WHERE order_id = ?
+    `)
+    .run(amountCents, currency || "eur", orderId);
+}
+
+export function getOrderStats() {
+  const database = ensureDb();
+  const totals = database
+    .prepare(`
+      SELECT
+        COUNT(*) AS total_orders,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed_orders,
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) AS failed_orders,
+        COUNT(CASE WHEN status = 'processing' THEN 1 END) AS processing_orders,
+        COUNT(CASE WHEN status = 'held' THEN 1 END) AS held_orders,
+        COALESCE(SUM(CASE WHEN status = 'completed' THEN amount_cents END), 0) AS total_revenue_cents,
+        COALESCE(MAX(currency), 'eur') AS currency
+      FROM processed_orders
+    `)
+    .get();
+
+  const last30Days = database
+    .prepare(`
+      SELECT
+        COUNT(*) AS orders,
+        COALESCE(SUM(CASE WHEN status = 'completed' THEN amount_cents END), 0) AS revenue_cents
+      FROM processed_orders
+      WHERE created_at >= datetime('now', '-30 days')
+    `)
+    .get();
+
+  const last7Days = database
+    .prepare(`
+      SELECT
+        COUNT(*) AS orders,
+        COALESCE(SUM(CASE WHEN status = 'completed' THEN amount_cents END), 0) AS revenue_cents
+      FROM processed_orders
+      WHERE created_at >= datetime('now', '-7 days')
+    `)
+    .get();
+
+  const dailyOrders = database
+    .prepare(`
+      SELECT
+        DATE(created_at) AS day,
+        COUNT(*) AS orders,
+        COALESCE(SUM(amount_cents), 0) AS revenue_cents
+      FROM processed_orders
+      WHERE created_at >= datetime('now', '-30 days')
+      GROUP BY DATE(created_at)
+      ORDER BY day
+    `)
+    .all();
+
+  return {
+    total_orders: Number(totals.total_orders),
+    completed_orders: Number(totals.completed_orders),
+    failed_orders: Number(totals.failed_orders),
+    processing_orders: Number(totals.processing_orders),
+    held_orders: Number(totals.held_orders),
+    total_revenue_cents: Number(totals.total_revenue_cents),
+    currency: totals.currency || "eur",
+    last_30_days: {
+      orders: Number(last30Days.orders),
+      revenue_cents: Number(last30Days.revenue_cents),
+    },
+    last_7_days: {
+      orders: Number(last7Days.orders),
+      revenue_cents: Number(last7Days.revenue_cents),
+    },
+    daily_orders: dailyOrders.map((d) => ({
+      day: d.day,
+      orders: Number(d.orders),
+      revenue_cents: Number(d.revenue_cents),
+    })),
   };
 }
 

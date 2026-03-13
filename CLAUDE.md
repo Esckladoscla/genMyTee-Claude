@@ -98,6 +98,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `gallery.js` — `GET /api/gallery/designs` (curated designs listing with tag/featured filters), `GET /api/gallery/designs/:id` (design detail with compatible products)
 - `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
 - `preview.js` also exposes: `POST /api/preview/image/async` (enqueue async generation), `GET /api/preview/image/status` (poll job status)
+- `admin.js` — Admin panel: `GET /api/admin/dashboard` (business metrics), `POST /api/admin/ai` (toggle AI), `GET /api/admin/orders` (order review), `GET /api/admin/experiments` (A/B testing)
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -117,6 +118,8 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `registry.js` — Service registry for all external dependencies (storage, image, fulfillment, payments)
 - `captcha.js` — Cloudflare Turnstile CAPTCHA verification (invisible, configurable via `CAPTCHA_ENABLED`)
 - `image-moderator.js` — Post-generation image moderation using OpenAI omni-moderation (configurable via `IMAGE_MODERATION_ENABLED`)
+- `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
+- `ab-testing.js` — A/B testing framework: experiments, deterministic variant assignment, event tracking, results aggregation (configurable via `AB_TESTING_ENABLED`)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)

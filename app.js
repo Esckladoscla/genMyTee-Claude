@@ -10,6 +10,8 @@ import galleryRouter from "./routes/gallery.js";
 import referralsRouter from "./routes/referrals.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
+import { assignVariant, trackEvent, isAbTestingEnabled } from "./services/ab-testing.js";
+import { parseSessionCookie } from "./services/session-limiter.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -82,6 +84,31 @@ export function createApp() {
   app.use("/api/admin", adminRouter);
   app.use("/api/gallery", galleryRouter);
   app.use("/api/referrals", referralsRouter);
+
+  // A/B testing public endpoints (F2-08)
+  app.get("/api/ab/assign", (req, res) => {
+    if (!isAbTestingEnabled()) {
+      return res.json({ ok: true, variant: null, enabled: false });
+    }
+    const experimentId = String(req.query.experiment_id || "").trim();
+    if (!experimentId) {
+      return res.status(422).json({ ok: false, error: "experiment_id required" });
+    }
+    const sessionId = parseSessionCookie(req.headers.cookie) || "anon";
+    const variant = assignVariant(experimentId, sessionId);
+    return res.json({ ok: true, variant, experiment_id: experimentId });
+  });
+
+  app.post("/api/ab/track", (req, res) => {
+    if (!isAbTestingEnabled()) return res.json({ ok: true });
+    const { experiment_id, event_type } = req.body || {};
+    if (!experiment_id || !event_type) {
+      return res.status(422).json({ ok: false, error: "experiment_id and event_type required" });
+    }
+    const sessionId = parseSessionCookie(req.headers.cookie) || "anon";
+    trackEvent(experiment_id, sessionId, event_type);
+    return res.json({ ok: true });
+  });
 
   app.use(express.static(join(__dirname, "public")));
 
