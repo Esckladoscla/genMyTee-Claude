@@ -2,7 +2,12 @@ import { timingSafeEqual } from "node:crypto";
 import express from "express";
 import { getBooleanEnv, getEnv, getDbPath } from "../services/env.js";
 import { getOpenAiUsageSnapshot } from "../services/openai.js";
-import { getHourlyStats } from "../services/generation-tracker.js";
+import { getHourlyStats, getGenerationHistory } from "../services/generation-tracker.js";
+import { getOrderStats } from "../services/idempotency.js";
+import { getSessionStats } from "../services/session-limiter.js";
+import {
+  createExperiment, listExperiments, getExperimentResults, isAbTestingEnabled,
+} from "../services/ab-testing.js";
 import { DatabaseSync } from "node:sqlite";
 
 function verifyAdminSecret(req) {
@@ -88,6 +93,72 @@ export function buildAdminRouter({ logger = console } = {}) {
     });
   });
 
+  // ── Dashboard (F1-31) ──
+
+  router.get("/dashboard", (_req, res) => {
+    try {
+      const hourly = getHourlyStats();
+      const usage = getOpenAiUsageSnapshot({ limit: 500 });
+      const generationHistory = getGenerationHistory();
+
+      let orderStats;
+      try {
+        orderStats = getOrderStats();
+      } catch {
+        orderStats = null;
+      }
+
+      let sessionStats;
+      try {
+        sessionStats = getSessionStats();
+      } catch {
+        sessionStats = null;
+      }
+
+      // Estimated OpenAI costs (approximate pricing)
+      const IMAGE_COST_USD = 0.04; // gpt-image-1 per image (1024x1024)
+      const MODERATION_COST_USD = 0.001; // omni-moderation per call
+      const estimatedCost = {
+        image_generation_usd: usage.image_generation_calls * IMAGE_COST_USD,
+        moderation_usd: usage.moderation_calls * MODERATION_COST_USD,
+        total_usd: (usage.image_generation_calls * IMAGE_COST_USD) +
+                   (usage.moderation_calls * MODERATION_COST_USD),
+        note: "Estimates based on approximate per-call pricing. In-memory only (resets on deploy).",
+      };
+
+      // Conversion rate
+      const totalGenerations = generationHistory.reduce((sum, h) => sum + h.count, 0) || hourly.count;
+      const completedOrders = orderStats?.completed_orders || 0;
+      const conversionRate = totalGenerations > 0
+        ? ((completedOrders / totalGenerations) * 100).toFixed(2)
+        : "0.00";
+
+      return res.json({
+        ok: true,
+        ai_enabled: getBooleanEnv("AI_ENABLED", { defaultValue: true }),
+        hourly_generations: hourly,
+        generation_history: generationHistory,
+        openai_usage: {
+          total_calls: usage.total_calls,
+          moderation_calls: usage.moderation_calls,
+          image_generation_calls: usage.image_generation_calls,
+          successful_calls: usage.successful_calls,
+          failed_calls: usage.failed_calls,
+        },
+        estimated_cost: estimatedCost,
+        orders: orderStats,
+        sessions: sessionStats,
+        conversion: {
+          total_generations: totalGenerations,
+          completed_orders: completedOrders,
+          rate_percent: conversionRate,
+        },
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
   // ── Order review panel (F1-15) ──
 
   router.get("/orders", (_req, res) => {
@@ -154,6 +225,46 @@ export function buildAdminRouter({ logger = console } = {}) {
       db.close();
       logger.warn(`[admin] Order ${req.params.orderId} approved`);
       return res.json({ ok: true, status: "completed" });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  // ── A/B Testing (F2-08) ──
+
+  router.get("/experiments", (_req, res) => {
+    try {
+      return res.json({
+        ok: true,
+        enabled: isAbTestingEnabled(),
+        experiments: listExperiments(),
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  router.post("/experiments", (req, res) => {
+    try {
+      const { name, variants } = req.body || {};
+      if (!name || typeof name !== "string") {
+        return res.status(422).json({ ok: false, error: "name is required" });
+      }
+      const variantList = Array.isArray(variants) && variants.length >= 2
+        ? variants
+        : ["control", "variant_a"];
+      const experiment = createExperiment(name, variantList);
+      return res.json({ ok: true, experiment });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  router.get("/experiments/:id/results", (req, res) => {
+    try {
+      const data = getExperimentResults(req.params.id);
+      if (!data) return res.status(404).json({ ok: false, error: "not_found" });
+      return res.json({ ok: true, ...data });
     } catch (err) {
       return res.status(500).json({ ok: false, error: err?.message });
     }

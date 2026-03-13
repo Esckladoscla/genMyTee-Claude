@@ -11,7 +11,8 @@ import {
 import { processOrder } from "../services/order-processing.js";
 import { createOrderSafe } from "../services/printful.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
-import { markCompleted, markFailed, startProcessing, getTracking, updateTracking } from "../services/idempotency.js";
+import { sendOrderConfirmation } from "../services/email.js";
+import { markCompleted, markFailed, startProcessing, getTracking, updateTracking, recordOrderAmount } from "../services/idempotency.js";
 import { getOrder as getPrintfulOrder } from "../services/printful.js";
 import {
   inferProductKey,
@@ -47,7 +48,7 @@ export function buildCheckoutRouter({
   parseVariantTitleFn = parseVariantTitle,
   inferProductKeyFn = inferProductKey,
   createOrderSafeFn = createOrderSafe,
-  idempotency = { startProcessing, markCompleted, markFailed, getTracking, updateTracking },
+  idempotency = { startProcessing, markCompleted, markFailed, getTracking, updateTracking, recordOrderAmount },
   getPrintfulOrderFn = getPrintfulOrder,
   getConfirmFn = () => getBooleanEnv("PRINTFUL_CONFIRM", { defaultValue: false }),
   getDefaultPlacementFn = () => getEnv("PRINTFUL_PLACEMENT", { defaultValue: "front" }),
@@ -261,6 +262,25 @@ export function buildCheckoutRouter({
         getDefaultPlacementFn,
         logger,
       });
+
+      // Record order amount for dashboard metrics
+      try {
+        if (session.amount_total && idempotency.recordOrderAmount) {
+          idempotency.recordOrderAmount(session.id, {
+            amountCents: session.amount_total,
+            currency: session.currency || "eur",
+          });
+        }
+      } catch { /* best-effort */ }
+
+      // Send order confirmation email (best-effort)
+      try {
+        const customerEmail = session.customer_details?.email;
+        if (customerEmail && !result.skipped) {
+          sendOrderConfirmation(customerEmail, { orderId: session.id }, { logger })
+            .catch(() => {});
+        }
+      } catch { /* best-effort */ }
 
       logger.log("[checkout] webhook processed", {
         session_id: session.id,

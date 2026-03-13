@@ -209,6 +209,26 @@ export function unlockWithEmail(sessionId, email) {
   };
 }
 
+export function getSessionStats() {
+  const database = ensureDb();
+  const row = database
+    .prepare(`
+      SELECT
+        COUNT(*) AS total_sessions,
+        COUNT(CASE WHEN email IS NOT NULL THEN 1 END) AS sessions_with_email,
+        COALESCE(SUM(count), 0) AS total_generations,
+        COUNT(DISTINCT ip_address) AS unique_ips
+      FROM session_generations
+    `)
+    .get();
+  return {
+    total_sessions: Number(row.total_sessions),
+    sessions_with_email: Number(row.sessions_with_email),
+    total_generations: Number(row.total_generations),
+    unique_ips: Number(row.unique_ips),
+  };
+}
+
 export function _resetSessionLimiterForTests() {
   if (db) {
     try { db.close(); } catch (_) { /* ignore */ }

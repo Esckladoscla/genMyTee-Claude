@@ -23,6 +23,9 @@ const files = [
   "./service-registry.test.js",
   "./captcha.test.js",
   "./image-moderator.test.js",
+  "./dashboard.test.js",
+  "./email.test.js",
+  "./ab-testing.test.js",
 ];
 
 for (const file of files) {
