@@ -5,6 +5,7 @@ import previewRouter from "./routes/preview.js";
 import ordersRouter from "./routes/orders.js";
 import catalogRouter from "./routes/catalog.js";
 import newsletterRouter from "./routes/newsletter.js";
+import adminRouter from "./routes/admin.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 
@@ -76,6 +77,7 @@ export function createApp() {
   app.use("/api/orders", ordersRouter);
   app.use("/api/catalog", catalogRouter);
   app.use("/api/newsletter", newsletterRouter);
+  app.use("/api/admin", adminRouter);
 
   app.use(express.static(join(__dirname, "public")));
 

@@ -192,6 +192,13 @@ function updatePrice() {
   if (!priceEl || !selectedProduct) return;
   const total = (selectedProduct.base_price_eur || 39) * panelQty;
   priceEl.textContent = `\u20AC${total.toFixed(2)}`;
+
+  // Also update the price hint near the generate button
+  const hintEl = document.getElementById('priceHintValue');
+  if (hintEl) {
+    const base = selectedProduct.base_price_eur || 39;
+    hintEl.textContent = `\u20AC${base.toFixed(2)}`;
+  }
 }
 
 // ── Panel tabs ──
@@ -303,6 +310,14 @@ async function generateDesign() {
     const imageData = await imageRes.json();
 
     if (!imageData.ok || !imageData.image_url) {
+      if (imageData.error === 'generation_limit_reached') {
+        showEmailGateModal(imageData.needs_email);
+        return;
+      }
+      if (imageData.error === 'brand_blocked') {
+        showGenerationError(imageData.message || 'Tu dise\u00f1o no puede incluir marcas registradas o personajes con copyright.');
+        return;
+      }
       const errorMsg = imageData.error || imageData.message || 'Error al generar el dise\u00f1o';
       showGenerationError(typeof errorMsg === 'string' ? errorMsg : 'Error al generar el dise\u00f1o');
       return;
@@ -944,6 +959,73 @@ function updateClientPreview() {
   if (!designImg) return;
   const { scaleVal, leftPct, topPct } = getLayoutPreview();
   designImg.style.transform = `translate(${leftPct}%, ${topPct}%) scale(${scaleVal})`;
+}
+
+// ── Email gate modal ──
+function showEmailGateModal(needsEmail) {
+  document.querySelectorAll('.email-gate-overlay').forEach(el => el.remove());
+
+  const message = needsEmail
+    ? 'Has alcanzado el límite de diseños gratuitos. Introduce tu email para desbloquear más generaciones.'
+    : 'Has alcanzado el límite de generaciones. Vuelve más tarde o compra uno de nuestros diseños.';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'email-gate-overlay';
+  overlay.innerHTML = `
+    <div class="email-gate-card">
+      <div class="email-gate-icon">&#9993;</div>
+      <h3 class="email-gate-title">${needsEmail ? 'Desbloquea más diseños' : 'Límite alcanzado'}</h3>
+      <p class="email-gate-msg">${escapeHtmlLocal(message)}</p>
+      ${needsEmail ? `
+        <form class="email-gate-form" id="emailGateForm">
+          <input type="email" class="email-gate-input" placeholder="tu@email.com" required autofocus />
+          <button type="submit" class="email-gate-submit">Desbloquear</button>
+        </form>
+        <p class="email-gate-privacy">Solo usaremos tu email para novedades de genMyTee. Sin spam.</p>
+      ` : ''}
+      <button class="email-gate-close">Cerrar</button>
+    </div>
+  `;
+
+  overlay.querySelector('.email-gate-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  if (needsEmail) {
+    const form = overlay.querySelector('#emailGateForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = form.querySelector('.email-gate-input');
+      const submitBtn = form.querySelector('.email-gate-submit');
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Desbloqueando...';
+
+      try {
+        const res = await fetch('/api/preview/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          overlay.remove();
+          showToast(`¡Desbloqueado! Tienes ${data.remaining} generaciones más.`);
+        } else {
+          showToast(data.error === 'email_invalid' ? 'Introduce un email válido.' : 'Error. Inténtalo de nuevo.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Desbloquear';
+        }
+      } catch (_) {
+        showToast('Error de conexión. Inténtalo de nuevo.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Desbloquear';
+      }
+    });
+  }
+
+  document.body.appendChild(overlay);
 }
 
 // Expose for catalog.js product card clicks
