@@ -11,7 +11,8 @@ import {
 import { processOrder } from "../services/order-processing.js";
 import { createOrderSafe } from "../services/printful.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
-import { markCompleted, markFailed, startProcessing } from "../services/idempotency.js";
+import { markCompleted, markFailed, startProcessing, getTracking, updateTracking } from "../services/idempotency.js";
+import { getOrder as getPrintfulOrder } from "../services/printful.js";
 import {
   inferProductKey,
   normalizeProperties,
@@ -46,7 +47,8 @@ export function buildCheckoutRouter({
   parseVariantTitleFn = parseVariantTitle,
   inferProductKeyFn = inferProductKey,
   createOrderSafeFn = createOrderSafe,
-  idempotency = { startProcessing, markCompleted, markFailed },
+  idempotency = { startProcessing, markCompleted, markFailed, getTracking, updateTracking },
+  getPrintfulOrderFn = getPrintfulOrder,
   getConfirmFn = () => getBooleanEnv("PRINTFUL_CONFIRM", { defaultValue: false }),
   getDefaultPlacementFn = () => getEnv("PRINTFUL_PLACEMENT", { defaultValue: "front" }),
   productsFn = loadProducts,
@@ -138,16 +140,16 @@ export function buildCheckoutRouter({
     }
   });
 
-  // GET /status — order status lookup
+  // GET /status — order status lookup with tracking
   router.get("/status", async (req, res) => {
     const sessionId = String(req.query.session_id || "").trim();
     if (!sessionId) {
       return res.status(422).json({ ok: false, error: "session_id is required" });
     }
 
+    let status;
     try {
-      const status = await retrieveSessionFn(sessionId);
-      return res.json({ ok: true, ...status });
+      status = await retrieveSessionFn(sessionId);
     } catch (error) {
       if (error?.statusCode === 404 || error?.code === "resource_missing") {
         return res.status(404).json({ ok: false, error: "session_not_found" });
@@ -158,6 +160,66 @@ export function buildCheckoutRouter({
       });
       return res.status(500).json({ ok: false, error: "status_unavailable" });
     }
+
+    // Enrich with tracking data from SQLite + Printful
+    let tracking = null;
+    try {
+      const cached = idempotency.getTracking(sessionId);
+      if (cached?.printful_order_id) {
+        const TRACKING_CACHE_MS = 30 * 60 * 1000; // 30 minutes
+        const cacheAge = cached.tracking_updated_at
+          ? Date.now() - Date.parse(cached.tracking_updated_at)
+          : Infinity;
+        const isFresh = Number.isFinite(cacheAge) && cacheAge < TRACKING_CACHE_MS;
+        const isTerminal = cached.printful_status === "fulfilled" || cached.printful_status === "canceled";
+
+        if (isFresh || isTerminal) {
+          tracking = cached;
+        } else {
+          // Fetch fresh data from Printful
+          try {
+            const pfOrder = await getPrintfulOrderFn(cached.printful_order_id);
+            const shipment = Array.isArray(pfOrder?.shipments) ? pfOrder.shipments[0] : null;
+            const pfStatus = pfOrder?.status || null;
+
+            const trackingData = {
+              printfulStatus: pfStatus,
+              trackingNumber: shipment?.tracking_number || null,
+              trackingUrl: shipment?.tracking_url || null,
+              shippingCarrier: shipment?.carrier || shipment?.service || null,
+            };
+
+            idempotency.updateTracking(sessionId, trackingData);
+            tracking = {
+              printful_order_id: cached.printful_order_id,
+              printful_status: trackingData.printfulStatus,
+              tracking_number: trackingData.trackingNumber,
+              tracking_url: trackingData.trackingUrl,
+              shipping_carrier: trackingData.shippingCarrier,
+            };
+          } catch (pfError) {
+            logger.error("[checkout] Printful order fetch failed", {
+              printful_order_id: cached.printful_order_id,
+              message: pfError?.message,
+            });
+            // Return stale cached data if available
+            tracking = cached;
+          }
+        }
+      }
+    } catch {
+      // Tracking enrichment is best-effort; don't fail the whole request
+    }
+
+    const response = { ok: true, ...status };
+    if (tracking) {
+      response.printful_status = tracking.printful_status || null;
+      response.tracking_number = tracking.tracking_number || null;
+      response.tracking_url = tracking.tracking_url || null;
+      response.shipping_carrier = tracking.shipping_carrier || null;
+    }
+
+    return res.json(response);
   });
 
   // POST /webhook — Stripe webhook handler

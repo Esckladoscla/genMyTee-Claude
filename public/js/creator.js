@@ -338,6 +338,9 @@ async function generateDesign() {
 
     advanceStep(3);
 
+    // Show instant CSS composite preview while mockup loads
+    showInstantPreview();
+
     // Step 2: Request mockup (non-blocking)
     requestMockup(productKey);
 
@@ -487,13 +490,37 @@ function escapeHtmlLocal(str) {
   return div.innerHTML;
 }
 
+// ── Instant CSS preview (shown immediately after AI generation) ──
+function showInstantPreview() {
+  if (!generatedImageUrl || !selectedProduct) return;
+
+  const preview = document.querySelector('.garment-preview');
+  if (!preview) return;
+
+  // Hide garment photo and small design overlay — replaced by full composite
+  const garmentBg = preview.querySelector('.garment-bg');
+  const garmentCanvas = preview.querySelector('.garment-canvas');
+  if (garmentBg) garmentBg.style.display = 'none';
+  if (garmentCanvas) garmentCanvas.style.display = 'none';
+
+  // Set up and show the CSS composite preview
+  setupClientPreview();
+}
+
 // ── Mockup display ──
 function showMockupLoading() {
   const preview = document.querySelector('.garment-preview');
   if (!preview || preview.querySelector('.mockup-loading')) return;
+
+  // If instant CSS preview is showing, use a subtle bottom label
+  const clientPreview = document.getElementById('clientPreview');
+  const hasInstantPreview = clientPreview && clientPreview.style.display !== 'none';
+
   const loader = document.createElement('div');
-  loader.className = 'mockup-loading';
-  loader.innerHTML = '<div class="mockup-loading-text">Aplicando dise\u00F1o a la prenda\u2026</div>';
+  loader.className = 'mockup-loading' + (hasInstantPreview ? ' instant-preview-loading' : '');
+  loader.innerHTML = hasInstantPreview
+    ? '<div class="mockup-loading-text">Generando mockup profesional\u2026</div>'
+    : '<div class="mockup-loading-text">Aplicando dise\u00F1o a la prenda\u2026</div>';
   preview.appendChild(loader);
 }
 
@@ -508,6 +535,10 @@ function displayMockup(primaryUrl, allUrls) {
   const preview = document.querySelector('.garment-preview');
   if (!preview) return;
 
+  // Check if we're transitioning from instant CSS preview
+  const clientPreview = document.getElementById('clientPreview');
+  const fromInstantPreview = clientPreview && clientPreview.style.display !== 'none';
+
   // Hide the garment photo and design overlay — the mockup replaces everything
   const garmentBg = preview.querySelector('.garment-bg');
   const garmentCanvas = preview.querySelector('.garment-canvas');
@@ -519,7 +550,7 @@ function displayMockup(primaryUrl, allUrls) {
   if (existing) existing.remove();
 
   const container = document.createElement('div');
-  container.className = 'mockup-container';
+  container.className = 'mockup-container' + (fromInstantPreview ? ' fade-in' : '');
 
   const mainImg = document.createElement('img');
   mainImg.className = 'mockup-img';
@@ -550,6 +581,12 @@ function displayMockup(primaryUrl, allUrls) {
 
   preview.appendChild(container);
 
+  // Hide instant CSS preview now that real mockup is showing
+  if (fromInstantPreview && clientPreview) {
+    clientPreview.style.display = 'none';
+    if (previewResizeObserver) previewResizeObserver.disconnect();
+  }
+
   // If user is adjusting sliders, don't interrupt — keep mockup hidden in DOM
   if (previewMode === 'adjusting') {
     container.style.display = 'none';
@@ -568,6 +605,11 @@ function hideMockup() {
   exitAdjustMode();
   hideMockupLoading();
   document.querySelectorAll('.mockup-container').forEach(el => el.remove());
+
+  // Hide instant CSS preview if showing
+  const clientPreview = document.getElementById('clientPreview');
+  if (clientPreview) clientPreview.style.display = 'none';
+  if (previewResizeObserver) previewResizeObserver.disconnect();
 
   // Restore garment photo and design overlay
   const preview = document.querySelector('.garment-preview');

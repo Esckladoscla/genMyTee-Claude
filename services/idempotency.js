@@ -32,6 +32,17 @@ function ensureDb() {
       updated_at TEXT NOT NULL
     )
   `);
+    // Tracking columns — added in Sprint 3
+    const addColumnSafe = (col, type) => {
+      try {
+        database.exec(`ALTER TABLE processed_orders ADD COLUMN ${col} ${type}`);
+      } catch { /* column already exists */ }
+    };
+    addColumnSafe("printful_status", "TEXT");
+    addColumnSafe("tracking_number", "TEXT");
+    addColumnSafe("tracking_url", "TEXT");
+    addColumnSafe("shipping_carrier", "TEXT");
+    addColumnSafe("tracking_updated_at", "TEXT");
   };
 
   try {
@@ -157,6 +168,44 @@ export function markFailed(orderId, error) {
       WHERE order_id = ?
     `)
     .run(message, timestamp, orderId);
+}
+
+export function updateTracking(orderId, { printfulStatus, trackingNumber, trackingUrl, shippingCarrier } = {}) {
+  if (!orderId) return;
+  const database = ensureDb();
+  const timestamp = nowIso();
+  database
+    .prepare(`
+      UPDATE processed_orders
+      SET
+        printful_status = COALESCE(?, printful_status),
+        tracking_number = COALESCE(?, tracking_number),
+        tracking_url = COALESCE(?, tracking_url),
+        shipping_carrier = COALESCE(?, shipping_carrier),
+        tracking_updated_at = ?
+      WHERE order_id = ?
+    `)
+    .run(
+      printfulStatus || null,
+      trackingNumber || null,
+      trackingUrl || null,
+      shippingCarrier || null,
+      timestamp,
+      orderId
+    );
+}
+
+export function getTracking(orderId) {
+  const record = getOrderRecord(orderId);
+  if (!record) return null;
+  return {
+    printful_order_id: record.printful_order_id || null,
+    printful_status: record.printful_status || null,
+    tracking_number: record.tracking_number || null,
+    tracking_url: record.tracking_url || null,
+    shipping_carrier: record.shipping_carrier || null,
+    tracking_updated_at: record.tracking_updated_at || null,
+  };
 }
 
 export function _resetIdempotencyStateForTests() {
