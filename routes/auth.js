@@ -15,30 +15,45 @@ import {
   linkSessionToUser,
 } from "../services/auth.js";
 import { sendEmail } from "../services/email.js";
+import { verifyCaptcha } from "../services/captcha.js";
 import { parseSessionCookie } from "../services/session-limiter.js";
 import { linkDesignsToUser } from "../services/design-history.js";
 
-const EMAIL_TEMPLATES = {
-  email_verification: {
-    subject: "Tu código de verificación - genMyTee",
-    html: `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-        <h1 style="color:#1e293b;font-size:24px;">Verifica tu email</h1>
-        <p style="color:#475569;font-size:16px;line-height:1.6;">
-          Tu código de verificación es:
-        </p>
-        <div style="background:#f1f5f9;border-radius:12px;padding:24px;margin:16px 0;text-align:center;">
-          <p style="margin:0;color:#1e293b;font-size:36px;font-weight:700;letter-spacing:8px;">{code}</p>
-        </div>
-        <p style="color:#475569;font-size:14px;">
-          Este código expira en 30 minutos. Si no solicitaste este código, puedes ignorar este email.
-        </p>
-        <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
-        <p style="color:#94a3b8;font-size:12px;">genMyTee - Tu diseño, tu estilo</p>
-      </div>
-    `,
-  },
-};
+// --- In-memory rate limiter ---
+const rateLimits = new Map();
+
+function checkRateLimit(key, maxAttempts, windowMs) {
+  const now = Date.now();
+  const attempts = rateLimits.get(key) || [];
+  const recent = attempts.filter(t => now - t < windowMs);
+  if (recent.length >= maxAttempts) return false;
+  recent.push(now);
+  rateLimits.set(key, recent);
+  return true;
+}
+
+// Periodic cleanup every 15 minutes
+const _rateLimitCleanupInterval = setInterval(() => {
+  const now = Date.now();
+  const maxWindow = 30 * 60 * 1000; // longest window used
+  for (const [key, attempts] of rateLimits) {
+    const recent = attempts.filter(t => now - t < maxWindow);
+    if (recent.length === 0) {
+      rateLimits.delete(key);
+    } else {
+      rateLimits.set(key, recent);
+    }
+  }
+}, 15 * 60 * 1000);
+if (_rateLimitCleanupInterval.unref) _rateLimitCleanupInterval.unref();
+
+function getClientIp(req) {
+  return req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+}
+
+export function _resetRateLimitsForTests() {
+  rateLimits.clear();
+}
 
 export function buildAuthRouter({
   registerUserFn = registerUser,
@@ -49,6 +64,7 @@ export function buildAuthRouter({
   verifyEmailCodeFn = verifyEmailCode,
   handleGoogleCallbackFn = handleGoogleCallback,
   sendEmailFn = sendEmail,
+  verifyCaptchaFn = verifyCaptcha,
   linkSessionToUserFn = linkSessionToUser,
   linkDesignsToUserFn = linkDesignsToUser,
   logger = console,
@@ -56,14 +72,27 @@ export function buildAuthRouter({
   const router = express.Router();
 
   // --- Register ---
-  router.post("/register", (req, res) => {
-    const { email, password, name } = req.body || {};
+  router.post("/register", async (req, res) => {
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`register:ip:${ip}`, 3, 15 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+
+    const { email, password, name, captcha_token } = req.body || {};
+
+    // CAPTCHA verification (optional — only enforced if enabled)
+    const captchaResult = await verifyCaptchaFn(captcha_token, ip);
+    if (!captchaResult.ok) {
+      return res.status(422).json({ ok: false, error: captchaResult.error });
+    }
+
     const result = registerUserFn(email, password, name);
 
     if (!result.ok) {
       const statusMap = {
         email_invalid: 422,
         password_too_short: 422,
+        password_too_long: 422,
         email_exists: 409,
       };
       return res.status(statusMap[result.error] || 400).json({ ok: false, error: result.error });
@@ -95,6 +124,20 @@ export function buildAuthRouter({
   // --- Login ---
   router.post("/login", (req, res) => {
     const { email, password } = req.body || {};
+    const ip = getClientIp(req);
+
+    // Rate limit by IP
+    if (!checkRateLimit(`login:ip:${ip}`, 20, 15 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+    // Rate limit by email
+    if (email && typeof email === "string") {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!checkRateLimit(`login:email:${normalizedEmail}`, 5, 15 * 60 * 1000)) {
+        return res.status(429).json({ ok: false, error: "rate_limited" });
+      }
+    }
+
     const result = loginUserFn(email, password);
 
     if (!result.ok) {
@@ -162,6 +205,11 @@ export function buildAuthRouter({
       return res.json({ ok: true, already_verified: true });
     }
 
+    // Rate limit: max 3 per email per 15 min
+    if (!checkRateLimit(`verify-send:email:${user.email}`, 3, 15 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+
     const verification = generateVerificationCodeFn(user.email);
     if (!verification.ok) {
       return res.status(500).json({ ok: false, error: "verification_failed" });
@@ -179,6 +227,11 @@ export function buildAuthRouter({
       return res.status(401).json({ ok: false, error: "not_authenticated" });
     }
 
+    // Rate limit: max 5 per email per 30 min
+    if (!checkRateLimit(`verify-confirm:email:${user.email}`, 5, 30 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+
     const { code } = req.body || {};
     const result = verifyEmailCodeFn(user.email, code);
     if (!result.ok) {
@@ -194,21 +247,37 @@ export function buildAuthRouter({
     if (!config.enabled) {
       return res.status(503).json({ ok: false, error: "google_not_configured" });
     }
-    const url = getGoogleAuthUrl();
-    return res.redirect(url);
+    const authResult = getGoogleAuthUrl();
+    if (!authResult) {
+      return res.status(503).json({ ok: false, error: "google_not_configured" });
+    }
+    // Store state in cookie for CSRF verification
+    res.setHeader("Set-Cookie", `gmt_oauth_state=${authResult.state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+    return res.redirect(authResult.url);
   });
 
   // --- Google OAuth: callback ---
   router.get("/google/callback", async (req, res) => {
-    const { code, error } = req.query;
+    const { code, error, state } = req.query;
     if (error || !code) {
       return res.redirect("/?auth_error=google_denied");
+    }
+
+    // Verify OAuth state parameter (CSRF protection)
+    const cookieHeader = req.headers.cookie || "";
+    const stateMatch = cookieHeader.match(/(?:^|;\s*)gmt_oauth_state=([^;]+)/);
+    const storedState = stateMatch ? stateMatch[1].trim() : null;
+    const clearStateCookie = "gmt_oauth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+    if (!state || !storedState || state !== storedState) {
+      res.setHeader("Set-Cookie", clearStateCookie);
+      return res.redirect("/?auth_error=invalid_state");
     }
 
     try {
       const result = await handleGoogleCallbackFn(String(code));
       if (!result.ok) {
-        return res.redirect(`/?auth_error=${result.error}`);
+        res.setHeader("Set-Cookie", clearStateCookie);
+        return res.redirect(`/?auth_error=${encodeURIComponent(result.error)}`);
       }
 
       // Link anonymous session data
@@ -220,10 +289,14 @@ export function buildAuthRouter({
         } catch (_) { /* best-effort */ }
       }
 
-      res.setHeader("Set-Cookie", buildAuthCookie(result.session.token));
+      res.setHeader("Set-Cookie", [
+        clearStateCookie,
+        buildAuthCookie(result.session.token),
+      ]);
       return res.redirect("/?auth=success");
     } catch (err) {
       logger.error("[auth] Google callback error", { message: err?.message });
+      res.setHeader("Set-Cookie", clearStateCookie);
       return res.redirect("/?auth_error=google_failed");
     }
   });
@@ -240,10 +313,6 @@ export function buildAuthRouter({
 
   return router;
 }
-
-// Register email_verification template with the email service
-// We do this by re-exporting for the email service to use
-export { EMAIL_TEMPLATES as AUTH_EMAIL_TEMPLATES };
 
 const router = buildAuthRouter();
 export default router;

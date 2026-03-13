@@ -120,8 +120,12 @@ async function loadProfile() {
     }
     emailEl.textContent = user.email;
 
-    if (user.avatar_url) {
-      avatarEl.innerHTML = `<img src="${user.avatar_url}" alt="" />`;
+    if (user.avatar_url && user.avatar_url.startsWith("https://")) {
+      const avatarImg = document.createElement("img");
+      avatarImg.src = user.avatar_url;
+      avatarImg.alt = "";
+      avatarEl.textContent = "";
+      avatarEl.appendChild(avatarImg);
     } else {
       avatarEl.textContent = (user.name || user.email || "U")[0].toUpperCase();
     }
@@ -134,17 +138,33 @@ async function loadProfile() {
 
     const grid = document.getElementById("designsGrid");
     if (designsData.designs && designsData.designs.length > 0) {
-      grid.innerHTML = designsData.designs.map(d => `
-        <div class="profile-design-card">
-          ${d.preview_url ? `<img src="${d.preview_url}" alt="${d.prompt}" loading="lazy" />` : '<div style="aspect-ratio:1;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--muted);">Sin imagen</div>'}
-          <div class="design-prompt">${d.prompt}</div>
-        </div>
-      `).join("");
+      grid.innerHTML = "";
+      for (const d of designsData.designs) {
+        const card = document.createElement("div");
+        card.className = "profile-design-card";
+        if (d.preview_url) {
+          const img = document.createElement("img");
+          img.src = d.preview_url;
+          img.setAttribute("alt", d.prompt || "");
+          img.loading = "lazy";
+          card.appendChild(img);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.style.cssText = "aspect-ratio:1;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;color:var(--muted);";
+          placeholder.textContent = "Sin imagen";
+          card.appendChild(placeholder);
+        }
+        const promptDiv = document.createElement("div");
+        promptDiv.className = "design-prompt";
+        promptDiv.textContent = d.prompt || "";
+        card.appendChild(promptDiv);
+        grid.appendChild(card);
+      }
     } else {
       document.getElementById("designsEmpty").style.display = "";
     }
   } catch (err) {
-    document.getElementById("profileLoading").innerHTML = "Error al cargar el perfil.";
+    document.getElementById("profileLoading").textContent = "Error al cargar el perfil.";
   }
 }
 
@@ -154,8 +174,12 @@ async function requestVerification() {
     const data = await res.json();
     if (data.ok) {
       if (typeof showToast === "function") showToast("Código de verificación enviado a tu email");
+    } else {
+      if (typeof showToast === "function") showToast(data.error || "Error al enviar el código");
     }
-  } catch (_) { /* ignore */ }
+  } catch (_) {
+    if (typeof showToast === "function") showToast("Error al enviar el código");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", loadProfile);

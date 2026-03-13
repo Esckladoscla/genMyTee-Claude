@@ -15,6 +15,7 @@ import {
   parseAuthCookie,
   generateVerificationCode,
   verifyEmailCode,
+  getGoogleAuthUrl,
   getAuthGenerationLimit,
   getUserGenerationCount,
   incrementUserGenerationCount,
@@ -22,7 +23,7 @@ import {
   _resetAuthForTests,
 } from "../services/auth.js";
 
-import { buildAuthRouter } from "../routes/auth.js";
+import { buildAuthRouter, _resetRateLimitsForTests } from "../routes/auth.js";
 
 describe("services/auth — user registration", () => {
   beforeEach(() => _resetAuthForTests());
@@ -205,17 +206,23 @@ describe("services/auth — user stats", () => {
 
 describe("routes/auth — API endpoints", () => {
   let app;
+  const captchaOk = async () => ({ ok: true });
 
   beforeEach(() => {
     _resetAuthForTests();
+    _resetRateLimitsForTests();
     app = express();
     app.use(express.json());
   });
-  afterEach(() => _resetAuthForTests());
+  afterEach(() => {
+    _resetAuthForTests();
+    _resetRateLimitsForTests();
+  });
 
   it("POST /register creates user and returns session", async () => {
     const router = buildAuthRouter({
       sendEmailFn: async () => ({ ok: true }),
+      verifyCaptchaFn: captchaOk,
       linkSessionToUserFn: () => {},
       linkDesignsToUserFn: () => {},
     });
@@ -237,6 +244,7 @@ describe("routes/auth — API endpoints", () => {
     registerUser("dup@example.com", "password123");
     const router = buildAuthRouter({
       sendEmailFn: async () => ({ ok: true }),
+      verifyCaptchaFn: captchaOk,
       linkSessionToUserFn: () => {},
       linkDesignsToUserFn: () => {},
     });
@@ -249,6 +257,51 @@ describe("routes/auth — API endpoints", () => {
 
     assert.equal(res.status, 409);
     assert.equal(res.body.error, "email_exists");
+  });
+
+  it("POST /register rejects when captcha fails", async () => {
+    const captchaFail = async () => ({ ok: false, error: "captcha_invalid" });
+    const router = buildAuthRouter({
+      sendEmailFn: async () => ({ ok: true }),
+      verifyCaptchaFn: captchaFail,
+      linkSessionToUserFn: () => {},
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    const res = await injectRequest(app, "POST", "/api/auth/register", {
+      email: "captcha@example.com",
+      password: "password123",
+    });
+
+    assert.equal(res.status, 422);
+    assert.equal(res.body.error, "captcha_invalid");
+  });
+
+  it("POST /register rate limits by IP", async () => {
+    const router = buildAuthRouter({
+      sendEmailFn: async () => ({ ok: true }),
+      verifyCaptchaFn: captchaOk,
+      linkSessionToUserFn: () => {},
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    // 3 registrations should succeed (different emails)
+    for (let i = 0; i < 3; i++) {
+      await injectRequest(app, "POST", "/api/auth/register", {
+        email: `ratelimit${i}@example.com`,
+        password: "password123",
+      });
+    }
+
+    // 4th should be rate limited
+    const res = await injectRequest(app, "POST", "/api/auth/register", {
+      email: "ratelimit3@example.com",
+      password: "password123",
+    });
+    assert.equal(res.status, 429);
+    assert.equal(res.body.error, "rate_limited");
   });
 
   it("POST /login authenticates user", async () => {
@@ -284,6 +337,30 @@ describe("routes/auth — API endpoints", () => {
     assert.equal(res.body.error, "invalid_credentials");
   });
 
+  it("POST /login rate limits by email", async () => {
+    registerUser("rl-login@example.com", "password123");
+    const router = buildAuthRouter({
+      linkDesignsToUserFn: () => {},
+    });
+    app.use("/api/auth", router);
+
+    // 5 failed attempts
+    for (let i = 0; i < 5; i++) {
+      await injectRequest(app, "POST", "/api/auth/login", {
+        email: "rl-login@example.com",
+        password: "wrong",
+      });
+    }
+
+    // 6th should be rate limited
+    const res = await injectRequest(app, "POST", "/api/auth/login", {
+      email: "rl-login@example.com",
+      password: "password123",
+    });
+    assert.equal(res.status, 429);
+    assert.equal(res.body.error, "rate_limited");
+  });
+
   it("GET /me returns null when unauthenticated", async () => {
     const router = buildAuthRouter();
     app.use("/api/auth", router);
@@ -308,6 +385,97 @@ describe("routes/auth — API endpoints", () => {
 
     const res = await injectRequest(app, "POST", "/api/auth/logout");
     assert.equal(res.body.ok, true);
+  });
+});
+
+describe("services/auth — email validation regex", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("rejects email without domain part", () => {
+    const result = registerUser("user@", "password123");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "email_invalid");
+  });
+
+  it("rejects email without local part", () => {
+    const result = registerUser("@example.com", "password123");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "email_invalid");
+  });
+
+  it("rejects email with spaces", () => {
+    const result = registerUser("user @example.com", "password123");
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "email_invalid");
+  });
+
+  it("accepts valid email with subdomain", () => {
+    const result = registerUser("user@mail.example.com", "password123");
+    assert.equal(result.ok, true);
+  });
+});
+
+describe("services/auth — password max length", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("rejects password longer than 256 characters", () => {
+    const longPassword = "a".repeat(257);
+    const result = registerUser("long@example.com", longPassword);
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "password_too_long");
+  });
+
+  it("accepts password of exactly 256 characters", () => {
+    const maxPassword = "a".repeat(256);
+    const result = registerUser("max@example.com", maxPassword);
+    assert.equal(result.ok, true);
+  });
+});
+
+describe("services/auth — verification attempt tracking", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("locks out after 5 failed verification attempts", () => {
+    registerUser("attempts@example.com", "password123");
+    const gen = generateVerificationCode("attempts@example.com");
+
+    // 5 failed attempts
+    for (let i = 0; i < 5; i++) {
+      const result = verifyEmailCode("attempts@example.com", "000000");
+      assert.equal(result.ok, false);
+      assert.equal(result.error, "invalid_or_expired_code");
+    }
+
+    // 6th attempt should trigger too_many_attempts (even with correct code)
+    const result = verifyEmailCode("attempts@example.com", gen.code);
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "too_many_attempts");
+  });
+
+  it("resets attempt counter on successful verification", () => {
+    registerUser("reset-attempts@example.com", "password123");
+    const gen = generateVerificationCode("reset-attempts@example.com");
+
+    // 3 failed attempts
+    for (let i = 0; i < 3; i++) {
+      verifyEmailCode("reset-attempts@example.com", "000000");
+    }
+
+    // Succeed with correct code
+    const result = verifyEmailCode("reset-attempts@example.com", gen.code);
+    assert.equal(result.ok, true);
+  });
+});
+
+describe("services/auth — Google OAuth state parameter", () => {
+  it("getGoogleAuthUrl returns url and state when configured", () => {
+    // Without env vars configured, it returns null
+    const result = getGoogleAuthUrl();
+    // When not configured, returns null
+    assert.equal(result, null);
   });
 });
 

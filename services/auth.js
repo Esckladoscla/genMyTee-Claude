@@ -11,7 +11,23 @@ const SCRYPT_PARALLELIZATION = 1;
 const SESSION_MAX_AGE_DAYS = 30;
 const VERIFICATION_CODE_LENGTH = 6;
 const VERIFICATION_CODE_EXPIRY_MINUTES = 30;
+const VERIFICATION_MAX_ATTEMPTS = 5;
 const AUTH_GENERATIONS_LIMIT = 15;
+
+// In-memory attempt tracking for verification codes (auto-expires entries after 30 min)
+const verificationAttempts = new Map();
+const verificationAttemptTimestamps = new Map();
+const VERIFICATION_ATTEMPT_TTL = 30 * 60 * 1000;
+const _verificationCleanup = setInterval(() => {
+  const now = Date.now();
+  for (const [email, ts] of verificationAttemptTimestamps) {
+    if (now - ts > VERIFICATION_ATTEMPT_TTL) {
+      verificationAttempts.delete(email);
+      verificationAttemptTimestamps.delete(email);
+    }
+  }
+}, 15 * 60 * 1000);
+_verificationCleanup.unref();
 
 let db;
 let currentDbPath;
@@ -102,6 +118,16 @@ function generateToken() {
 
 function createSession(userId) {
   const database = ensureDb();
+
+  // Probabilistic cleanup of expired sessions (1-in-10 chance)
+  if (Math.random() < 0.1) {
+    try {
+      database
+        .prepare("DELETE FROM auth_sessions WHERE expires_at < datetime('now')")
+        .run();
+    } catch (_) { /* best-effort cleanup */ }
+  }
+
   const token = generateToken();
   const now = new Date();
   const expires = new Date(now.getTime() + SESSION_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
@@ -146,11 +172,14 @@ export function validateSession(token) {
 // --- User registration ---
 
 export function registerUser(email, password, name) {
-  if (!email || typeof email !== "string" || !email.includes("@")) {
+  if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return { ok: false, error: "email_invalid" };
   }
   if (!password || typeof password !== "string" || password.length < 8) {
     return { ok: false, error: "password_too_short" };
+  }
+  if (password.length > 256) {
+    return { ok: false, error: "password_too_long" };
   }
 
   const database = ensureDb();
@@ -159,6 +188,9 @@ export function registerUser(email, password, name) {
     .prepare("SELECT id FROM users WHERE email = ?")
     .get(trimmedEmail);
   if (existing) {
+    // UX tradeoff: revealing that an email is already registered enables user enumeration,
+    // but provides a much better registration experience. Many apps accept this tradeoff.
+    // If stricter privacy is needed, return a generic error and send an email to the address instead.
     return { ok: false, error: "email_exists" };
   }
 
@@ -257,13 +289,32 @@ export function verifyEmailCode(email, code) {
   const trimmedEmail = email.trim().toLowerCase();
   const now = new Date().toISOString();
 
+  // Check attempt count
+  const attempts = verificationAttempts.get(trimmedEmail) || 0;
+  if (attempts >= VERIFICATION_MAX_ATTEMPTS) {
+    // Invalidate all codes for this email after too many failed attempts
+    database
+      .prepare("DELETE FROM email_verifications WHERE email = ?")
+      .run(trimmedEmail);
+    verificationAttempts.delete(trimmedEmail);
+    verificationAttemptTimestamps.delete(trimmedEmail);
+    return { ok: false, error: "too_many_attempts" };
+  }
+
   const record = database
     .prepare("SELECT * FROM email_verifications WHERE email = ? AND code = ? AND expires_at > ? ORDER BY created_at DESC LIMIT 1")
     .get(trimmedEmail, String(code).trim(), now);
 
   if (!record) {
+    // Track failed attempt
+    verificationAttempts.set(trimmedEmail, attempts + 1);
+    verificationAttemptTimestamps.set(trimmedEmail, Date.now());
     return { ok: false, error: "invalid_or_expired_code" };
   }
+
+  // Success — clear attempt counter
+  verificationAttempts.delete(trimmedEmail);
+  verificationAttemptTimestamps.delete(trimmedEmail);
 
   // Mark email as verified
   database
@@ -298,6 +349,8 @@ export function getGoogleAuthUrl() {
   const config = getGoogleOAuthConfig();
   if (!config.enabled) return null;
 
+  const state = crypto.randomBytes(32).toString("hex");
+
   const params = new URLSearchParams({
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
@@ -305,9 +358,10 @@ export function getGoogleAuthUrl() {
     scope: "openid email profile",
     access_type: "offline",
     prompt: "select_account",
+    state,
   });
 
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  return { url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`, state };
 }
 
 export async function handleGoogleCallback(code) {
@@ -416,12 +470,23 @@ export function incrementUserGenerationCount(userId) {
     .run(now, userId);
 }
 
+// --- Revoke all sessions for a user ---
+
+export function revokeAllSessions(userId) {
+  if (!userId) return;
+  const database = ensureDb();
+  database.prepare("DELETE FROM auth_sessions WHERE user_id = ?").run(userId);
+}
+
 // --- Link session to user ---
 
 export function linkSessionToUser(sessionId, userId) {
   // When a user registers/logs in, link their anonymous session's generation count
   const database = ensureDb();
   try {
+    // The session_generations table is created by the generation limiter service
+    // (services/session-limiter.js), not by this module. The try/catch is intentional
+    // because this table may not exist if the limiter hasn't been initialized yet.
     const session = database
       .prepare("SELECT count FROM session_generations WHERE session_id = ?")
       .get(sessionId);
@@ -431,7 +496,7 @@ export function linkSessionToUser(sessionId, userId) {
         .run(session.count, userId);
     }
   } catch (_) {
-    // Best-effort — session_generations table might not exist yet
+    // Best-effort — session_generations table might not exist yet (see comment above)
   }
 }
 
@@ -465,4 +530,6 @@ export function _resetAuthForTests() {
   }
   db = undefined;
   currentDbPath = undefined;
+  verificationAttempts.clear();
+  verificationAttemptTimestamps.clear();
 }

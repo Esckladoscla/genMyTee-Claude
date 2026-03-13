@@ -78,7 +78,6 @@ export function getSessionDesigns(sessionId, { limit = 20, offset = 0 } = {}) {
 export function linkDesignsToUser(sessionId, userId) {
   if (!sessionId || !userId) return;
   const database = ensureDb();
-  const now = new Date().toISOString();
   database
     .prepare("UPDATE user_designs SET user_id = ? WHERE session_id = ? AND user_id IS NULL")
     .run(userId, sessionId);

@@ -13,8 +13,18 @@ async function authFetch(url, opts = {}) {
   const res = await fetch(url, {
     ...opts,
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...opts.headers },
+    headers: {
+      ...(opts.body ? { "Content-Type": "application/json" } : {}),
+      ...opts.headers,
+    },
   });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const err = new Error(body.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.data = body;
+    throw err;
+  }
   return res.json();
 }
 
@@ -46,11 +56,17 @@ function updateAuthUI() {
 
   if (AUTH_STATE.authenticated && AUTH_STATE.user) {
     const initial = (AUTH_STATE.user.name || AUTH_STATE.user.email || "U")[0].toUpperCase();
-    if (AUTH_STATE.user.avatar_url) {
-      btn.innerHTML = `<span class="nav-user-avatar"><img src="${AUTH_STATE.user.avatar_url}" alt=""/></span>`;
+    const avatarSpan = document.createElement("span");
+    avatarSpan.className = "nav-user-avatar";
+    if (AUTH_STATE.user.avatar_url && AUTH_STATE.user.avatar_url.startsWith("https://")) {
+      const img = document.createElement("img");
+      img.src = AUTH_STATE.user.avatar_url;
+      img.alt = "";
+      avatarSpan.appendChild(img);
     } else {
-      btn.innerHTML = `<span class="nav-user-avatar">${initial}</span>`;
+      avatarSpan.textContent = initial;
     }
+    btn.appendChild(avatarSpan);
     btn.title = AUTH_STATE.user.email;
     btn.onclick = () => { window.location.href = "/mi-cuenta.html"; };
   } else {
