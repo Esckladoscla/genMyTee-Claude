@@ -9,6 +9,8 @@ import adminRouter from "./routes/admin.js";
 import galleryRouter from "./routes/gallery.js";
 import referralsRouter from "./routes/referrals.js";
 import giftCardRouter from "./routes/gift-cards.js";
+import authRouter from "./routes/auth.js";
+import profileRouter from "./routes/profile.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 import { assignVariant, trackEvent, isAbTestingEnabled } from "./services/ab-testing.js";
@@ -86,6 +88,8 @@ export function createApp() {
   app.use("/api/gallery", galleryRouter);
   app.use("/api/referrals", referralsRouter);
   app.use("/api/gift-cards", giftCardRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/profile", profileRouter);
 
   // SSR design pages (SEO-indexable)
   // /galeria/:id → gallery SSR page

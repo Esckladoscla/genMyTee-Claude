@@ -100,6 +100,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
 - `preview.js` also exposes: `POST /api/preview/image/async` (enqueue async generation), `GET /api/preview/image/status` (poll job status)
 - `admin.js` — Admin panel: `GET /api/admin/dashboard` (business metrics), `POST /api/admin/ai` (toggle AI), `GET /api/admin/orders` (order review), `GET /api/admin/experiments` (A/B testing), `GET /api/admin/gift-cards` (gift card list), `POST /api/admin/gallery/batch-generate` (batch image generation)
+- `auth.js` — User authentication: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/verify-email/send`, `POST /api/auth/verify-email/confirm`, `GET /api/auth/google` (OAuth redirect), `GET /api/auth/google/callback`, `GET /api/auth/config`
+- `profile.js` — User profile (auth required): `GET /api/profile/designs` (design history), `GET /api/profile/orders` (order history placeholder), `GET /api/profile/summary`
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -122,6 +124,8 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests, gift cards (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
 - `ab-testing.js` — A/B testing framework: experiments, deterministic variant assignment, event tracking, results aggregation (configurable via `AB_TESTING_ENABLED`)
 - `gift-cards.js` — SQLite-backed digital gift cards: create, validate, redeem (codes: `GMT-XXXX-XXXX-XXXX`, amounts: €25/50/75/100, 1-year expiry)
+- `auth.js` — User authentication service: SQLite-backed users, sessions, email verification (scrypt hashing, timing-safe comparison, Google OAuth2, generation quota per user, configurable via `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
+- `design-history.js` — SQLite-backed design history per user/session (tracks prompts + preview URLs, supports linking anonymous sessions to users on registration)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
@@ -142,6 +146,9 @@ Standalone vanilla HTML/CSS/JS frontend served by Express.
 - `js/app.js` — global UI (cart with localStorage, nav, toast, newsletter, checkout via `/api/checkout/session`)
 - `js/catalog.js` — fetches products from `/api/catalog/products`, renders product grid
 - `js/creator.js` — 4-step design flow: garment → prompt → generate → size/add-to-cart. Calls `/api/preview/image` and `/api/preview/mockup`.
+- `js/auth.js` — auth state management, login/register modal, Google OAuth, email verification UI
+- `css/auth.css` — auth modal, profile page, nav user button styles
+- `mi-cuenta.html` — user profile page (design history, account info)
 - `checkout-success.html` — post-payment success page (clears cart, shows confirmation)
 - `checkout-cancel.html` — payment cancelled page
 - `order-status.html` — consulta de estado de pedido por session ID

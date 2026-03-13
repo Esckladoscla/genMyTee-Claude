@@ -77,6 +77,26 @@ const EMAIL_TEMPLATES = {
     `,
   },
 
+  email_verification: {
+    subject: "Tu código de verificación - genMyTee",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+        <h1 style="color:#1e293b;font-size:24px;">Verifica tu email</h1>
+        <p style="color:#475569;font-size:16px;line-height:1.6;">
+          Tu código de verificación es:
+        </p>
+        <div style="background:#f1f5f9;border-radius:12px;padding:24px;margin:16px 0;text-align:center;">
+          <p style="margin:0;color:#1e293b;font-size:36px;font-weight:700;letter-spacing:8px;">{code}</p>
+        </div>
+        <p style="color:#475569;font-size:14px;">
+          Este código expira en 30 minutos. Si no solicitaste este código, puedes ignorar este email.
+        </p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+        <p style="color:#94a3b8;font-size:12px;">genMyTee - Tu diseño, tu estilo</p>
+      </div>
+    `,
+  },
+
   review_request: {
     subject: "Como quedo tu prenda? - genMyTee",
     html: `
