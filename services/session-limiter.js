@@ -69,7 +69,7 @@ export function parseSessionCookie(cookieHeader) {
 
 export function buildSessionCookie(sessionId) {
   const maxAge = 30 * 24 * 60 * 60; // 30 days
-  return `gmt_session=${sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`;
+  return `gmt_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 }
 
 function ensureSession(sessionId, ipAddress) {

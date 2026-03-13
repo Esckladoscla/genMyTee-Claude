@@ -2,6 +2,12 @@
    CREATOR — 4-step design flow
 ══════════════════════════════ */
 
+// ── CAPTCHA state ──
+let captchaEnabled = false;
+let captchaSiteKey = null;
+let turnstileWidgetId = null;
+let turnstileReady = false;
+
 // ── State ──
 let selectedProduct = null;
 let selectedColor = null;
@@ -42,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initCreator, 300);
 });
 
-function initCreator() {
+async function initCreator() {
   initPanelTabs();
   initPromptInput();
   initPromptChips();
@@ -52,6 +58,57 @@ function initCreator() {
   initAddToCartButton();
   initGarmentTypes();
   initLayoutControls();
+  await initCaptcha();
+}
+
+// ── CAPTCHA (Cloudflare Turnstile) ──
+async function initCaptcha() {
+  try {
+    const res = await fetch('/api/preview/captcha-config');
+    const data = await res.json();
+    if (!data.ok || !data.enabled || !data.site_key) return;
+
+    captchaEnabled = true;
+    captchaSiteKey = data.site_key;
+
+    // Load Turnstile script
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
+    script.async = true;
+    document.head.appendChild(script);
+
+    // Global callback when Turnstile is ready
+    window.onTurnstileLoad = () => {
+      turnstileReady = true;
+    };
+  } catch (e) {
+    console.warn('[creator] captcha config fetch failed, proceeding without captcha', e);
+  }
+}
+
+function getCaptchaToken() {
+  return new Promise((resolve) => {
+    if (!captchaEnabled || !turnstileReady || !window.turnstile) {
+      resolve(null);
+      return;
+    }
+
+    // Remove previous widget if exists
+    const container = document.getElementById('turnstile-container');
+    if (!container) {
+      resolve(null);
+      return;
+    }
+    container.innerHTML = '';
+
+    window.turnstile.render(container, {
+      sitekey: captchaSiteKey,
+      callback: (token) => resolve(token),
+      'error-callback': () => resolve(null),
+      'expired-callback': () => resolve(null),
+      size: 'invisible',
+    });
+  });
 }
 
 // ── Garment types from catalog ──
@@ -301,11 +358,14 @@ async function generateDesign() {
   try {
     const productKey = selectedProduct ? selectedProduct.product_key : 'all-over-print-mens-athletic-t-shirt';
 
+    // Get CAPTCHA token (invisible, no user interaction)
+    const captchaToken = await getCaptchaToken();
+
     // Step 1: Generate AI image
     const imageRes = await fetch('/api/preview/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: input.value.trim() }),
+      body: JSON.stringify({ prompt: input.value.trim(), captcha_token: captchaToken }),
     });
     const imageData = await imageRes.json();
 
