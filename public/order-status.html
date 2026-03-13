@@ -48,11 +48,24 @@
 .status-badge.paid{background:var(--success);color:var(--green);border-color:var(--green)}
 .status-badge.processing{background:#FFF8E1;color:#F59E0B;border-color:#F59E0B}
 .status-badge.shipped{background:#E3F2FD;color:#2196F3;border-color:#2196F3}
+.status-badge.fulfilled{background:var(--success);color:var(--green);border-color:var(--green)}
+.status-badge.canceled{background:#FFF5F5;color:#DC2626;border-color:#DC2626}
 .status-error{
   background:#FFF5F5;border:1px solid #FCA5A5;padding:1rem;
   font-size:0.85rem;color:#DC2626;display:none;
 }
 .status-note{font-size:0.78rem;color:var(--muted);margin-top:1.5rem;line-height:1.6}
+.tracking-section{
+  margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);
+  display:none;
+}
+.tracking-link{
+  display:inline-block;margin-top:0.5rem;
+  background:var(--text);color:var(--white);
+  font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.7rem 1.4rem;text-decoration:none;transition:background 0.2s;
+}
+.tracking-link:hover{background:var(--accent)}
 </style>
 </head>
 <body>
@@ -87,16 +100,25 @@
       <div class="status-value"><span class="status-badge paid" id="statusPayment">Pagado</span></div>
 
       <div class="status-label">Estado de producción</div>
-      <div class="status-value" id="statusProduction">En preparación</div>
+      <div class="status-value"><span class="status-badge processing" id="statusProduction">En preparación</span></div>
 
       <div class="status-label">Email</div>
       <div class="status-value" id="statusEmail">—</div>
+
+      <div class="tracking-section" id="trackingSection">
+        <div class="status-label">Seguimiento del envío</div>
+        <div class="status-value">
+          <span id="trackingCarrier"></span>
+          <span id="trackingNumber" style="font-family:monospace"></span>
+        </div>
+        <a class="tracking-link" id="trackingLink" href="#" target="_blank" rel="noopener">Seguir envío</a>
+      </div>
     </div>
   </div>
 
   <div class="status-note">
-    Tu prenda se produce bajo demanda tras confirmar el pago. El tiempo estimado de entrega es de 5-7 días laborables.
-    Si tienes dudas, contacta con nosotros en <a href="mailto:info@genmytee.com" style="color:var(--accent)">info@genmytee.com</a>.
+    Tu prenda se produce bajo demanda tras confirmar el pago. El tiempo estimado de entrega es de 10-15 días laborables.
+    Si tienes dudas, contacta con nosotros en <a href="mailto:soporte@genmytee.com" style="color:var(--accent)">soporte@genmytee.com</a>.
   </div>
 </div>
 
@@ -107,6 +129,23 @@
 </footer>
 
 <script>
+  const PRINTFUL_STATUS_MAP = {
+    draft: 'Borrador',
+    pending: 'Pendiente',
+    failed: 'Error',
+    canceled: 'Cancelado',
+    inprocess: 'En producción',
+    onhold: 'En espera',
+    partial: 'Envío parcial',
+    fulfilled: 'Enviado',
+  };
+
+  function badgeClass(pfStatus) {
+    if (pfStatus === 'fulfilled' || pfStatus === 'partial') return 'shipped';
+    if (pfStatus === 'canceled' || pfStatus === 'failed') return 'canceled';
+    return 'processing';
+  }
+
   // Pre-fill from URL params
   const params = new URLSearchParams(window.location.search);
   const sid = params.get('session_id');
@@ -122,8 +161,10 @@
 
     const errorEl = document.getElementById('statusError');
     const resultEl = document.getElementById('statusResult');
+    const trackingEl = document.getElementById('trackingSection');
     errorEl.style.display = 'none';
     resultEl.style.display = 'none';
+    trackingEl.style.display = 'none';
 
     try {
       const res = await fetch('/api/checkout/status?session_id=' + encodeURIComponent(val));
@@ -140,11 +181,37 @@
       document.getElementById('statusRef').textContent = data.session_id || val;
       document.getElementById('statusEmail').textContent = data.email || '—';
 
-      const badge = document.getElementById('statusPayment');
-      badge.textContent = data.payment_status === 'paid' ? 'Pagado' : data.payment_status || 'Pendiente';
-      badge.className = 'status-badge ' + (data.payment_status === 'paid' ? 'paid' : 'processing');
+      // Payment badge
+      const payBadge = document.getElementById('statusPayment');
+      payBadge.textContent = data.payment_status === 'paid' ? 'Pagado' : data.payment_status || 'Pendiente';
+      payBadge.className = 'status-badge ' + (data.payment_status === 'paid' ? 'paid' : 'processing');
 
-      document.getElementById('statusProduction').textContent = data.fulfillment_status || 'En preparación';
+      // Production status
+      const prodBadge = document.getElementById('statusProduction');
+      const pfStatus = data.printful_status || null;
+      if (pfStatus) {
+        prodBadge.textContent = PRINTFUL_STATUS_MAP[pfStatus] || pfStatus;
+        prodBadge.className = 'status-badge ' + badgeClass(pfStatus);
+      } else {
+        prodBadge.textContent = data.fulfillment_status || 'En preparación';
+        prodBadge.className = 'status-badge processing';
+      }
+
+      // Tracking info
+      if (data.tracking_number || data.tracking_url) {
+        const carrier = data.shipping_carrier || '';
+        document.getElementById('trackingCarrier').textContent = carrier ? carrier + ' · ' : '';
+        document.getElementById('trackingNumber').textContent = data.tracking_number || '';
+
+        const link = document.getElementById('trackingLink');
+        if (data.tracking_url) {
+          link.href = data.tracking_url;
+          link.style.display = 'inline-block';
+        } else {
+          link.style.display = 'none';
+        }
+        trackingEl.style.display = 'block';
+      }
 
       resultEl.style.display = 'block';
     } catch (err) {

@@ -130,7 +130,7 @@
       "name": "Crop Top Personalizado",
       "description": "Crop tee all-over print. Diseño vibrante que cubre toda la prenda.",
       "product_key": "all-over-print-crop-tee",
-      "base_price_eur": 35,
+      "base_price_eur": 39,
       "sizes": [
         "XS",
         "S",
@@ -199,7 +199,7 @@
       "name": "Polo Adidas Premium",
       "description": "Polo Adidas con bordado personalizado. Elegancia deportiva con tu toque personal.",
       "product_key": "adidas-premium-polo-shirt",
-      "base_price_eur": 55,
+      "base_price_eur": 59,
       "colors": [
         "Black",
         "White"
@@ -270,7 +270,7 @@
       "name": "Hoodie Personalizado",
       "description": "Sudadera con capucha all-over print reciclada. Tu diseño cubre toda la prenda.",
       "product_key": "all-over-print-recycled-unisex-hoodie",
-      "base_price_eur": 59,
+      "base_price_eur": 65,
       "sizes": [
         "XS",
         "S",
@@ -529,7 +529,7 @@
       "name": "Camiseta Infantil",
       "description": "Camiseta infantil all-over print. Para los más pequeños de la casa.",
       "product_key": "all-over-print-kids-crew-neck-t-shirt",
-      "base_price_eur": 29,
+      "base_price_eur": 35,
       "sizes": [
         "2T",
         "3T",
@@ -562,7 +562,7 @@
       "name": "Tote Bag",
       "description": "Bolsa tote all-over print. Lleva tu diseño a todas partes.",
       "product_key": "all-over-print-tote-bag",
-      "base_price_eur": 25,
+      "base_price_eur": 29,
       "sizes": [
         "15″×15″"
       ],
@@ -685,7 +685,7 @@
       "name": "Funda iPhone",
       "description": "Funda snap para iPhone con tu diseño. Policarbonato resistente, compatible carga inalámbrica.",
       "product_key": "snap-case-for-iphone",
-      "base_price_eur": 25,
+      "base_price_eur": 29,
       "colors": [
         "Glossy",
         "Matte"
@@ -721,7 +721,7 @@
       "name": "Mochila",
       "description": "Mochila all-over print. Tu diseño te acompaña a donde vayas.",
       "product_key": "all-over-print-backpack",
-      "base_price_eur": 45,
+      "base_price_eur": 59,
       "sizes": [
         "One size"
       ],
@@ -750,7 +750,7 @@
       "name": "Bandolera",
       "description": "Bolso bandolera all-over print. Estilo cruzado con tu toque personal.",
       "product_key": "all-over-print-crossbody-bag",
-      "base_price_eur": 35,
+      "base_price_eur": 42,
       "colors": [
         "Black",
         "White"
@@ -787,7 +787,7 @@
       "name": "Bolsa de Deporte",
       "description": "Bolsa de deporte all-over print. Tu diseño en el gimnasio.",
       "product_key": "all-over-print-duffle-bag",
-      "base_price_eur": 45,
+      "base_price_eur": 65,
       "colors": [
         "White"
       ],
@@ -822,7 +822,7 @@
       "name": "Bolsa Gym",
       "description": "Bolsa de gimnasio all-over print. Lleva tu estilo al entreno.",
       "product_key": "all-over-print-gym-bag",
-      "base_price_eur": 35,
+      "base_price_eur": 39,
       "colors": [
         "White"
       ],
@@ -856,7 +856,7 @@
       "name": "Póster Premium",
       "description": "Póster en papel mate premium. Tu diseño hecho arte para la pared.",
       "product_key": "enhanced-matte-paper-poster-in",
-      "base_price_eur": 15,
+      "base_price_eur": 19,
       "sizes": [
         "12″×16″",
         "12″×18″",
@@ -889,7 +889,7 @@
       "name": "Taza Personalizada",
       "description": "Taza blanca brillante con tu diseño. El mejor regalo personalizado.",
       "product_key": "white-glossy-mug",
-      "base_price_eur": 15,
+      "base_price_eur": 19,
       "sizes": [
         "11 OZ",
         "15 OZ"

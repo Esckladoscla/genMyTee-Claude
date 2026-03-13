@@ -91,6 +91,11 @@ export async function createOrderSafe(payload, { confirm } = {}) {
   }
 }
 
+export async function getOrder(printfulOrderId) {
+  const data = await pfFetch(`/orders/${encodeURIComponent(printfulOrderId)}`);
+  return data?.result || data;
+}
+
 export async function getVariant(variantId) {
   const data = await pfFetch(`/products/variant/${variantId}`);
   return data?.result || data;
