@@ -11,9 +11,18 @@ import { uploadImageBuffer } from "../services/storage.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
 import { resolveVariantId } from "../services/variants.js";
 import { generateMockupForVariant, getMockupTask } from "../services/printful.js";
-
-const DEFAULT_RATE_LIMIT_MAX = 10;
-const DEFAULT_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+import { consumeRateLimit } from "../services/rate-limiter.js";
+import { recordGeneration } from "../services/generation-tracker.js";
+import { applyWatermark } from "../services/watermark.js";
+import {
+  parseSessionCookie,
+  generateSessionId,
+  buildSessionCookie,
+  checkGenerationAllowed,
+  recordSessionGeneration,
+  unlockWithEmail,
+} from "../services/session-limiter.js";
+import { checkBrandBlacklist } from "../services/brand-filter.js";
 const LAYOUT_SCALE_MIN = 0.30;
 const LAYOUT_SCALE_MAX = 1.35;
 const LAYOUT_OFFSET_MIN = -100;
@@ -123,28 +132,26 @@ function parseOptionalPositiveInteger(input) {
   return Math.floor(parsed);
 }
 
-function buildRateLimiter({ maxRequests, windowMs, now }) {
+export function buildInMemoryRateLimiter({ maxRequests = 10, windowMs = 300000, now = () => Date.now() } = {}) {
   const buckets = new Map();
 
-  return {
-    consume(ip) {
-      const nowMs = now();
-      const cutoff = nowMs - windowMs;
-      const current = (buckets.get(ip) || []).filter((timestamp) => timestamp > cutoff);
+  return (ip) => {
+    const nowMs = now();
+    const cutoff = nowMs - windowMs;
+    const current = (buckets.get(ip) || []).filter((timestamp) => timestamp > cutoff);
 
-      if (current.length >= maxRequests) {
-        buckets.set(ip, current);
-        const retryAfterMs = Math.max(1, windowMs - (nowMs - current[0]));
-        return {
-          limited: true,
-          retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
-        };
-      }
-
-      current.push(nowMs);
+    if (current.length >= maxRequests) {
       buckets.set(ip, current);
-      return { limited: false, retryAfterSeconds: 0 };
-    },
+      const retryAfterMs = Math.max(1, windowMs - (nowMs - current[0]));
+      return {
+        limited: true,
+        retryAfterSeconds: Math.ceil(retryAfterMs / 1000),
+      };
+    }
+
+    current.push(nowMs);
+    buckets.set(ip, current);
+    return { limited: false, retryAfterSeconds: 0 };
   };
 }
 
@@ -155,13 +162,17 @@ export function buildPreviewRouter({
   resolveVariantIdFn = resolveVariantId,
   generateMockupForVariantFn = generateMockupForVariant,
   getMockupTaskFn = getMockupTask,
+  consumeRateLimitFn = consumeRateLimit,
+  recordGenerationFn = recordGeneration,
+  applyWatermarkFn = applyWatermark,
+  checkGenerationAllowedFn = checkGenerationAllowed,
+  recordSessionGenerationFn = recordSessionGeneration,
+  unlockWithEmailFn = unlockWithEmail,
+  checkBrandBlacklistFn = checkBrandBlacklist,
   now = () => Date.now(),
-  maxRequests = DEFAULT_RATE_LIMIT_MAX,
-  windowMs = DEFAULT_RATE_LIMIT_WINDOW_MS,
   logger = console,
 } = {}) {
   const router = express.Router();
-  const limiter = buildRateLimiter({ maxRequests, windowMs, now });
   const taskMockupSelectionByKey = new Map();
   const mockupSelectionTtlMs = 6 * 60 * 60 * 1000;
 
@@ -210,12 +221,44 @@ export function buildPreviewRouter({
     });
   });
 
+  router.post("/unlock", (req, res) => {
+    const { email } = req.body || {};
+    let sessionId = parseSessionCookie(req.headers.cookie);
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
+    }
+    const result = unlockWithEmailFn(sessionId, email);
+    if (!result.ok) {
+      return res.status(422).json({ ok: false, error: result.error });
+    }
+    return res.json({ ok: true, remaining: result.remaining, limit: result.limit });
+  });
+
   router.post("/image", async (req, res) => {
     const clientIp = getClientIp(req);
-    const rate = limiter.consume(clientIp);
+    const rate = consumeRateLimitFn(clientIp);
     if (rate.limited) {
       res.setHeader("Retry-After", String(rate.retryAfterSeconds));
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
+    }
+
+    // Session-based generation limit
+    let sessionId = parseSessionCookie(req.headers.cookie);
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
+    }
+
+    const sessionCheck = checkGenerationAllowedFn(sessionId);
+    if (!sessionCheck.allowed) {
+      return res.status(403).json({
+        ok: false,
+        error: "generation_limit_reached",
+        remaining: 0,
+        limit: sessionCheck.limit,
+        needs_email: sessionCheck.needs_email,
+      });
     }
 
     try {
@@ -228,6 +271,17 @@ export function buildPreviewRouter({
           ok: false,
           error: "ai_disabled",
           message: "AI generation is disabled (AI_ENABLED=false)",
+        });
+      }
+
+      // Brand/IP blacklist check (before OpenAI call to save API cost)
+      const brandCheck = checkBrandBlacklistFn(normalizedPrompt);
+      if (brandCheck.blocked) {
+        logger.log("[preview] prompt blocked by brand filter", { brand: brandCheck.brand });
+        return res.status(422).json({
+          ok: false,
+          error: "brand_blocked",
+          message: "Tu diseño no puede incluir marcas registradas o personajes con copyright. Prueba con una descripción original.",
         });
       }
 
@@ -244,13 +298,35 @@ export function buildPreviewRouter({
         size: getEnv("AI_IMAGE_SIZE", { defaultValue: "auto" }),
       });
 
-      const imageUrl = await uploadImageBufferFn(imageBuffer, {
-        folder: "previews",
+      // Upload clean image for production use (Printful orders)
+      const productionUrl = await uploadImageBufferFn(imageBuffer, {
+        folder: "production",
       });
+
+      // Apply watermark and upload preview version
+      let previewUrl;
+      try {
+        const watermarkedBuffer = await applyWatermarkFn(imageBuffer);
+        previewUrl = await uploadImageBufferFn(watermarkedBuffer, {
+          folder: "previews",
+          filename: productionUrl.split("/").pop(),
+        });
+      } catch (wmError) {
+        logger.warn("[preview] watermark failed, using clean image as preview", {
+          message: wmError?.message,
+        });
+        previewUrl = await uploadImageBufferFn(imageBuffer, {
+          folder: "previews",
+          filename: productionUrl.split("/").pop(),
+        });
+      }
+
+      recordGenerationFn({ logger });
+      recordSessionGenerationFn(sessionId);
 
       return res.json({
         ok: true,
-        image_url: imageUrl,
+        image_url: previewUrl,
         moderation: { flagged: false },
       });
     } catch (error) {

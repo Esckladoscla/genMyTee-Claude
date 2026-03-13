@@ -9,6 +9,12 @@ const files = [
   "./checkout-route.test.js",
   "./order-processing.test.js",
   "./printful-position.test.js",
+  "./rate-limiter.test.js",
+  "./generation-tracker.test.js",
+  "./admin-route.test.js",
+  "./watermark.test.js",
+  "./session-limiter.test.js",
+  "./brand-filter.test.js",
 ];
 
 for (const file of files) {

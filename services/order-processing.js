@@ -7,6 +7,7 @@ import {
   parseVariantTitle,
   resolveVariantId,
 } from "./variants.js";
+import { resolveProductionUrl } from "./watermark.js";
 
 const DEFAULT_PRODUCT_KEY = "all-over-print-mens-athletic-t-shirt";
 
@@ -95,7 +96,7 @@ export function buildPrintfulItems(
 
       const quantity = Math.max(1, Number(item.quantity) || 1);
 
-      const fileEntry = { type: "default", placement, url: imageUrl };
+      const fileEntry = { type: "default", placement, url: resolveProductionUrl(imageUrl) };
       if (item.layout) {
         const normalized = normalizeMockupLayout(item.layout);
         if (normalized) {
@@ -147,7 +148,7 @@ export function buildPrintfulItems(
     printfulItems.push({
       variant_id: numericVariantId,
       quantity,
-      files: [{ type: "default", placement, url: imageUrl }],
+      files: [{ type: "default", placement, url: resolveProductionUrl(imageUrl) }],
     });
   }
 
