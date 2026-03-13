@@ -17,6 +17,10 @@ const files = [
   "./brand-filter.test.js",
   "./gallery-route.test.js",
   "./referrals.test.js",
+  "./generation-queue.test.js",
+  "./prompt-cache.test.js",
+  "./image-provider.test.js",
+  "./service-registry.test.js",
 ];
 
 for (const file of files) {
