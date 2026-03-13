@@ -212,14 +212,7 @@ export function buildPreviewRouter({
     };
   };
 
-  router.get("/openai/usage", (req, res) => {
-    const rawLimit = Number(req.query?.limit);
-    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(500, Math.floor(rawLimit))) : 100;
-    return res.json({
-      ok: true,
-      usage: getOpenAiUsageSnapshot({ limit }),
-    });
-  });
+  // NOTE: /openai/usage moved to routes/admin.js (requires admin auth)
 
   router.post("/unlock", (req, res) => {
     const { email } = req.body || {};
@@ -250,7 +243,7 @@ export function buildPreviewRouter({
       res.setHeader("Set-Cookie", buildSessionCookie(sessionId));
     }
 
-    const sessionCheck = checkGenerationAllowedFn(sessionId);
+    const sessionCheck = checkGenerationAllowedFn(sessionId, clientIp);
     if (!sessionCheck.allowed) {
       return res.status(403).json({
         ok: false,

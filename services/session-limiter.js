@@ -23,15 +23,22 @@ function ensureDb() {
       session_id TEXT PRIMARY KEY,
       count INTEGER NOT NULL DEFAULT 0,
       email TEXT,
+      ip_address TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
   `;
 
+  const addColumnSafe = (col, type) => {
+    try { db?.exec(`ALTER TABLE session_generations ADD COLUMN ${col} ${type}`); }
+    catch { /* column already exists */ }
+  };
+
   try {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     db = new DatabaseSync(dbPath);
     db.exec(schema);
+    addColumnSafe("ip_address", "TEXT");
     currentDbPath = dbPath;
   } catch (_) {
     db = new DatabaseSync(":memory:");
@@ -65,51 +72,80 @@ export function buildSessionCookie(sessionId) {
   return `gmt_session=${sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`;
 }
 
-function ensureSession(sessionId) {
+function ensureSession(sessionId, ipAddress) {
   const database = ensureDb();
   const now = new Date().toISOString();
   const existing = database
     .prepare("SELECT * FROM session_generations WHERE session_id = ?")
     .get(sessionId);
 
-  if (existing) return existing;
+  if (existing) {
+    // Update IP if not set or changed
+    if (ipAddress && existing.ip_address !== ipAddress) {
+      database
+        .prepare("UPDATE session_generations SET ip_address = ?, updated_at = ? WHERE session_id = ?")
+        .run(ipAddress, now, sessionId);
+    }
+    return database
+      .prepare("SELECT * FROM session_generations WHERE session_id = ?")
+      .get(sessionId);
+  }
 
   database
     .prepare(
-      "INSERT INTO session_generations (session_id, count, email, created_at, updated_at) VALUES (?, 0, NULL, ?, ?)"
+      "INSERT INTO session_generations (session_id, count, email, ip_address, created_at, updated_at) VALUES (?, 0, NULL, ?, ?, ?)"
     )
-    .run(sessionId, now, now);
+    .run(sessionId, ipAddress || null, now, now);
 
   return database
     .prepare("SELECT * FROM session_generations WHERE session_id = ?")
     .get(sessionId);
 }
 
-export function checkGenerationAllowed(sessionId) {
-  const session = ensureSession(sessionId);
+/**
+ * Returns the total generation count across all sessions from the same IP.
+ * This prevents cookie-clearing abuse: even with a fresh session cookie,
+ * the IP-level count is carried over.
+ */
+function getIpGenerationCount(ipAddress) {
+  if (!ipAddress) return 0;
+  const database = ensureDb();
+  const row = database
+    .prepare("SELECT COALESCE(SUM(count), 0) AS total FROM session_generations WHERE ip_address = ?")
+    .get(ipAddress);
+  return Number(row?.total || 0);
+}
+
+export function checkGenerationAllowed(sessionId, ipAddress) {
+  const session = ensureSession(sessionId, ipAddress);
   const freeLimit = getFreeLimit();
   const emailBonus = getEmailBonus();
-  const maxAllowed = session.email ? freeLimit + emailBonus : freeLimit;
-  const count = Number(session.count || 0);
-  const remaining = Math.max(0, maxAllowed - count);
+  const hasEmail = Boolean(session.email);
+  const maxAllowed = hasEmail ? freeLimit + emailBonus : freeLimit;
+  const sessionCount = Number(session.count || 0);
 
-  if (count >= maxAllowed) {
+  // Use the higher of session count or IP-aggregated count
+  const ipCount = getIpGenerationCount(ipAddress);
+  const effectiveCount = Math.max(sessionCount, ipCount);
+  const remaining = Math.max(0, maxAllowed - effectiveCount);
+
+  if (effectiveCount >= maxAllowed) {
     return {
       allowed: false,
-      count,
+      count: effectiveCount,
       limit: maxAllowed,
       remaining: 0,
-      has_email: Boolean(session.email),
-      needs_email: !session.email,
+      has_email: hasEmail,
+      needs_email: !hasEmail,
     };
   }
 
   return {
     allowed: true,
-    count,
+    count: effectiveCount,
     limit: maxAllowed,
     remaining,
-    has_email: Boolean(session.email),
+    has_email: hasEmail,
     needs_email: false,
   };
 }

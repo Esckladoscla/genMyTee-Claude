@@ -1,0 +1,124 @@
+{
+  "designs": [
+    {
+      "id": "lobo-geometrico",
+      "title": "Lobo Geométrico",
+      "description": "Lobo en triángulos degradados, estilo low poly moderno",
+      "image_url": null,
+      "tags": ["animal", "geometrico", "minimalista"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-womens-crop-top", "all-over-print-mens-tank-top"],
+      "featured": true,
+      "prompt_used": "Lobo geométrico en triángulos, estilo low poly"
+    },
+    {
+      "id": "montana-vintage",
+      "title": "Montaña Vintage",
+      "description": "Montañas nevadas al amanecer con estilo grabado clásico",
+      "image_url": null,
+      "tags": ["naturaleza", "vintage", "montaña"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-unisex-hoodie"],
+      "featured": true,
+      "prompt_used": "Montañas nevadas al amanecer, estilo grabado vintage"
+    },
+    {
+      "id": "tigre-japones",
+      "title": "Tigre Japonés",
+      "description": "Tigre en blanco y negro con trazo de pincel japonés",
+      "image_url": null,
+      "tags": ["animal", "japones", "blanco-negro"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-mens-tank-top"],
+      "featured": true,
+      "prompt_used": "Tigre en blanco y negro, trazo de pincel japonés"
+    },
+    {
+      "id": "flores-botanicas",
+      "title": "Flores Botánicas",
+      "description": "Flores silvestres en ilustración acuarela delicada",
+      "image_url": null,
+      "tags": ["floral", "acuarela", "botanico"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-womens-crop-top", "all-over-print-womens-racerback-tank-top", "all-over-print-dress"],
+      "featured": true,
+      "prompt_used": "Flores silvestres botánicas, ilustración acuarela"
+    },
+    {
+      "id": "constelaciones",
+      "title": "Constelaciones",
+      "description": "Mapa estelar con constelaciones y luna en grabado celestial",
+      "image_url": null,
+      "tags": ["espacio", "celestial", "noche"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-unisex-hoodie"],
+      "featured": false,
+      "prompt_used": "Constelaciones y luna, estilo grabado celestial"
+    },
+    {
+      "id": "ola-japonesa",
+      "title": "Ola Japonesa",
+      "description": "Ola oceánica estilo ukiyo-e japonés moderno",
+      "image_url": null,
+      "tags": ["japones", "oceano", "clasico"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-mens-tank-top", "all-over-print-unisex-hoodie"],
+      "featured": true,
+      "prompt_used": "Ola oceánica, estilo ukiyo-e japonés moderno"
+    },
+    {
+      "id": "desierto-calido",
+      "title": "Desierto Cálido",
+      "description": "Cactus y desierto al atardecer, paleta cálida minimalista",
+      "image_url": null,
+      "tags": ["naturaleza", "minimalista", "calido"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-womens-crop-top"],
+      "featured": false,
+      "prompt_used": "Cactus y desierto al atardecer, paleta cálida minimalista"
+    },
+    {
+      "id": "astronauta-retro",
+      "title": "Astronauta Retro",
+      "description": "Astronauta flotando entre planetas, estilo retro sci-fi",
+      "image_url": null,
+      "tags": ["espacio", "retro", "scifi"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-unisex-hoodie", "all-over-print-mens-tank-top"],
+      "featured": true,
+      "prompt_used": "Astronauta flotando entre planetas, estilo retro sci-fi"
+    },
+    {
+      "id": "calavera-mexicana",
+      "title": "Calavera Mexicana",
+      "description": "Calavera con flores estilo Día de Muertos colorido",
+      "image_url": null,
+      "tags": ["cultural", "colorido", "mexicano"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-womens-crop-top", "all-over-print-mens-tank-top"],
+      "featured": false,
+      "prompt_used": "Calavera mexicana con flores, estilo día de muertos colorido"
+    },
+    {
+      "id": "gato-tattoo",
+      "title": "Gato Tattoo",
+      "description": "Gato siamés en línea fina estilo tatuaje",
+      "image_url": null,
+      "tags": ["animal", "tattoo", "linea-fina"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-womens-crop-top", "all-over-print-womens-racerback-tank-top"],
+      "featured": false,
+      "prompt_used": "Gato siamés durmiendo, línea fina estilo tattoo"
+    },
+    {
+      "id": "ciudad-cyberpunk",
+      "title": "Ciudad Cyberpunk",
+      "description": "Skyline futurista con neón y lluvia estilo cyberpunk",
+      "image_url": null,
+      "tags": ["urbano", "cyberpunk", "neon"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-unisex-hoodie"],
+      "featured": true,
+      "prompt_used": "Skyline de ciudad futurista, neón y lluvia, estilo cyberpunk"
+    },
+    {
+      "id": "mandala-dorado",
+      "title": "Mandala Dorado",
+      "description": "Mandala geométrico sagrado con líneas doradas sobre negro",
+      "image_url": null,
+      "tags": ["geometrico", "mandala", "dorado"],
+      "compatible_products": ["all-over-print-mens-athletic-t-shirt", "all-over-print-mens-crew-neck-t-shirt", "all-over-print-womens-crop-top", "all-over-print-dress"],
+      "featured": true,
+      "prompt_used": "Mandala geométrico sagrado, líneas doradas sobre negro"
+    }
+  ]
+}

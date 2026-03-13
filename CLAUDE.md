@@ -89,11 +89,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `app.js` — `createApp()` assembles middleware, routes, CORS, error handler
 
 ### Route layer (`routes/`)
-- `preview.js` — `POST /api/preview/image` (AI generation), `POST /api/preview/mockup` (Printful mockup), `GET /api/preview/mockup/status`, `GET /api/preview/openai/usage`
+- `preview.js` — `POST /api/preview/image` (AI generation), `POST /api/preview/mockup` (Printful mockup), `GET /api/preview/mockup/status`
 - `orders.js` — `POST /api/orders` (generic order creation)
 - `catalog.js` — `GET /api/catalog/products`, `GET /api/catalog/products/:slug` (product catalog from `data/products.json`)
 - `checkout.js` — `POST /api/checkout/session` (creates Stripe Checkout Session from cart items), `POST /api/checkout/webhook` (handles Stripe `checkout.session.completed` → Printful order via `order-processing.js`), `GET /api/checkout/status`
 - `newsletter.js` — `POST /api/newsletter` (email subscription, stored in SQLite)
+- `gallery.js` — `GET /api/gallery/designs` (curated designs listing with tag/featured filters), `GET /api/gallery/designs/:id` (design detail with compatible products)
+- `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -113,6 +115,8 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `color-alias.json` — color name normalization
 - `printful_product_ids.json` — Printful product metadata
 - `products.json` — product catalog (slug, name, product_key, base_price_eur, sizes, colors, placement)
+- `curated-designs.json` — gallery of pre-made designs (id, title, image_url, tags, compatible_products)
+- `bundles.json` — pack/bundle pricing rules (min_items, categories, bundle_price_eur)
 - `app.db` — SQLite database for idempotency and newsletter subscribers
 
 ### Frontend (`public/`)

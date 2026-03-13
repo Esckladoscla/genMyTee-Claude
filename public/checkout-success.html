@@ -54,6 +54,16 @@
   </p>
   <div class="success-id" id="sessionId"></div>
   <a href="/" class="btn-primary">Volver a la tienda</a>
+
+  <!-- Referral share section -->
+  <div id="referralShare" style="display:none;margin-top:2.5rem;padding:1.5rem 2rem;background:var(--surface);max-width:420px;width:100%;text-align:center">
+    <p style="font-size:0.85rem;font-weight:500;margin-bottom:0.5rem">&#x1F381; Invita a un amigo y gana descuentos</p>
+    <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem">Comparte tu enlace personal. Tu amigo recibe un descuento y t&#250; tambi&#233;n.</p>
+    <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center">
+      <input id="referralLink" type="text" readonly style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:0" />
+      <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap">Copiar</button>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -73,6 +83,64 @@
   }
   // Clear cart on successful checkout
   try { localStorage.removeItem('genmytee_cart'); } catch {}
+  // Clear referral code after purchase
+  try { localStorage.removeItem('genmytee_ref'); } catch {}
+
+  // Show referral share section
+  // Auto-generate a referral code using the customer's email from Stripe session
+  async function initReferralShare() {
+    const shareSection = document.getElementById('referralShare');
+    if (!shareSection) return;
+    // We don't have the email client-side, so show a simple email input
+    shareSection.style.display = 'block';
+    shareSection.querySelector('#referralLink').value = window.location.origin + '/?ref=...';
+    shareSection.querySelector('#referralLink').placeholder = 'Introduce tu email para generar tu enlace';
+    shareSection.innerHTML = `
+      <p style="font-size:0.85rem;font-weight:500;margin-bottom:0.5rem">&#x1F381; Invita a un amigo</p>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem">Comparte tu enlace personal. Tu amigo recibe un descuento en su primera compra.</p>
+      <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center;flex-wrap:wrap">
+        <input id="referralEmail" type="email" placeholder="tu@email.com" style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:180px" />
+        <button id="referralGenBtn" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap">Generar enlace</button>
+      </div>
+      <div id="referralResult" style="display:none;margin-top:0.8rem">
+        <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center">
+          <input id="referralLink" type="text" readonly style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:0" />
+          <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--text);color:#fff;border:none;cursor:pointer;white-space:nowrap">Copiar</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('referralGenBtn').addEventListener('click', async () => {
+      const email = document.getElementById('referralEmail').value.trim();
+      if (!email) return;
+      try {
+        const res = await fetch('/api/referrals/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('referralResult').style.display = 'block';
+          document.getElementById('referralLink').value = data.share_url;
+          document.getElementById('referralGenBtn').textContent = 'Enlace generado';
+          document.getElementById('referralGenBtn').disabled = true;
+        }
+      } catch (err) {
+        console.error('[referral] failed', err);
+      }
+    });
+  }
+  initReferralShare();
+
+  function copyReferralLink() {
+    const input = document.getElementById('referralLink');
+    if (input) {
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = input.nextElementSibling;
+        if (btn) { btn.textContent = 'Copiado'; setTimeout(() => btn.textContent = 'Copiar', 2000); }
+      });
+    }
+  }
 </script>
 </body>
 </html>

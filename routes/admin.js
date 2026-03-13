@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import express from "express";
 import { getBooleanEnv, getEnv } from "../services/env.js";
 import { getOpenAiUsageSnapshot } from "../services/openai.js";
@@ -11,7 +12,12 @@ function verifyAdminSecret(req) {
   if (!authHeader.startsWith("Bearer ")) return false;
 
   const token = authHeader.slice(7).trim();
-  return token === secret;
+
+  // Use timing-safe comparison to prevent timing attacks
+  const tokenBuf = Buffer.from(token);
+  const secretBuf = Buffer.from(secret);
+  if (tokenBuf.length !== secretBuf.length) return false;
+  return timingSafeEqual(tokenBuf, secretBuf);
 }
 
 export function buildAdminRouter({ logger = console } = {}) {
@@ -51,6 +57,15 @@ export function buildAdminRouter({ logger = console } = {}) {
     return res.json({
       ok: true,
       ai_enabled: getBooleanEnv("AI_ENABLED", { defaultValue: true }),
+    });
+  });
+
+  router.get("/openai/usage", (req, res) => {
+    const rawLimit = Number(req.query?.limit);
+    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(500, Math.floor(rawLimit))) : 100;
+    return res.json({
+      ok: true,
+      usage: getOpenAiUsageSnapshot({ limit }),
     });
   });
 
