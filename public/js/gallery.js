@@ -255,7 +255,7 @@ async function openDesignModal(design) {
         <div class="gallery-product-label">Elige tu prenda</div>
         <div class="gallery-product-row" id="galleryProductRow">
           ${compatibleProducts.map(p => `
-            <button class="gallery-product-chip" data-product-key="${p.product_key}">
+            <button class="gallery-product-chip" data-product-key="${escapeHtml(p.product_key)}">
               <span class="chip-emoji">${p.garment_emoji || '&#x1F455;'}</span>
               <span>${escapeHtml(p.name)}</span>
               <span class="chip-price">&euro;${p.base_price_eur.toFixed(2)}</span>

@@ -4,29 +4,55 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const SAFE_SLUG_RE = /^[a-z0-9-]+$/;
+
+let _designsCache = null;
+let _productsCache = null;
+let _collectionsCache = null;
 
 function loadDesigns() {
-  const raw = readFileSync(
-    join(__dirname, "..", "data", "curated-designs.json"),
-    "utf8"
-  );
-  return JSON.parse(raw).designs;
+  if (!_designsCache) {
+    const raw = readFileSync(
+      join(__dirname, "..", "data", "curated-designs.json"),
+      "utf8"
+    );
+    const designs = JSON.parse(raw).designs;
+    for (const d of designs) {
+      if (d.id && !SAFE_SLUG_RE.test(d.id)) {
+        throw new Error(`Invalid design id: ${d.id}`);
+      }
+    }
+    _designsCache = designs;
+  }
+  return _designsCache;
 }
 
 function loadProducts() {
-  const raw = readFileSync(
-    join(__dirname, "..", "data", "products.json"),
-    "utf8"
-  );
-  return JSON.parse(raw).products;
+  if (!_productsCache) {
+    const raw = readFileSync(
+      join(__dirname, "..", "data", "products.json"),
+      "utf8"
+    );
+    _productsCache = JSON.parse(raw).products;
+  }
+  return _productsCache;
 }
 
 function loadCollections() {
-  const raw = readFileSync(
-    join(__dirname, "..", "data", "collections.json"),
-    "utf8"
-  );
-  return JSON.parse(raw).collections;
+  if (!_collectionsCache) {
+    const raw = readFileSync(
+      join(__dirname, "..", "data", "collections.json"),
+      "utf8"
+    );
+    const collections = JSON.parse(raw).collections;
+    for (const c of collections) {
+      if (c.slug && !SAFE_SLUG_RE.test(c.slug)) {
+        throw new Error(`Invalid collection slug: ${c.slug}`);
+      }
+    }
+    _collectionsCache = collections;
+  }
+  return _collectionsCache;
 }
 
 /**
@@ -85,12 +111,12 @@ function renderDesignPage(design, compatibleProducts, collections) {
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>${escapeHtml(design.title)} — Diseño exclusivo | genMyTee</title>
 <meta name="description" content="${escapeHtml(design.description)}. Disponible en ${compatibleProducts.length} prendas desde €${priceRange}. Envío a toda Europa."/>
-<meta name="keywords" content="${design.tags.join(", ")}, camiseta personalizada, diseño exclusivo, genMyTee"/>
-<link rel="canonical" href="https://genmytee.com/galeria/${design.id}"/>
+<meta name="keywords" content="${design.tags.map(t => escapeHtml(t)).join(", ")}, camiseta personalizada, diseño exclusivo, genMyTee"/>
+<link rel="canonical" href="https://genmytee.com/galeria/${escapeHtml(design.id)}"/>
 <meta property="og:title" content="${escapeHtml(design.title)} — genMyTee"/>
 <meta property="og:description" content="${escapeHtml(design.description)}"/>
 <meta property="og:type" content="product"/>
-<meta property="og:url" content="https://genmytee.com/galeria/${design.id}"/>
+<meta property="og:url" content="https://genmytee.com/galeria/${escapeHtml(design.id)}"/>
 <meta property="og:image" content="${escapeHtml(design.image_url || "https://genmytee.com/img/hero.png")}"/>
 <meta property="og:site_name" content="genMyTee"/>
 <meta property="og:locale" content="es_ES"/>
@@ -101,8 +127,8 @@ function renderDesignPage(design, compatibleProducts, collections) {
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/gallery.css"/>
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<script type="application/ld+json">${JSON.stringify(breadcrumbLd)}</script>
+<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/<\//g, "<\\/")}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumbLd).replace(/<\//g, "<\\/")}</script>
 <style>
   .ssr-design-page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
   .ssr-breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; }
@@ -143,7 +169,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
 </nav>
 <div class="ssr-design-page">
   <div class="ssr-breadcrumb">
-    <a href="/">Inicio</a> › <a href="/#galeria">Galería</a>${collection ? ` › <a href="/galeria/coleccion/${collection.slug}">${escapeHtml(collection.name)}</a>` : ""} › ${escapeHtml(design.title)}
+    <a href="/">Inicio</a> › <a href="/#galeria">Galería</a>${collection ? ` › <a href="/galeria/coleccion/${escapeHtml(collection.slug)}">${escapeHtml(collection.name)}</a>` : ""} › ${escapeHtml(design.title)}
   </div>
   <div class="ssr-design-layout">
     <div class="ssr-design-image">
@@ -159,7 +185,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
       <div class="ssr-products-title">Disponible en ${compatibleProducts.length} prendas</div>
       <div class="ssr-products-grid">${productsHtml}</div>
       <a href="/#galeria" class="ssr-cta">Ver en la galería</a>
-      ${collection ? `<div class="ssr-collection-link"><a href="/galeria/coleccion/${collection.slug}">← Ver toda la colección ${escapeHtml(collection.name)}</a></div>` : ""}
+      ${collection ? `<div class="ssr-collection-link"><a href="/galeria/coleccion/${escapeHtml(collection.slug)}">← Ver toda la colección ${escapeHtml(collection.name)}</a></div>` : ""}
     </div>
   </div>
 </div>
@@ -181,7 +207,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
  */
 function renderCollectionPage(collection, designs, allCollections) {
   const designsHtml = designs.map((d) => `
-    <a href="/galeria/${d.id}" class="ssr-collection-card">
+    <a href="/galeria/${escapeHtml(d.id)}" class="ssr-collection-card">
       <div class="ssr-card-img">
         ${d.image_url ? `<img src="${escapeHtml(d.image_url)}" alt="${escapeHtml(d.title)}" loading="lazy"/>` : `<span class="ssr-card-placeholder">🎨</span>`}
         ${d.featured ? `<span class="ssr-card-badge">Destacado</span>` : ""}
@@ -194,7 +220,7 @@ function renderCollectionPage(collection, designs, allCollections) {
   const otherCollections = allCollections
     .filter((c) => c.id !== collection.id)
     .slice(0, 5)
-    .map((c) => `<a href="/galeria/coleccion/${c.slug}" class="ssr-other-collection">${c.emoji} ${escapeHtml(c.name)}</a>`)
+    .map((c) => `<a href="/galeria/coleccion/${escapeHtml(c.slug)}" class="ssr-other-collection">${c.emoji} ${escapeHtml(c.name)}</a>`)
     .join("");
 
   const jsonLd = {
@@ -222,17 +248,17 @@ function renderCollectionPage(collection, designs, allCollections) {
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Colección ${escapeHtml(collection.name)} — genMyTee</title>
 <meta name="description" content="${escapeHtml(collection.description)} ${designs.length} diseños exclusivos disponibles."/>
-<link rel="canonical" href="https://genmytee.com/galeria/coleccion/${collection.slug}"/>
+<link rel="canonical" href="https://genmytee.com/galeria/coleccion/${escapeHtml(collection.slug)}"/>
 <meta property="og:title" content="Colección ${escapeHtml(collection.name)} — genMyTee"/>
 <meta property="og:description" content="${escapeHtml(collection.description)}"/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://genmytee.com/galeria/coleccion/${collection.slug}"/>
+<meta property="og:url" content="https://genmytee.com/galeria/coleccion/${escapeHtml(collection.slug)}"/>
 <meta property="og:site_name" content="genMyTee"/>
 <meta property="og:locale" content="es_ES"/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/gallery.css"/>
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/<\//g, "<\\/")}</script>
 <style>
   .ssr-collection-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
   .ssr-collection-header { text-align: center; margin-bottom: 2rem; }
@@ -295,7 +321,8 @@ function escapeHtml(str) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function buildGalleryRouter({
@@ -449,14 +476,14 @@ export function buildGalleryRouter({
       // Homepage
       xml += `  <url><loc>https://genmytee.com/</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n`;
 
-      // Design pages
-      for (const d of designs) {
-        xml += `  <url><loc>https://genmytee.com/galeria/${d.id}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n`;
+      // Design pages (only those with images)
+      for (const d of designs.filter(d => d.image_url)) {
+        xml += `  <url><loc>https://genmytee.com/galeria/${escapeHtml(d.id)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n`;
       }
 
       // Collection pages
       for (const c of collections) {
-        xml += `  <url><loc>https://genmytee.com/galeria/coleccion/${c.slug}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
+        xml += `  <url><loc>https://genmytee.com/galeria/coleccion/${escapeHtml(c.slug)}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>\n`;
       }
 
       // Static pages
@@ -473,6 +500,12 @@ export function buildGalleryRouter({
   });
 
   return router;
+}
+
+export function _resetGalleryForTests() {
+  _designsCache = null;
+  _productsCache = null;
+  _collectionsCache = null;
 }
 
 const router = buildGalleryRouter();
