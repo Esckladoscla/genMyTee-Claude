@@ -91,13 +91,13 @@ function renderDesignPage(design, compatibleProducts, collections) {
 <meta property="og:description" content="${escapeHtml(design.description)}"/>
 <meta property="og:type" content="product"/>
 <meta property="og:url" content="https://genmytee.com/galeria/${design.id}"/>
-<meta property="og:image" content="${design.image_url || "https://genmytee.com/img/hero.png"}"/>
+<meta property="og:image" content="${escapeHtml(design.image_url || "https://genmytee.com/img/hero.png")}"/>
 <meta property="og:site_name" content="genMyTee"/>
 <meta property="og:locale" content="es_ES"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${escapeHtml(design.title)} — genMyTee"/>
 <meta name="twitter:description" content="${escapeHtml(design.description)}"/>
-<meta name="twitter:image" content="${design.image_url || "https://genmytee.com/img/hero.png"}"/>
+<meta name="twitter:image" content="${escapeHtml(design.image_url || "https://genmytee.com/img/hero.png")}"/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/gallery.css"/>
@@ -148,7 +148,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
   <div class="ssr-design-layout">
     <div class="ssr-design-image">
       ${design.image_url
-        ? `<img src="${design.image_url}" alt="${escapeHtml(design.title)}" />`
+        ? `<img src="${escapeHtml(design.image_url)}" alt="${escapeHtml(design.title)}" />`
         : `<span class="ssr-design-placeholder">🎨</span>`}
     </div>
     <div class="ssr-design-info">
@@ -183,7 +183,7 @@ function renderCollectionPage(collection, designs, allCollections) {
   const designsHtml = designs.map((d) => `
     <a href="/galeria/${d.id}" class="ssr-collection-card">
       <div class="ssr-card-img">
-        ${d.image_url ? `<img src="${d.image_url}" alt="${escapeHtml(d.title)}" loading="lazy"/>` : `<span class="ssr-card-placeholder">🎨</span>`}
+        ${d.image_url ? `<img src="${escapeHtml(d.image_url)}" alt="${escapeHtml(d.title)}" loading="lazy"/>` : `<span class="ssr-card-placeholder">🎨</span>`}
         ${d.featured ? `<span class="ssr-card-badge">Destacado</span>` : ""}
       </div>
       <div class="ssr-card-title">${escapeHtml(d.title)}</div>
