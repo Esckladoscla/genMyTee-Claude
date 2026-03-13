@@ -96,6 +96,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-local.ps1
 - `newsletter.js` — `POST /api/newsletter` (email subscription, stored in SQLite)
 - `gallery.js` — `GET /api/gallery/designs` (curated designs listing with tag/featured filters), `GET /api/gallery/designs/:id` (design detail with compatible products)
 - `referrals.js` — `POST /api/referrals/generate` (create referral code), `GET /api/referrals/validate` (validate code + record visit), `GET /api/referrals/stats` (referral stats by email)
+- `preview.js` also exposes: `POST /api/preview/image/async` (enqueue async generation), `GET /api/preview/image/status` (poll job status)
 
 All route files export a `build*Router()` factory that accepts dependency injection for testing, then export a default router instance using the real implementations.
 
@@ -109,6 +110,10 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `stripe.js` — Stripe SDK wrapper: `createCheckoutSession()`, `verifyWebhookSignature()`, `extractOrderFromSession()`
 - `newsletter.js` — SQLite-backed email subscription storage
 - `env.js` — typed env getters (`getEnv`, `requireEnv`, `getBooleanEnv`, `getNumberEnv`) with legacy alias support and deprecation warnings
+- `generation-queue.js` — SQLite-backed async generation queue with retry logic and FIFO processing
+- `prompt-cache.js` — SQLite-backed prompt→image cache with TTL and hit tracking
+- `image-provider.js` — Provider abstraction for image generation (OpenAI default, register fallbacks)
+- `registry.js` — Service registry for all external dependencies (storage, image, fulfillment, payments)
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
