@@ -8,7 +8,13 @@ import { getSessionStats } from "../services/session-limiter.js";
 import {
   createExperiment, listExperiments, getExperimentResults, isAbTestingEnabled,
 } from "../services/ab-testing.js";
+import { listGiftCards } from "../services/gift-cards.js";
 import { DatabaseSync } from "node:sqlite";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __adminDirname = dirname(fileURLToPath(import.meta.url));
 
 function verifyAdminSecret(req) {
   const secret = getEnv("ADMIN_SECRET");
@@ -266,6 +272,92 @@ export function buildAdminRouter({ logger = console } = {}) {
       if (!data) return res.status(404).json({ ok: false, error: "not_found" });
       return res.json({ ok: true, ...data });
     } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  // ── Gift Cards Admin ──
+
+  router.get("/gift-cards", (_req, res) => {
+    try {
+      const cards = listGiftCards({ limit: 100 });
+      return res.json({ ok: true, gift_cards: cards, total: cards.length });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err?.message });
+    }
+  });
+
+  // ── Gallery Batch Generation (F2-01) ──
+
+  router.post("/gallery/batch-generate", async (req, res) => {
+    try {
+      const { limit = 5, dry_run = true } = req.body || {};
+
+      // Load curated designs that need generation
+      const designsPath = join(__adminDirname, "..", "data", "curated-designs.json");
+      const raw = readFileSync(designsPath, "utf8");
+      const data = JSON.parse(raw);
+      const pending = data.designs.filter((d) => !d.image_url);
+
+      if (pending.length === 0) {
+        return res.json({ ok: true, message: "all_designs_have_images", pending: 0 });
+      }
+
+      const batch = pending.slice(0, Math.min(limit, 10));
+
+      if (dry_run) {
+        return res.json({
+          ok: true,
+          dry_run: true,
+          total_pending: pending.length,
+          batch_size: batch.length,
+          designs: batch.map((d) => ({ id: d.id, prompt: d.prompt_used })),
+        });
+      }
+
+      // Real generation — requires AI_ENABLED + OpenAI key
+      const aiEnabled = getBooleanEnv("AI_ENABLED", { defaultValue: true });
+      if (!aiEnabled) {
+        return res.status(503).json({ ok: false, error: "ai_disabled" });
+      }
+
+      // Dynamic import to avoid load-time issues
+      const { generateImageFromPrompt } = await import("../services/openai.js");
+      const { uploadImageBuffer } = await import("../services/storage.js");
+
+      const results = [];
+
+      for (const design of batch) {
+        try {
+          logger.log(`[admin] batch-generate: starting ${design.id}`);
+          const buffer = await generateImageFromPrompt(design.prompt_used, { size: "1024x1024" });
+          const filename = `${design.id}.png`;
+          const url = await uploadImageBuffer(buffer, { filename, folder: "gallery" });
+
+          // Update the design in the JSON file
+          const designEntry = data.designs.find((d) => d.id === design.id);
+          if (designEntry) designEntry.image_url = url;
+
+          results.push({ id: design.id, ok: true, image_url: url });
+          logger.log(`[admin] batch-generate: completed ${design.id} → ${url}`);
+        } catch (err) {
+          results.push({ id: design.id, ok: false, error: err?.message });
+          logger.error(`[admin] batch-generate: failed ${design.id}: ${err?.message}`);
+        }
+      }
+
+      // Persist updated designs file
+      writeFileSync(designsPath, JSON.stringify(data, null, 2) + "\n", "utf8");
+
+      return res.json({
+        ok: true,
+        generated: results.filter((r) => r.ok).length,
+        failed: results.filter((r) => !r.ok).length,
+        remaining: pending.length - results.filter((r) => r.ok).length,
+        results,
+      });
+    } catch (err) {
+      logger.error(`[admin] batch-generate error: ${err?.message}`);
       return res.status(500).json({ ok: false, error: err?.message });
     }
   });

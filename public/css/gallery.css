@@ -19,6 +19,56 @@
   margin-top: 0.5rem;
 }
 
+/* Collection chips */
+.collection-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.collection-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.collection-chip:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+.collection-chip.active {
+  background: var(--accent, #7c5cff);
+  border-color: var(--accent, #7c5cff);
+  color: #fff;
+}
+
+.collection-count {
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 0 0.4rem;
+  font-size: 0.65rem;
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.collection-chip.active .collection-count {
+  background: rgba(255,255,255,0.25);
+}
+
 /* Tag filters */
 .gallery-filters {
   display: flex;

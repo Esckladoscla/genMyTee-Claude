@@ -3,7 +3,9 @@
 ══════════════════════════════ */
 
 let galleryDesigns = [];
+let galleryCollections = [];
 let activeGalleryTag = null;
+let activeGalleryCollection = null;
 let selectedModalDesign = null;
 let selectedModalProduct = null;
 let selectedModalSize = null;
@@ -13,15 +15,25 @@ async function loadGallery() {
   if (!section) return;
 
   try {
-    const res = await fetch('/api/gallery/designs?show_all=true');
-    const data = await res.json();
-    if (data.ok && data.designs) {
-      galleryDesigns = data.designs;
-      renderGalleryFilters();
-      renderGalleryGrid();
-      renderHeroExamples();
-      injectGalleryStructuredData();
+    const [designsRes, collectionsRes] = await Promise.all([
+      fetch('/api/gallery/designs?show_all=true'),
+      fetch('/api/gallery/collections'),
+    ]);
+    const designsData = await designsRes.json();
+    const collectionsData = await collectionsRes.json();
+
+    if (designsData.ok && designsData.designs) {
+      galleryDesigns = designsData.designs;
     }
+    if (collectionsData.ok && collectionsData.collections) {
+      galleryCollections = collectionsData.collections;
+    }
+
+    renderCollectionChips();
+    renderGalleryFilters();
+    renderGalleryGrid();
+    renderHeroExamples();
+    injectGalleryStructuredData();
   } catch (err) {
     console.error('[gallery] failed to load designs', err);
   }
@@ -82,6 +94,11 @@ function renderGalleryFilters() {
     dorado: 'Dorado',
     botanico: 'Botánico',
     placeholder: 'Otro',
+    tribal: 'Tribal',
+    steampunk: 'Steampunk',
+    abstracto: 'Abstracto',
+    musica: 'Música',
+    montaña: 'Montaña',
   };
 
   for (const tag of tags) {
@@ -99,6 +116,58 @@ function renderGalleryFilters() {
   }
 }
 
+function renderCollectionChips() {
+  const section = document.getElementById('galeria');
+  if (!section || galleryCollections.length === 0) return;
+
+  // Insert collection row before the filters if not already present
+  let row = document.getElementById('collectionChips');
+  if (!row) {
+    row = document.createElement('div');
+    row.id = 'collectionChips';
+    row.className = 'collection-chips';
+    const filters = document.getElementById('galleryFilters');
+    if (filters) filters.parentNode.insertBefore(row, filters);
+  }
+
+  row.innerHTML = '';
+
+  // "Todos" chip
+  const allChip = document.createElement('button');
+  allChip.className = 'collection-chip active';
+  allChip.textContent = 'Todas las colecciones';
+  allChip.addEventListener('click', () => {
+    activeGalleryCollection = null;
+    row.querySelectorAll('.collection-chip').forEach(c => c.classList.remove('active'));
+    allChip.classList.add('active');
+    renderGalleryGrid();
+  });
+  row.appendChild(allChip);
+
+  for (const col of galleryCollections) {
+    const chip = document.createElement('a');
+    chip.className = 'collection-chip';
+    chip.href = `/galeria/coleccion/${col.slug}`;
+    chip.innerHTML = `${col.emoji || ''} ${escapeHtml(col.name)} <span class="collection-count">${col.design_count}</span>`;
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      activeGalleryCollection = col.id;
+      activeGalleryTag = null;
+      row.querySelectorAll('.collection-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      // Reset tag filters
+      const tagContainer = document.getElementById('galleryFilters');
+      if (tagContainer) {
+        tagContainer.querySelectorAll('.gallery-tag-btn').forEach(b => b.classList.remove('active'));
+        const allBtn = tagContainer.querySelector('.gallery-tag-btn');
+        if (allBtn) allBtn.classList.add('active');
+      }
+      renderGalleryGrid();
+    });
+    row.appendChild(chip);
+  }
+}
+
 function renderGalleryGrid() {
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
@@ -106,6 +175,9 @@ function renderGalleryGrid() {
   grid.innerHTML = '';
 
   let designs = galleryDesigns;
+  if (activeGalleryCollection) {
+    designs = designs.filter(d => d.collection === activeGalleryCollection);
+  }
   if (activeGalleryTag) {
     designs = designs.filter(d => d.tags.includes(activeGalleryTag));
   }
