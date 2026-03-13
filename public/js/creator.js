@@ -630,6 +630,42 @@ function initAddToCartButton() {
   });
 }
 
+// ── Layout preview helper ──
+// Computes CSS translate & scale that mirror the backend's buildPositionFromLayout,
+// accounting for object-fit:contain's internal aspect-ratio centering.
+function getLayoutPreview() {
+  const scaleVal = layoutScale / 100;
+  const dims = selectedProduct?.printfile_dims;
+  const areaW = dims?.width || 1800;
+  const areaH = dims?.height || 2400;
+  const areaAR = areaW / areaH;
+
+  const xOffsetMult = (layoutX + 100) / 200;
+  const yOffsetMult = (layoutY + 100) / 200;
+
+  let leftPct, topPct, disableX, disableY;
+
+  if (areaAR <= 1) {
+    // Portrait or square area (t-shirts, hoodies, etc.)
+    const yRange = 1 - areaAR * scaleVal;
+    const yContainOffset = scaleVal * (1 - areaAR) / 2;
+    leftPct = (1 - scaleVal) * xOffsetMult * 100;
+    topPct = (yRange * yOffsetMult - yContainOffset) * 100;
+    disableX = scaleVal >= 1;
+    disableY = yRange <= 0;
+  } else {
+    // Wide area (some accessories)
+    const xRange = 1 - scaleVal / areaAR;
+    const xContainOffset = scaleVal * (1 - 1 / areaAR) / 2;
+    leftPct = (xRange * xOffsetMult - xContainOffset) * 100;
+    topPct = (1 - scaleVal) * yOffsetMult * 100;
+    disableX = xRange <= 0;
+    disableY = scaleVal >= 1;
+  }
+
+  return { scaleVal, leftPct, topPct, disableX, disableY };
+}
+
 // ── Layout controls ──
 function initLayoutControls() {
   const scaleSlider = document.getElementById('layoutScale');
@@ -641,12 +677,25 @@ function initLayoutControls() {
   if (!scaleSlider) return;
 
   function updateOffsetSlidersState() {
-    // At scale >= 100% offsets have no effect (design fills or exceeds print area)
-    const disabled = layoutScale >= 100;
-    xSlider.disabled = disabled;
-    ySlider.disabled = disabled;
-    xSlider.style.opacity = disabled ? '0.4' : '1';
-    ySlider.style.opacity = disabled ? '0.4' : '1';
+    const { disableX, disableY } = getLayoutPreview();
+    xSlider.disabled = disableX;
+    ySlider.disabled = disableY;
+    const xGroup = document.getElementById('layoutXGroup');
+    const yGroup = document.getElementById('layoutYGroup');
+    const hint = document.getElementById('layoutHint');
+    if (xGroup) xGroup.classList.toggle('hidden', disableX);
+    if (yGroup) yGroup.classList.toggle('hidden', disableY);
+    if (hint) {
+      if (disableX && disableY) {
+        hint.textContent = 'Reduce el tama\u00f1o para ajustar la posici\u00f3n';
+      } else if (disableX) {
+        hint.textContent = 'Reduce el tama\u00f1o para mover horizontalmente';
+      } else if (disableY) {
+        hint.textContent = 'Reduce el tama\u00f1o para mover verticalmente';
+      } else {
+        hint.textContent = '';
+      }
+    }
   }
 
   scaleSlider.addEventListener('input', () => {
@@ -736,8 +785,27 @@ function resetLayout() {
   const xSlider = document.getElementById('layoutX');
   const ySlider = document.getElementById('layoutY');
   if (scaleSlider) scaleSlider.value = 100;
-  if (xSlider) { xSlider.value = 0; xSlider.disabled = true; xSlider.style.opacity = '0.4'; }
-  if (ySlider) { ySlider.value = 0; ySlider.disabled = true; ySlider.style.opacity = '0.4'; }
+  if (xSlider) { xSlider.value = 0; }
+  if (ySlider) { ySlider.value = 0; }
+  const { disableX, disableY } = getLayoutPreview();
+  if (xSlider) xSlider.disabled = disableX;
+  if (ySlider) ySlider.disabled = disableY;
+  const xGroup = document.getElementById('layoutXGroup');
+  const yGroup = document.getElementById('layoutYGroup');
+  const hint = document.getElementById('layoutHint');
+  if (xGroup) xGroup.classList.toggle('hidden', disableX);
+  if (yGroup) yGroup.classList.toggle('hidden', disableY);
+  if (hint) {
+    if (disableX && disableY) {
+      hint.textContent = 'Reduce el tama\u00f1o para ajustar la posici\u00f3n';
+    } else if (disableX) {
+      hint.textContent = 'Reduce el tama\u00f1o para mover horizontalmente';
+    } else if (disableY) {
+      hint.textContent = 'Reduce el tama\u00f1o para mover verticalmente';
+    } else {
+      hint.textContent = '';
+    }
+  }
   document.getElementById('layoutScaleValue').textContent = '100%';
   document.getElementById('layoutXValue').textContent = '0';
   document.getElementById('layoutYValue').textContent = '0';
@@ -874,12 +942,7 @@ function setupClientPreview() {
 function updateClientPreview() {
   const designImg = document.getElementById('clientPreviewDesign');
   if (!designImg) return;
-  const scaleVal = layoutScale / 100;
-  // Mirror Printful's buildPositionFromLayout:
-  // left = (areaWidth - width) * ((offset_x + 100) / 200)
-  // With transform-origin:0 0, translate(%) is relative to element size (= print area)
-  const leftPct = (1 - scaleVal) * ((layoutX + 100) / 200) * 100;
-  const topPct = (1 - scaleVal) * ((layoutY + 100) / 200) * 100;
+  const { scaleVal, leftPct, topPct } = getLayoutPreview();
   designImg.style.transform = `translate(${leftPct}%, ${topPct}%) scale(${scaleVal})`;
 }
 
