@@ -563,7 +563,14 @@ export function changePassword(userId, currentPassword, newPassword) {
     .prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
     .run(newHash, now, userId);
 
-  return { ok: true };
+  // Revoke all existing sessions after password change for security
+  try {
+    revokeAllSessions(userId);
+  } catch (_) {
+    // Password was already changed — don't mask success if session cleanup fails
+  }
+
+  return { ok: true, session_revoked: true };
 }
 
 // --- Delete account (GDPR) ---
