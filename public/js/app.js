@@ -478,6 +478,20 @@ function initGiftCardRedemption() {
   });
 }
 
+// ── Social counter ──
+function loadSocialCounter() {
+  const el = document.getElementById('counterNumber');
+  if (!el) return;
+  fetch('/api/stats/designs-count')
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.count > 0) {
+        el.textContent = '+' + data.count.toLocaleString('es-ES');
+      }
+    })
+    .catch(() => { /* keep default */ });
+}
+
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
@@ -487,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGiftCards();
   initGiftCardRedemption();
   loadBundles();
+  loadSocialCounter();
 
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {

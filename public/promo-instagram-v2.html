@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @import url('/fonts/fonts.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    background: #0A0908;
+    font-family: 'DM Sans', sans-serif;
+    color: #F7F4F0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Warm glow top-center */
+  .glow-top {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(181,96,63,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .glow-bottom {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(181,96,63,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 48px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand {
+    font-size: 16px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #8C8680;
+  }
+
+  .tag {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B5603F;
+    border: 1px solid rgba(181,96,63,0.5);
+    padding: 6px 16px;
+    border-radius: 100px;
+  }
+
+  /* Main content */
+  .main {
+    text-align: center;
+    padding: 36px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 58px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: #B5603F;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: #8C8680;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* The transformation visual — prompt → design */
+  .transform-section {
+    padding: 36px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .transform-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  /* Prompt bubble */
+  .prompt-bubble {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 28px 32px;
+    max-width: 320px;
+    text-align: left;
+    position: relative;
+  }
+
+  .prompt-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #B5603F;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .prompt-label .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #B5603F;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(181,96,63,0.6);
+  }
+
+  .prompt-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: #F7F4F0;
+    line-height: 1.4;
+  }
+
+  .prompt-text .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 22px;
+    background: #B5603F;
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Arrow */
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #B5603F;
+  }
+
+  .arrow-icon {
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .arrow-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8C8680;
+  }
+
+  /* Result design */
+  .result-design {
+    width: 280px;
+    height: 280px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(181,96,63,0.3);
+    border: 2px solid rgba(181,96,63,0.3);
+  }
+
+  .result-design img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .result-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(181,96,63,0.9);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+  }
+
+  /* More examples row */
+  .examples-section {
+    padding: 32px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .examples-label {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8C8680;
+    margin-bottom: 16px;
+  }
+
+  .examples-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .example-card {
+    width: 160px;
+    text-align: center;
+  }
+
+  .example-card img {
+    width: 160px;
+    height: 160px;
+    border-radius: 14px;
+    object-fit: cover;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .example-prompt {
+    font-size: 12px;
+    color: #8C8680;
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Bottom CTA */
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 60px 48px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cta-btn {
+    background: #B5603F;
+    color: white;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 0 30px rgba(181,96,63,0.4);
+  }
+
+  .bottom-right {
+    text-align: right;
+  }
+
+  .bottom-url {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #F7F4F0;
+    margin-bottom: 4px;
+  }
+
+  .bottom-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: #D4896A;
+  }
+</style>
+</head>
+<body>
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
+
+  <div class="header">
+    <div class="brand">G E N M Y T E E</div>
+    <div class="tag">Al instante</div>
+  </div>
+
+  <div class="main">
+    <h1>Descríbelo.<br><em>Lo creamos al instante.</em></h1>
+    <p class="subtitle">Escribe lo que imaginas y ve cómo cobra vida en segundos sobre tu prenda favorita.</p>
+  </div>
+
+  <div class="transform-section">
+    <div class="transform-flow">
+      <div class="prompt-bubble">
+        <div class="prompt-label"><span class="dot"></span> Tu descripción</div>
+        <div class="prompt-text">"Un tigre geométrico en tonos naranjas y azules, estilo retro minimalista"<span class="cursor"></span></div>
+      </div>
+
+      <div class="arrow">
+        <div class="arrow-icon">→</div>
+        <div class="arrow-label">Segundos</div>
+      </div>
+
+      <div class="result-design">
+        <img src="https://assets.genmytee.com/images/A%20retro%20geometric%20tiger%20in%20orange%20and%20blue.png" alt="Tigre generado">
+        <div class="result-badge">Generado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="examples-section">
+    <div class="examples-label">Más diseños creados por clientes</div>
+    <div class="examples-row">
+      <div class="example-card">
+        <img src="https://assets.genmytee.com/images/gallery-lobo-geometrico.png" alt="Lobo">
+        <div class="example-prompt">"Lobo en triángulos degradados"</div>
+      </div>
+      <div class="example-card">
+        <img src="https://assets.genmytee.com/images/gallery-fenix-fuego.png" alt="Fénix">
+        <div class="example-prompt">"Fénix renaciendo en llamas doradas"</div>
+      </div>
+      <div class="example-card">
+        <img src="https://assets.genmytee.com/images/gallery-ola-japonesa.png" alt="Ola">
+        <div class="example-prompt">"La gran ola estilo ukiyo-e"</div>
+      </div>
+      <div class="example-card">
+        <img src="https://assets.genmytee.com/images/gallery-samurai-cerezo.png" alt="Samurái">
+        <div class="example-prompt">"Samurái bajo pétalos de cerezo"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="cta-btn">CREAR MI PRENDA →</div>
+    <div class="bottom-right">
+      <div class="bottom-url">genmytee.com</div>
+      <div class="bottom-price">Desde €29</div>
+    </div>
+  </div>
+</body>
+</html>
