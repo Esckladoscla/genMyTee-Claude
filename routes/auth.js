@@ -13,6 +13,8 @@ import {
   getGoogleAuthUrl,
   handleGoogleCallback,
   linkSessionToUser,
+  changePassword,
+  deleteUserAccount,
 } from "../services/auth.js";
 import { sendEmail } from "../services/email.js";
 import { verifyCaptcha } from "../services/captcha.js";
@@ -67,6 +69,8 @@ export function buildAuthRouter({
   verifyCaptchaFn = verifyCaptcha,
   linkSessionToUserFn = linkSessionToUser,
   linkDesignsToUserFn = linkDesignsToUser,
+  changePasswordFn = changePassword,
+  deleteUserAccountFn = deleteUserAccount,
   logger = console,
 } = {}) {
   const router = express.Router();
@@ -299,6 +303,59 @@ export function buildAuthRouter({
       res.setHeader("Set-Cookie", clearStateCookie);
       return res.redirect("/?auth_error=google_failed");
     }
+  });
+
+  // --- Change password ---
+  router.post("/change-password", (req, res) => {
+    const token = parseAuthCookie(req.headers.cookie);
+    const user = validateSessionFn(token);
+    if (!user) {
+      return res.status(401).json({ ok: false, error: "not_authenticated" });
+    }
+
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`change-pw:ip:${ip}`, 5, 15 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+
+    const { current_password, new_password } = req.body || {};
+    const result = changePasswordFn(user.id, current_password, new_password);
+
+    if (!result.ok) {
+      const statusMap = {
+        passwords_required: 422,
+        password_too_short: 422,
+        password_too_long: 422,
+        invalid_current_password: 401,
+        no_password_set: 422,
+      };
+      return res.status(statusMap[result.error] || 400).json({ ok: false, error: result.error });
+    }
+
+    return res.json({ ok: true });
+  });
+
+  // --- Delete account (GDPR) ---
+  router.delete("/account", (req, res) => {
+    const token = parseAuthCookie(req.headers.cookie);
+    const user = validateSessionFn(token);
+    if (!user) {
+      return res.status(401).json({ ok: false, error: "not_authenticated" });
+    }
+
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`delete-account:ip:${ip}`, 3, 60 * 60 * 1000)) {
+      return res.status(429).json({ ok: false, error: "rate_limited" });
+    }
+
+    const result = deleteUserAccountFn(user.id);
+
+    if (!result.ok) {
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+
+    res.setHeader("Set-Cookie", buildClearAuthCookie());
+    return res.json({ ok: true });
   });
 
   // --- Auth config (for frontend) ---

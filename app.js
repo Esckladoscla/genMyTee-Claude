@@ -11,6 +11,7 @@ import referralsRouter from "./routes/referrals.js";
 import giftCardRouter from "./routes/gift-cards.js";
 import authRouter from "./routes/auth.js";
 import profileRouter from "./routes/profile.js";
+import blogRouter from "./routes/blog.js";
 import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 import { assignVariant, trackEvent, isAbTestingEnabled } from "./services/ab-testing.js";
@@ -50,7 +51,7 @@ function buildCorsMiddleware() {
     addVaryOrigin(res);
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
     if (req.method === "OPTIONS") {
@@ -91,6 +92,9 @@ export function createApp() {
   app.use("/api/gift-cards", giftCardRouter);
   app.use("/api/auth", authRouter);
   app.use("/api/profile", profileRouter);
+
+  // Blog pages (SSR)
+  app.use("/blog", blogRouter);
 
   // SSR design pages (SEO-indexable)
   // /galeria → gallery landing page

@@ -192,6 +192,43 @@ export async function retrieveSession(sessionId) {
   };
 }
 
+/**
+ * Lists completed checkout sessions for a given email address.
+ * Used for order history in user profiles.
+ *
+ * @param {string} email
+ * @param {{ limit?: number }} options
+ * @returns {Promise<Array<{session_id, amount_total, currency, payment_status, created, items}>>}
+ */
+export async function listOrdersByEmail(email, { limit = 20 } = {}) {
+  if (!email) return [];
+  const stripe = getStripe();
+
+  const sessions = await stripe.checkout.sessions.list({
+    limit,
+    status: "complete",
+    expand: ["data.line_items"],
+  });
+
+  // Filter by email client-side (Stripe list API doesn't support email filter directly)
+  const matched = sessions.data.filter(
+    (s) => s.customer_details?.email?.toLowerCase() === email.toLowerCase()
+  );
+
+  return matched.map((s) => ({
+    session_id: s.id,
+    amount_total: s.amount_total ? s.amount_total / 100 : 0,
+    currency: s.currency || "eur",
+    payment_status: s.payment_status,
+    created: new Date(s.created * 1000).toISOString(),
+    items: (s.line_items?.data || []).map((li) => ({
+      name: li.description || "Prenda",
+      quantity: li.quantity || 1,
+      amount: li.amount_total ? li.amount_total / 100 : 0,
+    })),
+  }));
+}
+
 export function _resetStripeForTests() {
   stripeInstance = null;
 }

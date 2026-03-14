@@ -83,6 +83,17 @@ export function linkDesignsToUser(sessionId, userId) {
     .run(userId, sessionId);
 }
 
+export function deleteDesign(designId, userId) {
+  if (!designId || !userId) return { ok: false, error: "missing_params" };
+  const database = ensureDb();
+  const design = database
+    .prepare("SELECT id FROM user_designs WHERE id = ? AND user_id = ?")
+    .get(designId, userId);
+  if (!design) return { ok: false, error: "design_not_found" };
+  database.prepare("DELETE FROM user_designs WHERE id = ? AND user_id = ?").run(designId, userId);
+  return { ok: true };
+}
+
 export function getUserDesignCount(userId) {
   if (!userId) return 0;
   const database = ensureDb();
