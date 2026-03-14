@@ -92,6 +92,11 @@ export function createApp() {
   app.use("/api/profile", profileRouter);
 
   // SSR design pages (SEO-indexable)
+  // /galeria → gallery landing page
+  app.get("/galeria", (req, res, next) => {
+    req.url = "/landing";
+    galleryRouter(req, res, next);
+  });
   // /galeria/:id → gallery SSR page
   app.get("/galeria/coleccion/:slug", (req, res, next) => {
     req.url = `/coleccion/${req.params.slug}`;
