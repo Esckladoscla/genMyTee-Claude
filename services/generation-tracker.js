@@ -52,7 +52,8 @@ function ensureDb() {
     db = new DatabaseSync(dbPath);
     db.exec(schema);
     currentDbPath = dbPath;
-  } catch (_) {
+  } catch (err) {
+    console.warn(`[generation-tracker] DB open failed, falling back to in-memory: ${err.message}`);
     db = new DatabaseSync(":memory:");
     db.exec(schema);
     currentDbPath = ":memory:";
@@ -116,8 +117,8 @@ function syncFromDb(hourKey) {
       currentHourCount = 0;
       alertedThisHour = false;
     }
-  } catch (_) {
-    // Fall back to in-memory if DB fails
+  } catch (err) {
+    console.warn(`[generation-tracker] syncFromDb failed, using in-memory defaults: ${err.message}`);
     currentHourCount = 0;
     alertedThisHour = false;
   }
@@ -139,7 +140,8 @@ function syncDayFromDb(dayKey) {
       currentDayCount = 0;
       dailyCapTriggered = false;
     }
-  } catch (_) {
+  } catch (err) {
+    console.warn(`[generation-tracker] syncDayFromDb failed, using in-memory defaults: ${err.message}`);
     currentDayCount = 0;
     dailyCapTriggered = false;
   }
@@ -158,8 +160,8 @@ function persistToDb(hourKey) {
       `)
       .run(hourKey, currentHourCount, alertedThisHour ? 1 : 0, now,
            currentHourCount, alertedThisHour ? 1 : 0, now);
-  } catch (_) {
-    // Best-effort persistence — in-memory still works
+  } catch (err) {
+    console.warn(`[generation-tracker] persistToDb failed: ${err.message}`);
   }
 }
 
@@ -175,8 +177,8 @@ function persistDayToDb(dayKey) {
       `)
       .run(dayKey, currentDayCount, dailyCapTriggered ? 1 : 0, now,
            currentDayCount, dailyCapTriggered ? 1 : 0, now);
-  } catch (_) {
-    // Best-effort
+  } catch (err) {
+    console.warn(`[generation-tracker] persistDayToDb failed: ${err.message}`);
   }
 }
 
@@ -355,7 +357,8 @@ export function getGenerationHistory({ limit = 168 } = {}) {
       .prepare("SELECT hour_key, count FROM generation_tracker ORDER BY hour_key DESC LIMIT ?")
       .all(Math.max(1, Math.min(500, limit)));
     return rows.map((r) => ({ hour: r.hour_key, count: Number(r.count) })).reverse();
-  } catch {
+  } catch (err) {
+    console.warn(`[generation-tracker] getGenerationHistory failed: ${err.message}`);
     return [];
   }
 }
