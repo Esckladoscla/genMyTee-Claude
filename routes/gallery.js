@@ -479,17 +479,34 @@ export function buildGalleryRouter({
 
   // ── Sitemap (dynamic) ──
 
-  router.get("/sitemap.xml", (_req, res) => {
+  router.get("/sitemap.xml", async (_req, res) => {
     try {
       const designs = designsFn();
       const collections = collectionsFn();
       const now = new Date().toISOString().split("T")[0];
+
+      // Load blog articles for sitemap
+      let blogArticles = [];
+      try {
+        const { readFileSync } = await import("node:fs");
+        const { join: joinPath } = await import("node:path");
+        const raw = readFileSync(joinPath(__dirname, "..", "data", "blog-articles.json"), "utf8");
+        blogArticles = JSON.parse(raw).articles || [];
+      } catch (_) { /* blog articles not available */ }
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
       // Homepage
       xml += `  <url><loc>https://genmytee.com/</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n`;
+
+      // Blog listing
+      xml += `  <url><loc>https://genmytee.com/blog</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n`;
+
+      // Blog articles
+      for (const a of blogArticles) {
+        xml += `  <url><loc>https://genmytee.com/blog/${escapeHtml(a.slug)}</loc><lastmod>${escapeHtml(a.published_at)}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+      }
 
       // Design pages (only those with images)
       for (const d of designs.filter(d => d.image_url)) {

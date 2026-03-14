@@ -15,6 +15,38 @@
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/auth.css"/>
+<style>
+  .profile-section { margin-top: 2rem; }
+  .profile-section-title { font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .profile-form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 380px; }
+  .profile-form input { width: 100%; padding: 0.65rem 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text); font-size: 0.85rem; outline: none; box-sizing: border-box; }
+  .profile-form input:focus { border-color: var(--accent); }
+  .profile-form input::placeholder { color: var(--muted); }
+  .profile-form .form-msg { font-size: 0.8rem; min-height: 1rem; margin: 0; }
+  .profile-form .form-msg.error { color: #ef4444; }
+  .profile-form .form-msg.success { color: #22c55e; }
+  .orders-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .order-card { background: var(--surface); border-radius: 10px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .order-card-info { flex: 1; }
+  .order-card-date { font-size: 0.75rem; color: var(--muted); }
+  .order-card-items { font-size: 0.85rem; color: var(--text); margin-top: 0.25rem; }
+  .order-card-amount { font-size: 1.1rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .orders-empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; }
+  .design-actions { display: flex; gap: 0.4rem; margin-top: 0.3rem; padding: 0 0.5rem 0.5rem; }
+  .design-action-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; transition: color 0.2s, background 0.2s; }
+  .design-action-btn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+  .design-action-btn.delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+  .danger-zone { margin-top: 3rem; padding: 1.5rem; border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; }
+  .danger-zone h3 { color: #ef4444; font-size: 0.95rem; margin: 0 0 0.5rem; }
+  .danger-zone p { color: var(--muted); font-size: 0.8rem; margin: 0 0 1rem; }
+  .danger-zone .profile-btn { font-size: 0.8rem; }
+  .confirm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .confirm-modal-overlay.active { display: flex; }
+  .confirm-modal { background: var(--surface); border-radius: 12px; padding: 2rem; max-width: 380px; width: 100%; text-align: center; }
+  .confirm-modal h3 { color: var(--text); margin: 0 0 0.75rem; }
+  .confirm-modal p { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.5rem; line-height: 1.5; }
+  .confirm-modal .btn-row { display: flex; gap: 0.75rem; justify-content: center; }
+</style>
 </head>
 <body>
 
@@ -76,21 +108,63 @@
       </div>
     </div>
 
-    <h3 class="profile-section-title">Mis diseños</h3>
-    <div class="profile-designs-grid" id="designsGrid"></div>
-    <div class="profile-empty" id="designsEmpty" style="display:none">
-      <p>Aún no has creado ningún diseño.</p>
-      <a href="/#creador" class="profile-btn" style="display:inline-block;text-decoration:none;">Crear mi primer diseño</a>
+    <!-- DESIGNS -->
+    <div class="profile-section">
+      <h3 class="profile-section-title">Mis diseños</h3>
+      <div class="profile-designs-grid" id="designsGrid"></div>
+      <div class="profile-empty" id="designsEmpty" style="display:none">
+        <p>Aún no has creado ningún diseño.</p>
+        <a href="/#creador" class="profile-btn" style="display:inline-block;text-decoration:none;">Crear mi primer diseño</a>
+      </div>
     </div>
 
-    <div class="profile-actions" style="margin-top:3rem;">
+    <!-- ORDERS -->
+    <div class="profile-section">
+      <h3 class="profile-section-title">Mis pedidos</h3>
+      <div class="orders-list" id="ordersList">
+        <div class="orders-empty" id="ordersLoading">Cargando pedidos...</div>
+      </div>
+    </div>
+
+    <!-- CHANGE PASSWORD -->
+    <div class="profile-section" id="changePasswordSection">
+      <h3 class="profile-section-title">Cambiar contraseña</h3>
+      <form class="profile-form" id="changePasswordForm" onsubmit="handleChangePassword(event)">
+        <input type="password" name="current_password" placeholder="Contraseña actual" required autocomplete="current-password"/>
+        <input type="password" name="new_password" placeholder="Nueva contraseña (mín. 8 caracteres)" required minlength="8" autocomplete="new-password"/>
+        <p class="form-msg" id="changePasswordMsg"></p>
+        <button type="submit" class="profile-btn" style="background:var(--accent);color:#fff;border:none;">Cambiar contraseña</button>
+      </form>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="profile-actions" style="margin-top:2rem;">
       <button class="profile-btn danger" onclick="handleLogout()">Cerrar sesión</button>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="danger-zone">
+      <h3>Zona peligrosa</h3>
+      <p>Eliminar tu cuenta es permanente. Se borrarán todos tus datos, diseños e historial. Esta acción no se puede deshacer.</p>
+      <button class="profile-btn danger" onclick="showDeleteConfirm()">Eliminar mi cuenta</button>
     </div>
   </div>
 
   <div id="profileNotAuth" style="display:none;text-align:center;padding:4rem;">
     <h2 style="color:var(--text);margin-bottom:1rem;">Inicia sesión para ver tu perfil</h2>
     <button class="profile-btn" onclick="openAuthModal('login')" style="background:var(--accent);color:#fff;border:none;">Iniciar sesión</button>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT CONFIRM MODAL -->
+<div class="confirm-modal-overlay" id="deleteConfirmOverlay" onclick="if(event.target===this)hideDeleteConfirm()">
+  <div class="confirm-modal">
+    <h3>¿Eliminar tu cuenta?</h3>
+    <p>Se eliminarán permanentemente tu cuenta, diseños, historial y datos personales. Esta acción cumple con el RGPD (derecho al olvido).</p>
+    <div class="btn-row">
+      <button class="profile-btn" onclick="hideDeleteConfirm()">Cancelar</button>
+      <button class="profile-btn danger" id="confirmDeleteBtn" onclick="handleDeleteAccount()">Sí, eliminar</button>
+    </div>
   </div>
 </div>
 
@@ -140,7 +214,23 @@ async function loadProfile() {
       avatarEl.textContent = (user.name || user.email || "U")[0].toUpperCase();
     }
 
+    // Hide password section for Google-only users
+    if (!user.email.includes("@") || user.avatar_url) {
+      // Can't reliably detect Google-only; keep visible — backend returns "no_password_set" if needed
+    }
+
     // Load designs
+    loadDesigns();
+
+    // Load orders
+    loadOrders();
+  } catch (err) {
+    document.getElementById("profileLoading").textContent = "Error al cargar el perfil.";
+  }
+}
+
+async function loadDesigns() {
+  try {
     const designsRes = await fetch("/api/profile/designs?limit=50", { credentials: "include" });
     const designsData = await designsRes.json();
 
@@ -152,6 +242,7 @@ async function loadProfile() {
       for (const d of designsData.designs) {
         const card = document.createElement("div");
         card.className = "profile-design-card";
+        card.id = "design-" + d.id;
         if (d.preview_url) {
           const img = document.createElement("img");
           img.src = d.preview_url;
@@ -168,13 +259,176 @@ async function loadProfile() {
         promptDiv.className = "design-prompt";
         promptDiv.textContent = d.prompt || "";
         card.appendChild(promptDiv);
+
+        // Action buttons
+        const actions = document.createElement("div");
+        actions.className = "design-actions";
+
+        const shareBtn = document.createElement("button");
+        shareBtn.className = "design-action-btn";
+        shareBtn.textContent = "Compartir";
+        shareBtn.onclick = () => shareDesign(d);
+        actions.appendChild(shareBtn);
+
+        const rebuyBtn = document.createElement("button");
+        rebuyBtn.className = "design-action-btn";
+        rebuyBtn.textContent = "Re-comprar";
+        rebuyBtn.onclick = () => rebuyDesign(d);
+        actions.appendChild(rebuyBtn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "design-action-btn delete";
+        deleteBtn.textContent = "Eliminar";
+        deleteBtn.onclick = () => deleteDesign(d.id);
+        actions.appendChild(deleteBtn);
+
+        card.appendChild(actions);
         grid.appendChild(card);
       }
     } else {
       document.getElementById("designsEmpty").style.display = "";
     }
-  } catch (err) {
-    document.getElementById("profileLoading").textContent = "Error al cargar el perfil.";
+  } catch (_) {
+    // silently fail
+  }
+}
+
+async function loadOrders() {
+  const container = document.getElementById("ordersList");
+  try {
+    const res = await fetch("/api/profile/orders", { credentials: "include" });
+    const data = await res.json();
+
+    if (data.orders && data.orders.length > 0) {
+      document.getElementById("statOrders").textContent = data.orders.length;
+      container.innerHTML = "";
+      for (const o of data.orders) {
+        const card = document.createElement("div");
+        card.className = "order-card";
+        const date = new Date(o.created).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+        const itemsText = o.items.map(i => `${i.quantity}x ${i.name}`).join(", ");
+        card.innerHTML = `
+          <div class="order-card-info">
+            <div class="order-card-date">${date}</div>
+            <div class="order-card-items">${itemsText || "Prenda personalizada"}</div>
+          </div>
+          <div class="order-card-amount">&euro;${o.amount_total.toFixed(2)}</div>
+        `;
+        container.appendChild(card);
+      }
+    } else {
+      document.getElementById("statOrders").textContent = "0";
+      container.innerHTML = '<div class="orders-empty">No tienes pedidos todavía.</div>';
+    }
+  } catch (_) {
+    document.getElementById("statOrders").textContent = "--";
+    container.innerHTML = '<div class="orders-empty">No se pudo cargar el historial de pedidos.</div>';
+  }
+}
+
+function shareDesign(design) {
+  const text = `Mira este diseño que creé en genMyTee: "${design.prompt || "Mi diseño personalizado"}"`;
+  const url = "https://genmytee.com/#creador";
+  if (navigator.share) {
+    navigator.share({ title: "Mi diseño — genMyTee", text, url }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text + " " + url).then(() => {
+      if (typeof showToast === "function") showToast("Enlace copiado al portapapeles");
+    }).catch(() => {});
+  }
+}
+
+function rebuyDesign(design) {
+  // Navigate to creator with the prompt pre-filled
+  const prompt = encodeURIComponent(design.prompt || "");
+  window.location.href = `/#creador?prompt=${prompt}`;
+}
+
+async function deleteDesign(designId) {
+  if (!confirm("¿Eliminar este diseño? Esta acción no se puede deshacer.")) return;
+  try {
+    const res = await fetch(`/api/profile/designs/${designId}`, { method: "DELETE", credentials: "include" });
+    const data = await res.json();
+    if (data.ok) {
+      const card = document.getElementById("design-" + designId);
+      if (card) card.remove();
+      const current = parseInt(document.getElementById("statDesigns").textContent) || 0;
+      document.getElementById("statDesigns").textContent = Math.max(0, current - 1);
+      if (typeof showToast === "function") showToast("Diseño eliminado");
+    } else {
+      if (typeof showToast === "function") showToast("Error al eliminar el diseño");
+    }
+  } catch (_) {
+    if (typeof showToast === "function") showToast("Error al eliminar el diseño");
+  }
+}
+
+async function handleChangePassword(e) {
+  e.preventDefault();
+  const form = e.target;
+  const msgEl = document.getElementById("changePasswordMsg");
+  msgEl.textContent = "";
+  msgEl.className = "form-msg";
+
+  const currentPassword = form.current_password.value;
+  const newPassword = form.new_password.value;
+
+  try {
+    const res = await fetch("/api/auth/change-password", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      msgEl.className = "form-msg success";
+      msgEl.textContent = "Contraseña actualizada correctamente.";
+      form.reset();
+    } else {
+      msgEl.className = "form-msg error";
+      const errors = {
+        invalid_current_password: "La contraseña actual es incorrecta.",
+        password_too_short: "La nueva contraseña debe tener al menos 8 caracteres.",
+        no_password_set: "Tu cuenta usa inicio de sesión con Google. No tienes contraseña configurada.",
+        rate_limited: "Demasiados intentos. Espera unos minutos.",
+      };
+      msgEl.textContent = errors[data.error] || "Error al cambiar la contraseña.";
+    }
+  } catch (_) {
+    msgEl.className = "form-msg error";
+    msgEl.textContent = "Error de conexión.";
+  }
+}
+
+function showDeleteConfirm() {
+  document.getElementById("deleteConfirmOverlay").classList.add("active");
+}
+function hideDeleteConfirm() {
+  document.getElementById("deleteConfirmOverlay").classList.remove("active");
+}
+
+async function handleDeleteAccount() {
+  const btn = document.getElementById("confirmDeleteBtn");
+  btn.disabled = true;
+  btn.textContent = "Eliminando...";
+
+  try {
+    const res = await fetch("/api/auth/account", { method: "DELETE", credentials: "include" });
+    const data = await res.json();
+    if (data.ok) {
+      if (typeof showToast === "function") showToast("Cuenta eliminada. Lamentamos verte marchar.");
+      setTimeout(() => { window.location.href = "/"; }, 1500);
+    } else {
+      btn.disabled = false;
+      btn.textContent = "Sí, eliminar";
+      if (typeof showToast === "function") showToast("Error al eliminar la cuenta.");
+    }
+  } catch (_) {
+    btn.disabled = false;
+    btn.textContent = "Sí, eliminar";
+    if (typeof showToast === "function") showToast("Error de conexión.");
   }
 }
 

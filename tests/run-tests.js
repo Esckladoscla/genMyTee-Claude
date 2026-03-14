@@ -30,6 +30,7 @@ const files = [
   "./auth.test.js",
   "./design-history.test.js",
   "./alerts.test.js",
+  "./account-blog.test.js",
 ];
 
 for (const file of files) {

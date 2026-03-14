@@ -1,11 +1,14 @@
 import express from "express";
 import { validateSession, parseAuthCookie } from "../services/auth.js";
-import { getUserDesigns, getUserDesignCount } from "../services/design-history.js";
+import { getUserDesigns, getUserDesignCount, deleteDesign } from "../services/design-history.js";
+import { listOrdersByEmail } from "../services/stripe.js";
 
 export function buildProfileRouter({
   validateSessionFn = validateSession,
   getUserDesignsFn = getUserDesigns,
   getUserDesignCountFn = getUserDesignCount,
+  deleteDesignFn = deleteDesign,
+  listOrdersByEmailFn = listOrdersByEmail,
   logger = console,
 } = {}) {
   const router = express.Router();
@@ -38,15 +41,29 @@ export function buildProfileRouter({
     });
   });
 
-  // --- User orders (placeholder for Stripe-linked lookup) ---
-  router.get("/orders", (_req, res) => {
-    // Orders are currently tracked by Stripe session ID, not user account
-    // This endpoint will be enhanced when we link Stripe customers to user accounts
-    return res.json({
-      ok: true,
-      orders: [],
-      message: "El historial de pedidos estará disponible próximamente vinculado a tu cuenta.",
-    });
+  // --- Delete a design ---
+  router.delete("/designs/:id", (req, res) => {
+    const designId = req.params.id;
+    const result = deleteDesignFn(designId, req.user.id);
+    if (!result.ok) {
+      return res.status(404).json({ ok: false, error: result.error });
+    }
+    return res.json({ ok: true });
+  });
+
+  // --- User orders (Stripe-linked) ---
+  router.get("/orders", async (req, res) => {
+    try {
+      const orders = await listOrdersByEmailFn(req.user.email, { limit: 20 });
+      return res.json({ ok: true, orders });
+    } catch (err) {
+      logger.warn("[profile] Error fetching orders from Stripe:", err?.message);
+      return res.json({
+        ok: true,
+        orders: [],
+        message: "El historial de pedidos no está disponible en este momento.",
+      });
+    }
   });
 
   // --- Profile summary ---

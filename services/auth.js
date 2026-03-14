@@ -533,6 +533,68 @@ export function grantUserGenerationBonus(userId, bonus) {
     .run(bonus, now, userId);
 }
 
+// --- Change password ---
+
+export function changePassword(userId, currentPassword, newPassword) {
+  if (!userId) return { ok: false, error: "not_authenticated" };
+  if (!currentPassword || !newPassword) return { ok: false, error: "passwords_required" };
+  if (typeof newPassword !== "string" || newPassword.length < 8) {
+    return { ok: false, error: "password_too_short" };
+  }
+  if (newPassword.length > 256) {
+    return { ok: false, error: "password_too_long" };
+  }
+
+  const database = ensureDb();
+  const user = database
+    .prepare("SELECT id, password_hash FROM users WHERE id = ?")
+    .get(userId);
+
+  if (!user) return { ok: false, error: "user_not_found" };
+  if (!user.password_hash) return { ok: false, error: "no_password_set" };
+
+  if (!verifyPassword(currentPassword, user.password_hash)) {
+    return { ok: false, error: "invalid_current_password" };
+  }
+
+  const newHash = hashPassword(newPassword);
+  const now = new Date().toISOString();
+  database
+    .prepare("UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?")
+    .run(newHash, now, userId);
+
+  return { ok: true };
+}
+
+// --- Delete account (GDPR) ---
+
+export function deleteUserAccount(userId) {
+  if (!userId) return { ok: false, error: "not_authenticated" };
+
+  const database = ensureDb();
+  const user = database
+    .prepare("SELECT id FROM users WHERE id = ?")
+    .get(userId);
+
+  if (!user) return { ok: false, error: "user_not_found" };
+
+  // Delete all sessions
+  database.prepare("DELETE FROM auth_sessions WHERE user_id = ?").run(userId);
+  // Delete email verifications
+  const userEmail = database.prepare("SELECT email FROM users WHERE id = ?").get(userId);
+  if (userEmail) {
+    database.prepare("DELETE FROM email_verifications WHERE email = ?").run(userEmail.email);
+  }
+  // Delete user designs (best-effort — table may not exist yet)
+  try {
+    database.prepare("DELETE FROM user_designs WHERE user_id = ?").run(userId);
+  } catch (_) { /* table may not exist */ }
+  // Delete the user
+  database.prepare("DELETE FROM users WHERE id = ?").run(userId);
+
+  return { ok: true };
+}
+
 // --- Revoke all sessions for a user ---
 
 export function revokeAllSessions(userId) {
