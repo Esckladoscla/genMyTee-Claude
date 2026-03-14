@@ -128,6 +128,9 @@ function renderDesignPage(design, compatibleProducts, collections) {
 <meta name="twitter:title" content="${escapeHtml(design.title)} — genMyTee"/>
 <meta name="twitter:description" content="${escapeHtml(design.description)}"/>
 <meta name="twitter:image" content="${escapeHtml(design.image_url || "https://genmytee.com/img/hero.png")}"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/gallery.css"/>
@@ -261,8 +264,16 @@ function renderCollectionPage(collection, designs, allCollections) {
 <meta property="og:description" content="${escapeHtml(collection.description)}"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://genmytee.com/galeria/coleccion/${escapeHtml(collection.slug)}"/>
+<meta property="og:image" content="${escapeHtml(designs.length > 0 && designs[0].image_url ? designs[0].image_url : "https://genmytee.com/img/hero.png")}"/>
 <meta property="og:site_name" content="genMyTee"/>
 <meta property="og:locale" content="es_ES"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Colección ${escapeHtml(collection.name)} — genMyTee"/>
+<meta name="twitter:description" content="${escapeHtml(collection.description)}"/>
+<meta name="twitter:image" content="${escapeHtml(designs.length > 0 && designs[0].image_url ? designs[0].image_url : "https://genmytee.com/img/hero.png")}"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/base.css"/>
 <link rel="stylesheet" href="/css/components.css"/>
 <link rel="stylesheet" href="/css/gallery.css"/>

@@ -246,6 +246,9 @@ footer{border-top:1px solid var(--border);padding:4rem 2.5rem 2rem}
 .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:0.6rem}
 .footer-col a{font-size:0.8rem;color:var(--muted);transition:color 0.2s}
 .footer-col a:hover{color:var(--accent)}
+.footer-email{margin-top:1rem;font-size:0.8rem}
+.footer-email a{color:var(--accent);text-decoration:none;font-weight:500}
+.footer-email a:hover{text-decoration:underline}
 .footer-bottom{
   display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
   padding-top:2rem;border-top:1px solid var(--border);
