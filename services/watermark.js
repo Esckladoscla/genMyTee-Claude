@@ -1,4 +1,8 @@
 import sharp from "sharp";
+import fs from "node:fs";
+import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
+import { getDbPath } from "./env.js";
 
 const WATERMARK_TEXT = "genMyTee";
 const WATERMARK_OPACITY = 0.18;
@@ -6,6 +10,58 @@ const WATERMARK_FONT_SIZE = 32;
 const WATERMARK_SPACING_X = 280;
 const WATERMARK_SPACING_Y = 160;
 const WATERMARK_ANGLE = -30;
+
+// --- URL mapping (preview → production) ---
+
+let db;
+let currentDbPath;
+
+function ensureDb() {
+  const dbPath = getDbPath();
+  if (db && currentDbPath === dbPath) return db;
+
+  if (db) {
+    try { db.close(); } catch (_) { /* ignore */ }
+  }
+
+  try {
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+    db = new DatabaseSync(dbPath);
+    currentDbPath = dbPath;
+  } catch (_) {
+    db = new DatabaseSync(":memory:");
+    currentDbPath = ":memory:";
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS url_mappings (
+      preview_url TEXT PRIMARY KEY,
+      production_url TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+  `);
+
+  return db;
+}
+
+/**
+ * Store the mapping between a preview URL and its production URL.
+ * Called after uploading both versions with independent filenames.
+ */
+export function storeProductionMapping(previewUrl, productionUrl) {
+  if (!previewUrl || !productionUrl) return;
+  try {
+    const database = ensureDb();
+    const now = new Date().toISOString();
+    database
+      .prepare(
+        "INSERT OR REPLACE INTO url_mappings (preview_url, production_url, created_at) VALUES (?, ?, ?)"
+      )
+      .run(previewUrl, productionUrl, now);
+  } catch (_) {
+    // Best-effort — fallback resolution still works
+  }
+}
 
 function buildWatermarkSvg(width, height) {
   const fillColor = `rgba(255, 255, 255, ${WATERMARK_OPACITY})`;
@@ -61,5 +117,26 @@ export async function applyWatermark(imageBuffer) {
 
 export function resolveProductionUrl(previewUrl) {
   if (!previewUrl || typeof previewUrl !== "string") return previewUrl;
+
+  // Try DB lookup first (independent filenames)
+  try {
+    const database = ensureDb();
+    const row = database
+      .prepare("SELECT production_url FROM url_mappings WHERE preview_url = ?")
+      .get(previewUrl);
+    if (row?.production_url) return row.production_url;
+  } catch (_) {
+    // Fall through to legacy resolution
+  }
+
+  // Legacy fallback: same filename, different folder
   return previewUrl.replace("/previews/", "/production/");
+}
+
+export function _resetWatermarkForTests() {
+  if (db) {
+    try { db.close(); } catch (_) { /* ignore */ }
+  }
+  db = undefined;
+  currentDbPath = undefined;
 }

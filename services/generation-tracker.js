@@ -1,14 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { getDbPath, getNumberEnv } from "./env.js";
+import { getDbPath, getNumberEnv, getBooleanEnv } from "./env.js";
 
 const DEFAULT_ALERT_THRESHOLD = 50;
+const DEFAULT_CIRCUIT_BREAKER_THRESHOLD = 200;
+const DEFAULT_DAILY_CAP = 500;
 
 // In-memory cache (fast path for alerting within the current process)
 let currentHourBucket = null;
 let currentHourCount = 0;
 let alertedThisHour = false;
+let circuitBrokenThisHour = false;
+
+// Daily tracking cache
+let currentDayBucket = null;
+let currentDayCount = 0;
+let dailyCapTriggered = false;
 
 // SQLite persistence (survives restarts)
 let db;
@@ -27,6 +35,12 @@ function ensureDb() {
       hour_key TEXT PRIMARY KEY,
       count INTEGER NOT NULL DEFAULT 0,
       alerted INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS daily_generation_tracker (
+      day_key TEXT PRIMARY KEY,
+      count INTEGER NOT NULL DEFAULT 0,
+      cap_triggered INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT NOT NULL
     );
   `;
@@ -50,9 +64,26 @@ function getCurrentHourKey() {
   return `${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}-${now.getUTCHours()}`;
 }
 
+function getCurrentDayKey() {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
+}
+
 function getThreshold() {
   return getNumberEnv("GENERATION_ALERT_THRESHOLD_PER_HOUR", {
     defaultValue: DEFAULT_ALERT_THRESHOLD,
+  });
+}
+
+function getCircuitBreakerThreshold() {
+  return getNumberEnv("CIRCUIT_BREAKER_THRESHOLD_PER_HOUR", {
+    defaultValue: DEFAULT_CIRCUIT_BREAKER_THRESHOLD,
+  });
+}
+
+function getDailyCap() {
+  return getNumberEnv("DAILY_GENERATION_CAP", {
+    defaultValue: DEFAULT_DAILY_CAP,
   });
 }
 
@@ -79,6 +110,28 @@ function syncFromDb(hourKey) {
     alertedThisHour = false;
   }
   currentHourBucket = hourKey;
+  // Reset circuit breaker on hour rollover
+  circuitBrokenThisHour = false;
+}
+
+function syncDayFromDb(dayKey) {
+  try {
+    const database = ensureDb();
+    const row = database
+      .prepare("SELECT count, cap_triggered FROM daily_generation_tracker WHERE day_key = ?")
+      .get(dayKey);
+    if (row) {
+      currentDayCount = Number(row.count);
+      dailyCapTriggered = Boolean(row.cap_triggered);
+    } else {
+      currentDayCount = 0;
+      dailyCapTriggered = false;
+    }
+  } catch (_) {
+    currentDayCount = 0;
+    dailyCapTriggered = false;
+  }
+  currentDayBucket = dayKey;
 }
 
 function persistToDb(hourKey) {
@@ -98,14 +151,36 @@ function persistToDb(hourKey) {
   }
 }
 
+function persistDayToDb(dayKey) {
+  try {
+    const database = ensureDb();
+    const now = new Date().toISOString();
+    database
+      .prepare(`
+        INSERT INTO daily_generation_tracker (day_key, count, cap_triggered, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(day_key) DO UPDATE SET count = ?, cap_triggered = ?, updated_at = ?
+      `)
+      .run(dayKey, currentDayCount, dailyCapTriggered ? 1 : 0, now,
+           currentDayCount, dailyCapTriggered ? 1 : 0, now);
+  } catch (_) {
+    // Best-effort
+  }
+}
+
 export function recordGeneration({ logger = console } = {}) {
   const hourKey = getCurrentHourKey();
+  const dayKey = getCurrentDayKey();
 
   if (hourKey !== currentHourBucket) {
     syncFromDb(hourKey);
   }
+  if (dayKey !== currentDayBucket) {
+    syncDayFromDb(dayKey);
+  }
 
   currentHourCount += 1;
+  currentDayCount += 1;
 
   const threshold = getThreshold();
   if (currentHourCount >= threshold && !alertedThisHour) {
@@ -116,9 +191,79 @@ export function recordGeneration({ logger = console } = {}) {
     );
   }
 
-  persistToDb(hourKey);
+  // Circuit breaker: auto-disable AI when hourly threshold is exceeded
+  const circuitBreakerThreshold = getCircuitBreakerThreshold();
+  if (currentHourCount >= circuitBreakerThreshold && !circuitBrokenThisHour) {
+    circuitBrokenThisHour = true;
+    process.env.AI_ENABLED = "false";
+    logger.warn(
+      `[generation-tracker] CIRCUIT BREAKER: ${currentHourCount} generations this hour ` +
+        `(limit: ${circuitBreakerThreshold}). AI auto-disabled. ` +
+        "Will auto-re-enable next hour or manually via POST /api/admin/ai."
+    );
+  }
 
-  return { count: currentHourCount, threshold, alerted: alertedThisHour };
+  // Daily cap: auto-disable AI when daily limit is exceeded
+  const dailyCap = getDailyCap();
+  if (currentDayCount >= dailyCap && !dailyCapTriggered) {
+    dailyCapTriggered = true;
+    process.env.AI_ENABLED = "false";
+    logger.warn(
+      `[generation-tracker] DAILY CAP: ${currentDayCount} generations today ` +
+        `(limit: ${dailyCap}). AI auto-disabled until midnight UTC. ` +
+        "Override manually via POST /api/admin/ai."
+    );
+  }
+
+  persistToDb(hourKey);
+  persistDayToDb(dayKey);
+
+  return {
+    count: currentHourCount,
+    threshold,
+    alerted: alertedThisHour,
+    circuit_broken: circuitBrokenThisHour,
+    daily_count: currentDayCount,
+    daily_cap: dailyCap,
+    daily_cap_triggered: dailyCapTriggered,
+  };
+}
+
+/**
+ * Check whether generation is allowed by the circuit breaker and daily cap.
+ * Returns { allowed: true } or { allowed: false, reason: "..." }.
+ * Called before generation to block requests proactively.
+ */
+export function checkGenerationAllowedByTracker() {
+  const hourKey = getCurrentHourKey();
+  const dayKey = getCurrentDayKey();
+
+  if (hourKey !== currentHourBucket) {
+    syncFromDb(hourKey);
+  }
+  if (dayKey !== currentDayBucket) {
+    syncDayFromDb(dayKey);
+  }
+
+  const circuitBreakerThreshold = getCircuitBreakerThreshold();
+  if (currentHourCount >= circuitBreakerThreshold) {
+    return {
+      allowed: false,
+      reason: "circuit_breaker",
+      message: `Hourly generation limit reached (${circuitBreakerThreshold}/hour). Please try again later.`,
+    };
+  }
+
+  const dailyCap = getDailyCap();
+  if (currentDayCount >= dailyCap) {
+    return {
+      allowed: false,
+      reason: "daily_cap",
+      message: `Daily generation limit reached (${dailyCap}/day). Resets at midnight UTC.`,
+    };
+  }
+
+  return { allowed: true };
 }
 
 export function getHourlyStats() {
@@ -130,7 +275,21 @@ export function getHourlyStats() {
     count: currentHourCount,
     threshold: getThreshold(),
     alerted: alertedThisHour,
+    circuit_broken: circuitBrokenThisHour,
     hour: currentHourBucket,
+  };
+}
+
+export function getDailyStats() {
+  const dayKey = getCurrentDayKey();
+  if (dayKey !== currentDayBucket) {
+    syncDayFromDb(dayKey);
+  }
+  return {
+    count: currentDayCount,
+    cap: getDailyCap(),
+    cap_triggered: dailyCapTriggered,
+    day: currentDayBucket,
   };
 }
 
@@ -155,4 +314,8 @@ export function _resetTrackerForTests() {
   currentHourBucket = null;
   currentHourCount = 0;
   alertedThisHour = false;
+  circuitBrokenThisHour = false;
+  currentDayBucket = null;
+  currentDayCount = 0;
+  dailyCapTriggered = false;
 }

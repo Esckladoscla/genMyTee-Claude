@@ -12,8 +12,8 @@ import { getBooleanEnv, getEnv } from "../services/env.js";
 import { resolveVariantId } from "../services/variants.js";
 import { generateMockupForVariant, getMockupTask } from "../services/printful.js";
 import { consumeRateLimit } from "../services/rate-limiter.js";
-import { recordGeneration } from "../services/generation-tracker.js";
-import { applyWatermark } from "../services/watermark.js";
+import { recordGeneration, checkGenerationAllowedByTracker } from "../services/generation-tracker.js";
+import { applyWatermark, storeProductionMapping } from "../services/watermark.js";
 import {
   parseSessionCookie,
   generateSessionId,
@@ -319,6 +319,16 @@ export function buildPreviewRouter({
       const { prompt } = req.body || {};
       const normalizedPrompt = normalizePrompt(prompt);
 
+      // Circuit breaker + daily cap check (server-wide)
+      const trackerCheck = checkGenerationAllowedByTracker();
+      if (!trackerCheck.allowed) {
+        return res.status(503).json({
+          ok: false,
+          error: trackerCheck.reason,
+          message: trackerCheck.message,
+        });
+      }
+
       const aiEnabled = getBooleanEnv("AI_ENABLED", { defaultValue: true });
       if (!aiEnabled) {
         return res.status(503).json({
@@ -384,13 +394,12 @@ export function buildPreviewRouter({
         });
       }
 
-      // Apply watermark and upload preview version
+      // Apply watermark and upload preview version (independent filename)
       let previewUrl;
       try {
         const watermarkedBuffer = await applyWatermarkFn(imageBuffer);
         previewUrl = await uploadImageBufferFn(watermarkedBuffer, {
           folder: "previews",
-          filename: productionUrl.split("/").pop(),
         });
       } catch (wmError) {
         logger.warn("[preview] watermark failed, using clean image as preview", {
@@ -398,9 +407,11 @@ export function buildPreviewRouter({
         });
         previewUrl = await uploadImageBufferFn(imageBuffer, {
           folder: "previews",
-          filename: productionUrl.split("/").pop(),
         });
       }
+
+      // Store preview→production URL mapping for order resolution
+      storeProductionMapping(previewUrl, productionUrl);
 
       recordGenerationFn({ logger });
       recordSessionGenerationFn(sessionId);
@@ -523,6 +534,16 @@ export function buildPreviewRouter({
       const { prompt } = req.body || {};
       const normalizedPrompt = normalizePrompt(prompt);
 
+      // Circuit breaker + daily cap check (server-wide)
+      const trackerCheck = checkGenerationAllowedByTracker();
+      if (!trackerCheck.allowed) {
+        return res.status(503).json({
+          ok: false,
+          error: trackerCheck.reason,
+          message: trackerCheck.message,
+        });
+      }
+
       const aiEnabled = getBooleanEnv("AI_ENABLED", { defaultValue: true });
       if (!aiEnabled) {
         return res.status(503).json({ ok: false, error: "ai_disabled" });
@@ -608,14 +629,15 @@ export function buildPreviewRouter({
       const watermarkedBuffer = await applyWatermarkFn(imageBuffer);
       previewUrl = await uploadImageBufferFn(watermarkedBuffer, {
         folder: "previews",
-        filename: productionUrl.split("/").pop(),
       });
     } catch (_) {
       previewUrl = await uploadImageBufferFn(imageBuffer, {
         folder: "previews",
-        filename: productionUrl.split("/").pop(),
       });
     }
+
+    // Store preview→production URL mapping for order resolution
+    storeProductionMapping(previewUrl, productionUrl);
 
     return { image_url: previewUrl };
   });
