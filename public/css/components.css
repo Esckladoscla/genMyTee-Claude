@@ -164,7 +164,7 @@ nav{
 
 /* ── TRUST BADGES ── */
 .trust-row{
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(5,1fr);
   border-bottom:1px solid var(--border);
 }
 .trust-item{
@@ -388,7 +388,14 @@ footer{border-top:1px solid var(--border);padding:4rem 2.5rem 2rem}
   font-size:0.88rem;line-height:1.75;color:var(--text);
   font-style:italic;flex:1;
 }
-.testimonial-author{display:flex;flex-direction:column;gap:0.15rem}
+.testimonial-author{display:flex;align-items:center;gap:0.8rem}
+.testimonial-avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;font-weight:600;letter-spacing:0.05em;
+  color:var(--text);
+}
+.testimonial-author-info{display:flex;flex-direction:column;gap:0.15rem}
 .testimonial-name{font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase}
 .testimonial-detail{font-size:0.7rem;color:var(--muted)}
 @media(max-width:768px){
@@ -519,3 +526,46 @@ footer{border-top:1px solid var(--border);padding:4rem 2.5rem 2rem}
 .gift-card-brand{font-size:1rem;font-weight:700;color:#fff;position:relative}
 .gift-card-value{font-size:2.5rem;font-weight:800;color:#fff;position:relative;text-align:center;flex:1;display:flex;align-items:center;justify-content:center}
 .gift-card-subtitle{font-size:0.75rem;color:rgba(255,255,255,0.8);text-align:right;position:relative}
+
+/* ── SOCIAL COUNTER ── */
+.social-counter{
+  padding:2.5rem 2rem;text-align:center;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.counter-inner{display:flex;align-items:center;justify-content:center;gap:0.8rem;flex-wrap:wrap}
+.counter-number{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,4vw,3rem);font-weight:600;color:var(--accent);
+}
+.counter-label{
+  font-size:0.88rem;color:var(--muted);
+}
+
+/* ── WHATSAPP WIDGET ── */
+.whatsapp-widget{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:140;
+  width:56px;height:56px;border-radius:50%;
+  background:#25D366;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(37,211,102,0.4);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.whatsapp-widget:hover{
+  transform:scale(1.08);
+  box-shadow:0 6px 24px rgba(37,211,102,0.5);
+}
+@media(max-width:768px){
+  .whatsapp-widget{bottom:1rem;right:1rem;width:50px;height:50px}
+  .whatsapp-widget svg{width:24px;height:24px}
+}
+
+/* ── STRIPE / TRUST BADGE EXTRA ── */
+.trust-stripe svg{color:var(--accent)}
+@media(max-width:900px){
+  .trust-row{grid-template-columns:repeat(2,1fr)}
+  .trust-stripe{grid-column:span 2;justify-content:center}
+}
+@media(max-width:768px){
+  .trust-row{grid-template-columns:1fr}
+  .trust-stripe{grid-column:span 1}
+}

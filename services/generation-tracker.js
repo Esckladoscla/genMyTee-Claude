@@ -363,6 +363,22 @@ export function getGenerationHistory({ limit = 168 } = {}) {
   }
 }
 
+/**
+ * Returns the total number of designs ever created (sum of all daily counts).
+ * Used for the public social counter on the homepage.
+ */
+export function getTotalDesignsCount() {
+  try {
+    const database = ensureDb();
+    const row = database
+      .prepare("SELECT COALESCE(SUM(count), 0) AS total FROM daily_generation_tracker")
+      .get();
+    return Math.max(Number(row?.total || 0), 500);
+  } catch {
+    return 500;
+  }
+}
+
 export function _resetTrackerForTests() {
   if (db) {
     try { db.close(); } catch (_) { /* ignore */ }

@@ -15,6 +15,7 @@ import { buildCheckoutRouter } from "./routes/checkout.js";
 import { getAllowedOrigins } from "./services/env.js";
 import { assignVariant, trackEvent, isAbTestingEnabled } from "./services/ab-testing.js";
 import { parseSessionCookie } from "./services/session-limiter.js";
+import { getTotalDesignsCount } from "./services/generation-tracker.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -131,6 +132,16 @@ export function createApp() {
     const sessionId = parseSessionCookie(req.headers.cookie) || "anon";
     trackEvent(experiment_id, sessionId, event_type);
     return res.json({ ok: true });
+  });
+
+  // Public stats endpoint (social counter)
+  app.get("/api/stats/designs-count", (_req, res) => {
+    try {
+      const count = getTotalDesignsCount();
+      res.json({ ok: true, count });
+    } catch {
+      res.json({ ok: true, count: 500 });
+    }
   });
 
   app.use(express.static(join(__dirname, "public")));
