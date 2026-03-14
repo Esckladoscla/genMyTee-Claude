@@ -98,7 +98,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Inicio", item: "https://genmytee.com/" },
-      { "@type": "ListItem", position: 2, name: "Galería", item: "https://genmytee.com/#galeria" },
+      { "@type": "ListItem", position: 2, name: "Galería", item: "https://genmytee.com/galeria" },
       ...(collection ? [{ "@type": "ListItem", position: 3, name: collection.name, item: `https://genmytee.com/galeria/coleccion/${collection.slug}` }] : []),
       { "@type": "ListItem", position: collection ? 4 : 3, name: design.title, item: `https://genmytee.com/galeria/${design.id}` },
     ],
@@ -166,7 +166,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
   <div class="nav-top">
     <a href="/" class="nav-logo">genMyTee</a>
     <ul class="nav-center">
-      <li><a href="/#galeria">Galería</a></li>
+      <li><a href="/galeria">Galería</a></li>
       <li><a href="/#productos">Prendas</a></li>
       <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
     </ul>
@@ -174,7 +174,7 @@ function renderDesignPage(design, compatibleProducts, collections) {
 </nav>
 <div class="ssr-design-page">
   <div class="ssr-breadcrumb">
-    <a href="/">Inicio</a> › <a href="/#galeria">Galería</a>${collection ? ` › <a href="/galeria/coleccion/${escapeHtml(collection.slug)}">${escapeHtml(collection.name)}</a>` : ""} › ${escapeHtml(design.title)}
+    <a href="/">Inicio</a> › <a href="/galeria">Galería</a>${collection ? ` › <a href="/galeria/coleccion/${escapeHtml(collection.slug)}">${escapeHtml(collection.name)}</a>` : ""} › ${escapeHtml(design.title)}
   </div>
   <div class="ssr-design-layout">
     <div class="ssr-design-image">
@@ -302,7 +302,7 @@ function renderCollectionPage(collection, designs, allCollections) {
   <div class="nav-top">
     <a href="/" class="nav-logo">genMyTee</a>
     <ul class="nav-center">
-      <li><a href="/#galeria">Galería</a></li>
+      <li><a href="/galeria">Galería</a></li>
       <li><a href="/#productos">Prendas</a></li>
       <li><a href="/#creador" style="color:var(--accent)">Crear mi prenda</a></li>
     </ul>
@@ -324,6 +324,161 @@ function renderCollectionPage(collection, designs, allCollections) {
 <footer>
   <div class="footer-grid" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
     <div><div class="footer-logo">genMyTee</div></div>
+  </div>
+</footer>
+<script async src="https://plausible.io/js/pa-rbsS4LC3PN6oDWmTJM0DS.js"></script>
+</body>
+</html>`;
+}
+
+/**
+ * Renders the standalone gallery landing page (SSR).
+ * Full page with all designs, collection filters, own meta tags.
+ */
+function renderGalleryLandingPage(designs, collections) {
+  const visibleDesigns = designs.filter((d) => d.image_url);
+
+  const collectionsHtml = collections
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((c) => {
+      const count = designs.filter((d) => d.collection === c.id).length;
+      return `<a href="/galeria/coleccion/${escapeHtml(c.slug)}" class="ssr-filter-chip">${c.emoji} ${escapeHtml(c.name)} <span class="ssr-chip-count">(${count})</span></a>`;
+    })
+    .join("");
+
+  const designsHtml = visibleDesigns.map((d) => `
+    <a href="/galeria/${escapeHtml(d.id)}" class="ssr-collection-card">
+      <div class="ssr-card-img">
+        <img src="${escapeHtml(d.image_url)}" alt="${escapeHtml(d.title)}" loading="lazy"/>
+        ${d.featured ? `<span class="ssr-card-badge">Destacado</span>` : ""}
+      </div>
+      <div class="ssr-card-title">${escapeHtml(d.title)}</div>
+      <div class="ssr-card-desc">${escapeHtml(d.description)}</div>
+    </a>
+  `).join("");
+
+  const firstImage = visibleDesigns.length > 0 ? visibleDesigns[0].image_url : "https://genmytee.com/img/hero.png";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Galería de Diseños — genMyTee",
+    description: `Explora ${visibleDesigns.length} diseños exclusivos para personalizar tu ropa. Camisetas, sudaderas, bolsos y más con arte único.`,
+    url: "https://genmytee.com/galeria",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: visibleDesigns.length,
+      itemListElement: visibleDesigns.slice(0, 30).map((d, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `https://genmytee.com/galeria/${d.id}`,
+        name: d.title,
+      })),
+    },
+  };
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: "https://genmytee.com/" },
+      { "@type": "ListItem", position: 2, name: "Galería", item: "https://genmytee.com/galeria" },
+    ],
+  };
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+<title>Galería de Diseños — genMyTee</title>
+<meta name="description" content="Explora ${visibleDesigns.length} diseños exclusivos para personalizar tu ropa. Camisetas, sudaderas, bolsos y más con arte único. Envío a toda Europa."/>
+<link rel="canonical" href="https://genmytee.com/galeria"/>
+<meta property="og:title" content="Galería de Diseños — genMyTee"/>
+<meta property="og:description" content="Explora ${visibleDesigns.length} diseños exclusivos para personalizar tu ropa."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://genmytee.com/galeria"/>
+<meta property="og:image" content="${escapeHtml(firstImage)}"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:site_name" content="genMyTee"/>
+<meta property="og:locale" content="es_ES"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Galería de Diseños — genMyTee"/>
+<meta name="twitter:description" content="Explora ${visibleDesigns.length} diseños exclusivos para personalizar tu ropa."/>
+<meta name="twitter:image" content="${escapeHtml(firstImage)}"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/base.css"/>
+<link rel="stylesheet" href="/css/components.css"/>
+<link rel="stylesheet" href="/css/gallery.css"/>
+<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/<\//g, "<\\/")}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumbLd).replace(/<\//g, "<\\/")}</script>
+<style>
+  .ssr-gallery-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .ssr-gallery-header { text-align: center; margin-bottom: 2rem; }
+  .ssr-gallery-header h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 300; color: #fff; margin: 0 0 0.5rem; }
+  .ssr-gallery-header h1 em { font-style: italic; color: var(--accent, #B5603F); }
+  .ssr-gallery-header p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .ssr-breadcrumb { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; }
+  .ssr-breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+  .ssr-breadcrumb a:hover { color: var(--accent, #B5603F); }
+  .ssr-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; }
+  .ssr-filter-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.4rem 0.9rem; background: rgba(255,255,255,0.06); border-radius: 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; transition: all 0.2s; }
+  .ssr-filter-chip:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .ssr-chip-count { font-size: 0.7rem; opacity: 0.6; }
+  .ssr-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+  .ssr-collection-card { background: rgba(255,255,255,0.04); border-radius: 12px; overflow: hidden; text-decoration: none; transition: transform 0.2s; }
+  .ssr-collection-card:hover { transform: translateY(-4px); }
+  .ssr-card-img { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); position: relative; }
+  .ssr-card-img img { width: 100%; height: 100%; object-fit: cover; }
+  .ssr-card-badge { position: absolute; top: 8px; right: 8px; background: var(--accent, #B5603F); color: #fff; font-size: 0.65rem; padding: 2px 8px; border-radius: 8px; }
+  .ssr-card-title { color: #fff; font-weight: 600; font-size: 0.9rem; padding: 0.75rem 0.75rem 0.25rem; }
+  .ssr-card-desc { color: rgba(255,255,255,0.5); font-size: 0.75rem; padding: 0 0.75rem 0.75rem; line-height: 1.4; }
+  .ssr-gallery-count { text-align: center; color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-bottom: 1.5rem; }
+  .ssr-cta-section { text-align: center; margin-top: 2rem; }
+  .ssr-cta { display: inline-block; padding: 0.75rem 2rem; background: var(--accent, #B5603F); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s; }
+  .ssr-cta:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-top">
+    <a href="/" class="nav-logo">genMyTee</a>
+    <ul class="nav-center">
+      <li><a href="/galeria" style="color:var(--accent)">Galería</a></li>
+      <li><a href="/#productos">Prendas</a></li>
+      <li><a href="/#creador">Crear mi prenda</a></li>
+    </ul>
+  </div>
+</nav>
+<div class="ssr-gallery-page">
+  <div class="ssr-breadcrumb">
+    <a href="/">Inicio</a> › Galería
+  </div>
+  <div class="ssr-gallery-header">
+    <h1>Galería de <em>Diseños</em></h1>
+    <p>Explora nuestra colección de diseños exclusivos. Cada uno disponible en múltiples prendas y colores.</p>
+  </div>
+  <div class="ssr-filters">${collectionsHtml}</div>
+  <div class="ssr-gallery-count">${visibleDesigns.length} diseños disponibles</div>
+  <div class="ssr-gallery-grid">${designsHtml}</div>
+  <div class="ssr-cta-section">
+    <p style="color:rgba(255,255,255,0.5);font-size:0.9rem;margin-bottom:1rem">¿Tienes tu propia idea? Créala desde cero.</p>
+    <a href="/#creador" class="ssr-cta">Crear mi prenda</a>
+  </div>
+</div>
+<footer>
+  <div class="footer-grid" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
+    <div>
+      <div class="footer-logo">genMyTee</div>
+      <p class="footer-about">Prendas únicas diseñadas desde tu imaginación.</p>
+    </div>
   </div>
 </footer>
 <script async src="https://plausible.io/js/pa-rbsS4LC3PN6oDWmTJM0DS.js"></script>
@@ -436,6 +591,19 @@ export function buildGalleryRouter({
     }
   });
 
+  // ── SSR gallery landing page ──
+
+  router.get("/landing", (_req, res) => {
+    try {
+      const designs = designsFn();
+      const collections = collectionsFn();
+      const html = renderGalleryLandingPage(designs, collections);
+      res.type("html").send(html);
+    } catch (error) {
+      return res.status(500).send("Error cargando galería");
+    }
+  });
+
   // ── SSR design page ──
 
   router.get("/page/:id", (req, res) => {
@@ -499,6 +667,9 @@ export function buildGalleryRouter({
 
       // Homepage
       xml += `  <url><loc>https://genmytee.com/</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>\n`;
+
+      // Gallery landing page
+      xml += `  <url><loc>https://genmytee.com/galeria</loc><lastmod>${now}</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>\n`;
 
       // Blog listing
       xml += `  <url><loc>https://genmytee.com/blog</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>\n`;

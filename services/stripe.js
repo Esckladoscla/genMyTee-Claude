@@ -139,19 +139,56 @@ export async function extractOrderFromSession(session) {
 
 /**
  * Retrieves a Stripe Checkout Session for order status lookup.
+ * Includes line items and shipping details for the checkout success page.
  *
  * @param {string} sessionId
- * @returns {Promise<{session_id, payment_status, email, fulfillment_status}>}
+ * @returns {Promise<{session_id, payment_status, email, fulfillment_status, items, shipping, amount_total, currency}>}
  */
 export async function retrieveSession(sessionId) {
   const stripe = getStripe();
   const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+  // Fetch line items with product metadata
+  let items = [];
+  try {
+    const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
+      expand: ["data.price.product"],
+    });
+    items = lineItems.data.map((li) => {
+      const product = li.price?.product;
+      const meta = (typeof product === "object" && product?.metadata) || {};
+      return {
+        name: (typeof product === "object" && product?.name) || li.description || "Prenda personalizada",
+        size: meta.size || null,
+        color: meta.color || null,
+        quantity: li.quantity || 1,
+        amount: li.amount_total ? li.amount_total / 100 : 0,
+        image_url: meta.image_url || null,
+        product_key: meta.product_key || null,
+      };
+    });
+  } catch {
+    // Line items fetch is best-effort
+  }
+
+  // Extract shipping address
+  const shipping = session.shipping_details || null;
+  const shippingInfo = shipping ? {
+    name: shipping.name || null,
+    city: shipping.address?.city || null,
+    country: shipping.address?.country || null,
+    postal_code: shipping.address?.postal_code || null,
+  } : null;
 
   return {
     session_id: session.id,
     payment_status: session.payment_status,
     email: session.customer_details?.email || null,
     fulfillment_status: session.metadata?.fulfillment_status || "processing",
+    items,
+    shipping: shippingInfo,
+    amount_total: session.amount_total ? session.amount_total / 100 : null,
+    currency: session.currency || "eur",
   };
 }
 
