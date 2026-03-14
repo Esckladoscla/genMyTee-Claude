@@ -82,3 +82,17 @@ test("generation count persists to SQLite and survives cache reset", () => {
   const stats = getHourlyStats();
   assert.equal(stats.count, 2, "Count should survive within the same process");
 });
+
+test("hourly stats hour key uses zero-padded month (1-12), date, and hours", () => {
+  recordGeneration({ logger: { warn: () => {} } });
+  const stats = getHourlyStats();
+
+  // Key format should be YYYY-MM-DD-HH (all zero-padded)
+  assert.match(stats.hour, /^\d{4}-\d{2}-\d{2}-\d{2}$/,
+    `Hour key "${stats.hour}" should match YYYY-MM-DD-HH format`);
+
+  // Month should be 01-12, never 00
+  const month = parseInt(stats.hour.split("-")[1], 10);
+  assert.ok(month >= 1 && month <= 12,
+    `Month ${month} should be 1-12, not 0-11`);
+});
