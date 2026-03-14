@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { getDbPath, getNumberEnv, getBooleanEnv } from "./env.js";
+import { getDbPath, getNumberEnv } from "./env.js";
 
 const DEFAULT_ALERT_THRESHOLD = 50;
 const DEFAULT_CIRCUIT_BREAKER_THRESHOLD = 200;
@@ -250,7 +250,7 @@ export function checkGenerationAllowedByTracker() {
     return {
       allowed: false,
       reason: "circuit_breaker",
-      message: `Hourly generation limit reached (${circuitBreakerThreshold}/hour). Please try again later.`,
+      message: `Límite de generaciones por hora alcanzado (${circuitBreakerThreshold}/hora). Inténtalo más tarde.`,
     };
   }
 
@@ -259,7 +259,7 @@ export function checkGenerationAllowedByTracker() {
     return {
       allowed: false,
       reason: "daily_cap",
-      message: `Daily generation limit reached (${dailyCap}/day). Resets at midnight UTC.`,
+      message: `Límite diario de generaciones alcanzado (${dailyCap}/día). Se reinicia a medianoche UTC.`,
     };
   }
 
