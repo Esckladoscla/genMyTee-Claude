@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import express from "express";
 import { getBooleanEnv, getEnv, getDbPath } from "../services/env.js";
 import { getOpenAiUsageSnapshot } from "../services/openai.js";
-import { getHourlyStats, getGenerationHistory } from "../services/generation-tracker.js";
+import { getHourlyStats, getDailyStats, getGenerationHistory } from "../services/generation-tracker.js";
 import { getOrderStats } from "../services/idempotency.js";
 import { getSessionStats } from "../services/session-limiter.js";
 import {
@@ -83,12 +83,14 @@ export function buildAdminRouter({ logger = console } = {}) {
 
   router.get("/stats", (_req, res) => {
     const hourly = getHourlyStats();
+    const daily = getDailyStats();
     const usage = getOpenAiUsageSnapshot({ limit: 50 });
 
     return res.json({
       ok: true,
       ai_enabled: getBooleanEnv("AI_ENABLED", { defaultValue: true }),
       hourly_generations: hourly,
+      daily_generations: daily,
       openai_usage: {
         total_calls: usage.total_calls,
         moderation_calls: usage.moderation_calls,
@@ -104,6 +106,7 @@ export function buildAdminRouter({ logger = console } = {}) {
   router.get("/dashboard", (_req, res) => {
     try {
       const hourly = getHourlyStats();
+      const daily = getDailyStats();
       const usage = getOpenAiUsageSnapshot({ limit: 500 });
       const generationHistory = getGenerationHistory();
 
@@ -143,6 +146,7 @@ export function buildAdminRouter({ logger = console } = {}) {
         ok: true,
         ai_enabled: getBooleanEnv("AI_ENABLED", { defaultValue: true }),
         hourly_generations: hourly,
+        daily_generations: daily,
         generation_history: generationHistory,
         openai_usage: {
           total_calls: usage.total_calls,

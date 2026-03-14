@@ -209,6 +209,31 @@ export function unlockWithEmail(sessionId, email) {
   };
 }
 
+/**
+ * Grant bonus generations to a session by reducing its count.
+ * Used when a customer completes a purchase.
+ */
+export function grantSessionBonus(sessionId, bonus) {
+  if (!sessionId || !bonus || bonus <= 0) return;
+  const database = ensureDb();
+  const now = new Date().toISOString();
+  database
+    .prepare("UPDATE session_generations SET count = MAX(0, count - ?), updated_at = ? WHERE session_id = ?")
+    .run(bonus, now, sessionId);
+}
+
+/**
+ * Find session ID associated with an email (from unlock flow).
+ */
+export function getSessionByEmail(email) {
+  if (!email) return null;
+  const database = ensureDb();
+  const row = database
+    .prepare("SELECT session_id FROM session_generations WHERE email = ? ORDER BY updated_at DESC LIMIT 1")
+    .get(email.trim().toLowerCase());
+  return row?.session_id || null;
+}
+
 export function getSessionStats() {
   const database = ensureDb();
   const row = database

@@ -470,6 +470,32 @@ export function incrementUserGenerationCount(userId) {
     .run(now, userId);
 }
 
+// --- Purchase generation bonus ---
+
+const DEFAULT_PURCHASE_BONUS = 10;
+
+export function getPurchaseBonusAmount() {
+  return getNumberEnv("PURCHASE_GENERATION_BONUS", { defaultValue: DEFAULT_PURCHASE_BONUS });
+}
+
+export function getUserByEmail(email) {
+  if (!email) return null;
+  const database = ensureDb();
+  const user = database
+    .prepare("SELECT id, email, generation_count FROM users WHERE email = ?")
+    .get(email.trim().toLowerCase());
+  return user || null;
+}
+
+export function grantUserGenerationBonus(userId, bonus) {
+  if (!userId || !bonus || bonus <= 0) return;
+  const database = ensureDb();
+  const now = new Date().toISOString();
+  database
+    .prepare("UPDATE users SET generation_count = MAX(0, generation_count - ?), updated_at = ? WHERE id = ?")
+    .run(bonus, now, userId);
+}
+
 // --- Revoke all sessions for a user ---
 
 export function revokeAllSessions(userId) {

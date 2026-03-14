@@ -124,8 +124,9 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `email.js` — Transactional email service (Resend API) with templates for order confirmation, shipping, review requests, gift cards (configurable via `EMAIL_ENABLED`, `RESEND_API_KEY`)
 - `ab-testing.js` — A/B testing framework: experiments, deterministic variant assignment, event tracking, results aggregation (configurable via `AB_TESTING_ENABLED`)
 - `gift-cards.js` — SQLite-backed digital gift cards: create, validate, redeem (codes: `GMT-XXXX-XXXX-XXXX`, amounts: €25/50/75/100, 1-year expiry)
-- `auth.js` — User authentication service: SQLite-backed users, sessions, email verification (scrypt hashing, timing-safe comparison, Google OAuth2, generation quota per user, configurable via `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
+- `auth.js` — User authentication service: SQLite-backed users, sessions, email verification (scrypt hashing, timing-safe comparison, Google OAuth2, generation quota per user, purchase bonus via `grantUserGenerationBonus()`, configurable via `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
 - `design-history.js` — SQLite-backed design history per user/session (tracks prompts + preview URLs, supports linking anonymous sessions to users on registration)
+- `watermark.js` — Watermark overlay on preview images + URL mapping (preview→production) for independent filenames. `storeProductionMapping()` saves the mapping, `resolveProductionUrl()` resolves via DB lookup with legacy string-replacement fallback
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
@@ -167,10 +168,16 @@ Services expose `_reset*ForTests()` functions to clear cached singletons between
 - Order processing is idempotent: duplicate Stripe webhook deliveries are detected via SQLite and return `skipped: true`
 - The `PRINTFUL_CONFIRM` env var controls whether Printful orders are auto-confirmed (default `false` for safety)
 - `AI_ENABLED=false` disables OpenAI calls entirely; preview returns 503
+- Circuit breaker auto-disables AI at >200 gen/hour (configurable via `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR`), auto-re-enables next hour
+- Daily cap auto-disables AI at >500 gen/day (configurable via `DAILY_GENERATION_CAP`), resets at midnight UTC
+- Preview and production images use independent random filenames — production URL is not derivable from preview URL
+- Successful Stripe checkout grants +10 generation bonus (configurable via `PURCHASE_GENERATION_BONUS`)
 
 ## Environment variables
 
 See README.md for the full list. Key ones: `OPENAI_KEY`, `R2_*` (Cloudflare storage), `PRINTFUL_API_KEY`, `AI_ENABLED`, `ALLOWED_ORIGINS`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
+
+Cost control env vars: `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR` (default 200), `DAILY_GENERATION_CAP` (default 500), `PURCHASE_GENERATION_BONUS` (default 10), `GENERATION_ALERT_THRESHOLD_PER_HOUR` (default 50).
 
 ## Product positioning
 

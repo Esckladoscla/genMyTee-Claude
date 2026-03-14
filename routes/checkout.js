@@ -12,6 +12,8 @@ import { processOrder } from "../services/order-processing.js";
 import { createOrderSafe } from "../services/printful.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
 import { sendOrderConfirmation } from "../services/email.js";
+import { getUserByEmail, grantUserGenerationBonus, getPurchaseBonusAmount } from "../services/auth.js";
+import { grantSessionBonus, getSessionByEmail } from "../services/session-limiter.js";
 import { markCompleted, markFailed, startProcessing, getTracking, updateTracking, recordOrderAmount } from "../services/idempotency.js";
 import { getOrder as getPrintfulOrder } from "../services/printful.js";
 import {
@@ -279,6 +281,30 @@ export function buildCheckoutRouter({
         if (customerEmail && !result.skipped) {
           sendOrderConfirmation(customerEmail, { orderId: session.id }, { logger })
             .catch(() => {});
+        }
+      } catch { /* best-effort */ }
+
+      // Grant generation bonus on successful purchase (best-effort)
+      try {
+        const customerEmail = session.customer_details?.email;
+        if (customerEmail && !result.skipped) {
+          const bonus = getPurchaseBonusAmount();
+          // Try authenticated user first
+          const user = getUserByEmail(customerEmail);
+          if (user) {
+            grantUserGenerationBonus(user.id, bonus);
+            logger.log("[checkout] generation bonus granted to user", {
+              user_id: user.id, bonus,
+            });
+          }
+          // Also grant session bonus (covers guest checkout)
+          const sessionId = getSessionByEmail(customerEmail);
+          if (sessionId) {
+            grantSessionBonus(sessionId, bonus);
+            logger.log("[checkout] session generation bonus granted", {
+              session_id: sessionId, bonus,
+            });
+          }
         }
       } catch { /* best-effort */ }
 
