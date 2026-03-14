@@ -12,7 +12,7 @@ import { getBooleanEnv, getEnv } from "../services/env.js";
 import { resolveVariantId } from "../services/variants.js";
 import { generateMockupForVariant, getMockupTask } from "../services/printful.js";
 import { consumeRateLimit } from "../services/rate-limiter.js";
-import { recordGeneration, checkGenerationAllowedByTracker } from "../services/generation-tracker.js";
+import { recordGeneration, checkGenerationAllowedByTracker, consumeGlobalRateLimit } from "../services/generation-tracker.js";
 import { applyWatermark, storeProductionMapping } from "../services/watermark.js";
 import {
   parseSessionCookie,
@@ -25,6 +25,7 @@ import {
 import { checkBrandBlacklist } from "../services/brand-filter.js";
 import { verifyCaptcha, isCaptchaEnabled, getCaptchaSiteKey } from "../services/captcha.js";
 import { moderateImage } from "../services/image-moderator.js";
+import { checkFingerprint } from "../services/browser-fingerprint.js";
 import { validateSession, parseAuthCookie, getAuthGenerationLimit, getUserGenerationCount, incrementUserGenerationCount } from "../services/auth.js";
 import { saveDesign } from "../services/design-history.js";
 import {
@@ -180,6 +181,8 @@ export function buildPreviewRouter({
   recordSessionGenerationFn = recordSessionGeneration,
   unlockWithEmailFn = unlockWithEmail,
   checkBrandBlacklistFn = checkBrandBlacklist,
+  checkFingerprintFn = checkFingerprint,
+  consumeGlobalRateLimitFn = consumeGlobalRateLimit,
   now = () => Date.now(),
   logger = console,
 } = {}) {
@@ -268,6 +271,17 @@ export function buildPreviewRouter({
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
     }
 
+    // Browser fingerprint check (detect bots/botnets before wasting CAPTCHA calls)
+    const fpResult = checkFingerprintFn(clientIp, req.headers);
+    if (fpResult.suspicious) {
+      logger.log("[preview] fingerprint suspicious", { reason: fpResult.reason, ip: clientIp });
+      return res.status(403).json({
+        ok: false,
+        error: "suspicious_request",
+        message: "Solicitud bloqueada por actividad sospechosa. Si eres un usuario real, recarga la página.",
+      });
+    }
+
     // CAPTCHA verification (Cloudflare Turnstile)
     const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
     if (!captchaResult.ok) {
@@ -319,7 +333,17 @@ export function buildPreviewRouter({
       const { prompt } = req.body || {};
       const normalizedPrompt = normalizePrompt(prompt);
 
-      // Circuit breaker + daily cap check (server-wide)
+      // Global server-wide rate limit (soft 429 before circuit breaker)
+      const globalRateCheck = consumeGlobalRateLimitFn();
+      if (!globalRateCheck.allowed) {
+        return res.status(429).json({
+          ok: false,
+          error: globalRateCheck.reason,
+          message: globalRateCheck.message,
+        });
+      }
+
+      // Circuit breaker + daily cap check (nuclear — disables AI entirely)
       const trackerCheck = checkGenerationAllowedByTracker();
       if (!trackerCheck.allowed) {
         return res.status(503).json({
@@ -503,6 +527,17 @@ export function buildPreviewRouter({
       return res.status(429).json({ ok: false, error: "Rate limit exceeded" });
     }
 
+    // Browser fingerprint check
+    const fpResult = checkFingerprintFn(clientIp, req.headers);
+    if (fpResult.suspicious) {
+      logger.log("[preview] fingerprint suspicious (async)", { reason: fpResult.reason, ip: clientIp });
+      return res.status(403).json({
+        ok: false,
+        error: "suspicious_request",
+        message: "Solicitud bloqueada por actividad sospechosa. Si eres un usuario real, recarga la página.",
+      });
+    }
+
     // CAPTCHA verification (Cloudflare Turnstile)
     const captchaResult = await verifyCaptcha(req.body?.captcha_token, clientIp);
     if (!captchaResult.ok) {
@@ -534,7 +569,17 @@ export function buildPreviewRouter({
       const { prompt } = req.body || {};
       const normalizedPrompt = normalizePrompt(prompt);
 
-      // Circuit breaker + daily cap check (server-wide)
+      // Global server-wide rate limit (soft 429 before circuit breaker)
+      const globalRateCheck = consumeGlobalRateLimitFn();
+      if (!globalRateCheck.allowed) {
+        return res.status(429).json({
+          ok: false,
+          error: globalRateCheck.reason,
+          message: globalRateCheck.message,
+        });
+      }
+
+      // Circuit breaker + daily cap check (nuclear — disables AI entirely)
       const trackerCheck = checkGenerationAllowedByTracker();
       if (!trackerCheck.allowed) {
         return res.status(503).json({

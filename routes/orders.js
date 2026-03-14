@@ -3,12 +3,7 @@ import { processOrder } from "../services/order-processing.js";
 import { createOrderSafe } from "../services/printful.js";
 import { getBooleanEnv, getEnv } from "../services/env.js";
 import { markCompleted, markFailed, startProcessing } from "../services/idempotency.js";
-import {
-  inferProductKey,
-  normalizeProperties,
-  parseVariantTitle,
-  resolveVariantId,
-} from "../services/variants.js";
+import { resolveVariantId } from "../services/variants.js";
 
 /**
  * Generic order creation route.
@@ -25,9 +20,6 @@ import {
  */
 export function buildOrdersRouter({
   resolveVariantIdFn = resolveVariantId,
-  normalizePropertiesFn = normalizeProperties,
-  parseVariantTitleFn = parseVariantTitle,
-  inferProductKeyFn = inferProductKey,
   createOrderSafeFn = createOrderSafe,
   idempotency = { startProcessing, markCompleted, markFailed },
   getConfirmFn = () => getBooleanEnv("PRINTFUL_CONFIRM", { defaultValue: false }),
@@ -55,9 +47,6 @@ export function buildOrdersRouter({
     try {
       const result = await processOrder(body, {
         resolveVariantIdFn,
-        normalizePropertiesFn,
-        parseVariantTitleFn,
-        inferProductKeyFn,
         createOrderSafeFn,
         idempotency,
         getConfirmFn,

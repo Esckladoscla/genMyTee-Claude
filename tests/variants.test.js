@@ -39,7 +39,7 @@ test("resolveVariantId supports reversed title order (size/color)", () => {
   assert.equal(variantId, 9328);
 });
 
-test("resolveVariantId falls back for Shopify default title variants", () => {
+test("resolveVariantId falls back for default title variants", () => {
   const variantId = resolveVariantId({
     productKey: "all-over-print-men-s-rash-guard",
     variantTitle: "Default Title",

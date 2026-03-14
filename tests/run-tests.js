@@ -29,6 +29,7 @@ const files = [
   "./gift-cards.test.js",
   "./auth.test.js",
   "./design-history.test.js",
+  "./alerts.test.js",
 ];
 
 for (const file of files) {

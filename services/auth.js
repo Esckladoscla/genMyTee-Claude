@@ -59,6 +59,7 @@ function ensureDb() {
       google_id TEXT,
       avatar_url TEXT,
       generation_count INTEGER NOT NULL DEFAULT 0,
+      generation_reset_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -80,6 +81,10 @@ function ensureDb() {
     CREATE INDEX IF NOT EXISTS idx_auth_sessions_user ON auth_sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email);
   `);
+
+  // Migration: add generation_reset_at column for monthly reset
+  try { db.exec("ALTER TABLE users ADD COLUMN generation_reset_at TEXT"); }
+  catch { /* column already exists */ }
 
   return db;
 }
@@ -200,9 +205,9 @@ export function registerUser(email, password, name) {
 
   database
     .prepare(
-      "INSERT INTO users (id, email, password_hash, name, email_verified, generation_count, created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0, ?, ?)"
+      "INSERT INTO users (id, email, password_hash, name, email_verified, generation_count, generation_reset_at, created_at, updated_at) VALUES (?, ?, ?, ?, 0, 0, ?, ?, ?)"
     )
-    .run(id, trimmedEmail, passwordHash, name || null, now, now);
+    .run(id, trimmedEmail, passwordHash, name || null, now, now, now);
 
   const session = createSession(id);
   return {
@@ -427,9 +432,9 @@ export async function handleGoogleCallback(code) {
       const id = crypto.randomUUID();
       database
         .prepare(
-          "INSERT INTO users (id, email, password_hash, name, email_verified, google_id, avatar_url, generation_count, created_at, updated_at) VALUES (?, ?, NULL, ?, 1, ?, ?, 0, ?, ?)"
+          "INSERT INTO users (id, email, password_hash, name, email_verified, google_id, avatar_url, generation_count, generation_reset_at, created_at, updated_at) VALUES (?, ?, NULL, ?, 1, ?, ?, 0, ?, ?, ?)"
         )
-        .run(id, trimmedEmail, name || null, String(googleId), picture || null, now, now);
+        .run(id, trimmedEmail, name || null, String(googleId), picture || null, now, now, now);
       user = { id, email: trimmedEmail, name: name || null };
     }
   }
@@ -454,7 +459,38 @@ export function getAuthGenerationLimit() {
   return getNumberEnv("AUTH_GENERATIONS_LIMIT", { defaultValue: AUTH_GENERATIONS_LIMIT });
 }
 
+function getCurrentMonthKey() {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Check if the user's generation count needs a monthly reset.
+ * If generation_reset_at is from a previous month, reset count to 0.
+ * This is a lazy reset — no cron job needed.
+ */
+function checkMonthlyReset(userId) {
+  const database = ensureDb();
+  const user = database
+    .prepare("SELECT generation_count, generation_reset_at FROM users WHERE id = ?")
+    .get(userId);
+  if (!user) return;
+
+  const currentMonth = getCurrentMonthKey();
+  const resetMonth = user.generation_reset_at
+    ? user.generation_reset_at.slice(0, 7)
+    : null;
+
+  if (resetMonth !== currentMonth) {
+    const now = new Date().toISOString();
+    database
+      .prepare("UPDATE users SET generation_count = 0, generation_reset_at = ?, updated_at = ? WHERE id = ?")
+      .run(now, now, userId);
+  }
+}
+
 export function getUserGenerationCount(userId) {
+  checkMonthlyReset(userId);
   const database = ensureDb();
   const user = database
     .prepare("SELECT generation_count FROM users WHERE id = ?")
@@ -463,11 +499,12 @@ export function getUserGenerationCount(userId) {
 }
 
 export function incrementUserGenerationCount(userId) {
+  checkMonthlyReset(userId);
   const database = ensureDb();
   const now = new Date().toISOString();
   database
-    .prepare("UPDATE users SET generation_count = generation_count + 1, updated_at = ? WHERE id = ?")
-    .run(now, userId);
+    .prepare("UPDATE users SET generation_count = generation_count + 1, generation_reset_at = COALESCE(generation_reset_at, ?), updated_at = ? WHERE id = ?")
+    .run(now, now, userId);
 }
 
 // --- Purchase generation bonus ---
@@ -548,7 +585,24 @@ export function getUserStats() {
   };
 }
 
+// --- Exposed for admin/stats ---
+
+export function getGenerationResetDate(userId) {
+  const database = ensureDb();
+  const user = database
+    .prepare("SELECT generation_reset_at FROM users WHERE id = ?")
+    .get(userId);
+  return user?.generation_reset_at || null;
+}
+
 // --- Test helpers ---
+
+export function _setUserGenerationResetAt(userId, isoDate) {
+  const database = ensureDb();
+  database
+    .prepare("UPDATE users SET generation_reset_at = ? WHERE id = ?")
+    .run(isoDate, userId);
+}
 
 export function _resetAuthForTests() {
   if (db) {
