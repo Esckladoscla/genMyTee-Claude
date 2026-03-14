@@ -233,6 +233,39 @@ test("GET /api/gallery/coleccion/:slug returns 404 for unknown", async () => {
   assert.equal(status, 404);
 });
 
+// ── SSR gallery landing page ──
+
+test("GET /api/gallery/landing returns HTML gallery landing page", async () => {
+  const app = buildApp();
+  const { status, body } = await request(app, "/api/gallery/landing", { raw: true });
+  assert.equal(status, 200);
+  assert.ok(body.includes("Galería de Diseños"));
+  assert.ok(body.includes("CollectionPage"));
+  assert.ok(body.includes("BreadcrumbList"));
+  assert.ok(body.includes("Lobo Geométrico"));
+  assert.ok(body.includes("Flores Botánicas"));
+  // Should not include design without image
+  assert.ok(!body.includes("Sin Imagen"));
+});
+
+test("GET /api/gallery/landing includes collection filter chips", async () => {
+  const app = buildApp();
+  const { status, body } = await request(app, "/api/gallery/landing", { raw: true });
+  assert.equal(status, 200);
+  assert.ok(body.includes("/galeria/coleccion/animales"));
+  assert.ok(body.includes("/galeria/coleccion/naturaleza"));
+});
+
+test("GET /api/gallery/landing has proper meta tags", async () => {
+  const app = buildApp();
+  const { status, body } = await request(app, "/api/gallery/landing", { raw: true });
+  assert.equal(status, 200);
+  assert.ok(body.includes('canonical" href="https://genmytee.com/galeria"'));
+  assert.ok(body.includes('og:url" content="https://genmytee.com/galeria"'));
+  assert.ok(body.includes('og:image"'));
+  assert.ok(body.includes('twitter:image"'));
+});
+
 // ── Sitemap ──
 
 test("GET /api/gallery/sitemap.xml returns valid XML sitemap", async () => {
@@ -243,4 +276,12 @@ test("GET /api/gallery/sitemap.xml returns valid XML sitemap", async () => {
   assert.ok(body.includes("genmytee.com"));
   assert.ok(body.includes("lobo-geometrico"));
   assert.ok(body.includes("coleccion/animales"));
+});
+
+test("GET /api/gallery/sitemap.xml includes /galeria landing page", async () => {
+  const app = buildApp();
+  const { status, body } = await request(app, "/api/gallery/sitemap.xml", { raw: true });
+  assert.equal(status, 200);
+  assert.ok(body.includes("<loc>https://genmytee.com/galeria</loc>"));
+  assert.ok(body.includes("priority>0.9</priority>"));
 });

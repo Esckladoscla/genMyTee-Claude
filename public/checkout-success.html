@@ -16,22 +16,117 @@
 <style>
 .success-page{
   min-height:calc(100vh - 200px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:4rem 2rem;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  padding:3rem 1.5rem;
 }
-.success-icon{font-size:4rem;margin-bottom:1.5rem}
+.success-icon{font-size:3.5rem;margin-bottom:1rem}
 .success-title{
   font-family:'Cormorant Garamond',serif;
-  font-size:clamp(2rem,4vw,3rem);font-weight:300;line-height:1.1;
-  margin-bottom:1rem;
+  font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;line-height:1.1;
+  margin-bottom:0.75rem;text-align:center;
 }
 .success-title em{font-style:italic;color:var(--accent)}
-.success-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:420px;margin-bottom:1rem}
-.success-disclaimer{font-size:0.72rem;color:var(--muted);opacity:0.6;line-height:1.5;max-width:420px;margin-bottom:2rem}
-.success-id{
+.success-ref{
   font-size:0.72rem;color:var(--muted);background:var(--surface);
-  padding:0.5rem 1rem;margin-bottom:2rem;letter-spacing:0.05em;
+  padding:0.4rem 0.8rem;margin-bottom:1.5rem;letter-spacing:0.05em;
 }
+
+/* Order summary card */
+.order-summary{
+  width:100%;max-width:520px;background:var(--surface);
+  border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;
+}
+.order-summary.loading{opacity:0.5;pointer-events:none}
+.order-item{
+  display:flex;gap:1rem;align-items:flex-start;
+  padding:0.75rem 0;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.order-item:last-child{border-bottom:none}
+.order-item-img{
+  width:72px;height:72px;border-radius:8px;overflow:hidden;
+  background:rgba(255,255,255,0.05);flex-shrink:0;
+}
+.order-item-img img{width:100%;height:100%;object-fit:cover}
+.order-item-placeholder{
+  width:72px;height:72px;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;background:rgba(255,255,255,0.05);border-radius:8px;flex-shrink:0;
+}
+.order-item-info{flex:1;min-width:0}
+.order-item-name{font-weight:500;font-size:0.9rem;margin-bottom:0.2rem}
+.order-item-details{font-size:0.75rem;color:var(--muted)}
+.order-item-price{font-weight:600;font-size:0.9rem;color:var(--accent);white-space:nowrap}
+
+.order-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);
+  margin-top:0.5rem;font-weight:600;
+}
+.order-total-amount{font-size:1.1rem;color:var(--accent)}
+
+.order-shipping{
+  font-size:0.75rem;color:var(--muted);margin-top:0.5rem;
+  display:flex;align-items:center;gap:0.4rem;
+}
+
+/* Timeline */
+.order-timeline{
+  width:100%;max-width:520px;
+  display:flex;justify-content:space-between;position:relative;
+  margin-bottom:2rem;padding:0 0.5rem;
+}
+.order-timeline::before{
+  content:'';position:absolute;top:16px;left:40px;right:40px;
+  height:2px;background:rgba(255,255,255,0.1);
+}
+.timeline-step{
+  display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+  position:relative;z-index:1;flex:1;
+}
+.timeline-dot{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;background:rgba(255,255,255,0.08);
+  border:2px solid rgba(255,255,255,0.15);
+}
+.timeline-dot.active{
+  background:var(--accent);border-color:var(--accent);
+}
+.timeline-dot.current{
+  border-color:var(--accent);animation:pulse-dot 2s infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{box-shadow:0 0 0 0 rgba(181,96,63,0.4)}
+  50%{box-shadow:0 0 0 6px rgba(181,96,63,0)}
+}
+.timeline-label{font-size:0.65rem;color:var(--muted);text-align:center;max-width:80px}
+.timeline-step.done .timeline-label{color:rgba(255,255,255,0.7)}
+
+/* Share section */
+.share-section{
+  width:100%;max-width:520px;text-align:center;
+  margin-bottom:2rem;
+}
+.share-title{font-size:0.85rem;font-weight:500;margin-bottom:0.75rem}
+.share-buttons{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.share-btn{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.5rem 1rem;border-radius:8px;font-size:0.75rem;
+  border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.8);cursor:pointer;transition:all 0.2s;
+  text-decoration:none;
+}
+.share-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2)}
+.share-btn.whatsapp{border-color:rgba(37,211,102,0.3);color:#25d366}
+.share-btn.whatsapp:hover{background:rgba(37,211,102,0.1)}
+.share-btn.twitter{border-color:rgba(29,161,242,0.3);color:#1da1f2}
+.share-btn.twitter:hover{background:rgba(29,161,242,0.1)}
+
+/* Disclaimer */
+.success-disclaimer{font-size:0.72rem;color:var(--muted);opacity:0.6;line-height:1.5;max-width:420px;margin-bottom:1.5rem;text-align:center}
+
+/* Fallback message (no session data) */
+.success-fallback{text-align:center;max-width:420px;margin-bottom:2rem}
+.success-fallback p{font-size:0.88rem;color:var(--muted);line-height:1.7}
 </style>
 </head>
 <body>
@@ -50,25 +145,80 @@
 <div class="success-page">
   <div class="success-icon">&#x2705;</div>
   <h1 class="success-title">Pedido <em>confirmado</em></h1>
-  <p class="success-desc">
-    Gracias por tu compra. Tu prenda personalizada se est&#225; preparando.
-    Recibir&#225;s un email de confirmaci&#243;n con los detalles del env&#237;o.
-    Entrega estimada: 10-15 d&#237;as laborables.
-  </p>
+  <div class="success-ref" id="sessionRef"></div>
+
+  <!-- Order summary (populated via JS) -->
+  <div class="order-summary loading" id="orderSummary" style="display:none">
+    <div id="orderItems"></div>
+    <div class="order-total" id="orderTotal" style="display:none">
+      <span>Total</span>
+      <span class="order-total-amount" id="totalAmount"></span>
+    </div>
+    <div class="order-shipping" id="orderShipping" style="display:none">
+      <span>&#x1F4E6;</span>
+      <span id="shippingText"></span>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="order-timeline" id="orderTimeline">
+    <div class="timeline-step done">
+      <div class="timeline-dot active">&#x2713;</div>
+      <span class="timeline-label">Pedido confirmado</span>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot current">&#x1F3A8;</div>
+      <span class="timeline-label">En producci&#243;n (10-15 d&#237;as)</span>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">&#x1F69A;</div>
+      <span class="timeline-label">Enviado</span>
+    </div>
+    <div class="timeline-step">
+      <div class="timeline-dot">&#x1F4E6;</div>
+      <span class="timeline-label">Entregado</span>
+    </div>
+  </div>
+
+  <!-- Share buttons -->
+  <div class="share-section" id="shareSection" style="display:none">
+    <div class="share-title">Comparte tu dise&#241;o</div>
+    <div class="share-buttons">
+      <a id="shareWhatsApp" class="share-btn whatsapp" href="#" target="_blank" rel="noopener">
+        &#x1F4AC; WhatsApp
+      </a>
+      <a id="shareTwitter" class="share-btn twitter" href="#" target="_blank" rel="noopener">
+        &#x1D54F; Twitter
+      </a>
+      <button class="share-btn" id="shareCopy">
+        &#x1F517; Copiar enlace
+      </button>
+    </div>
+  </div>
+
   <p class="success-disclaimer">
     Los colores y detalles del producto impreso pueden variar ligeramente respecto a la vista previa digital.
     Cada prenda es producida bajo demanda con impresi&#243;n profesional.
   </p>
-  <div class="success-id" id="sessionId"></div>
+
+  <!-- Fallback (shown when no session data available) -->
+  <div class="success-fallback" id="fallbackMsg" style="display:none">
+    <p>
+      Gracias por tu compra. Tu prenda personalizada se est&#225; preparando.
+      Recibir&#225;s un email de confirmaci&#243;n con los detalles del env&#237;o.
+      Entrega estimada: 10-15 d&#237;as laborables.
+    </p>
+  </div>
+
   <a href="/" class="btn-primary">Volver a la tienda</a>
 
   <!-- Referral share section -->
-  <div id="referralShare" style="display:none;margin-top:2.5rem;padding:1.5rem 2rem;background:var(--surface);max-width:420px;width:100%;text-align:center">
+  <div id="referralShare" style="display:none;margin-top:2.5rem;padding:1.5rem 2rem;background:var(--surface);max-width:420px;width:100%;text-align:center;border-radius:12px">
     <p style="font-size:0.85rem;font-weight:500;margin-bottom:0.5rem">&#x1F381; Invita a un amigo y gana descuentos</p>
     <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem">Comparte tu enlace personal. Tu amigo recibe un descuento y t&#250; tambi&#233;n.</p>
     <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center">
       <input id="referralLink" type="text" readonly style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:0" />
-      <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap">Copiar</button>
+      <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap;border-radius:6px">Copiar</button>
     </div>
   </div>
 </div>
@@ -82,37 +232,125 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
-  const el = document.getElementById('sessionId');
-  if (sessionId && el) {
-    el.textContent = 'Ref: ' + sessionId.slice(0, 20) + '...';
-  } else if (el) {
-    el.style.display = 'none';
-  }
+  const refEl = document.getElementById('sessionRef');
+
   // Clear cart on successful checkout
   try { localStorage.removeItem('genmytee_cart'); } catch {}
-  // Clear referral code after purchase
   try { localStorage.removeItem('genmytee_ref'); } catch {}
 
-  // Show referral share section
-  // Auto-generate a referral code using the customer's email from Stripe session
+  if (sessionId && refEl) {
+    refEl.textContent = 'Ref: ' + sessionId.slice(0, 20) + '...';
+    loadOrderSummary(sessionId);
+  } else {
+    if (refEl) refEl.style.display = 'none';
+    document.getElementById('fallbackMsg').style.display = 'block';
+  }
+
+  async function loadOrderSummary(sid) {
+    const summaryEl = document.getElementById('orderSummary');
+    try {
+      const res = await fetch('/api/checkout/status?session_id=' + encodeURIComponent(sid));
+      const data = await res.json();
+
+      if (!data.ok || !data.items || data.items.length === 0) {
+        document.getElementById('fallbackMsg').style.display = 'block';
+        return;
+      }
+
+      // Render items
+      const itemsEl = document.getElementById('orderItems');
+      itemsEl.innerHTML = data.items.map(item => `
+        <div class="order-item">
+          ${item.image_url
+            ? `<div class="order-item-img"><img src="${escapeAttr(item.image_url)}" alt="${escapeAttr(item.name)}" /></div>`
+            : `<div class="order-item-placeholder">&#x1F455;</div>`
+          }
+          <div class="order-item-info">
+            <div class="order-item-name">${escapeHtml(item.name)}</div>
+            <div class="order-item-details">${[item.color, item.size].filter(Boolean).join(' · ')}${item.quantity > 1 ? ' · x' + item.quantity : ''}</div>
+          </div>
+          <div class="order-item-price">&euro;${item.amount.toFixed(2)}</div>
+        </div>
+      `).join('');
+
+      // Total
+      if (data.amount_total) {
+        document.getElementById('totalAmount').textContent = '€' + data.amount_total.toFixed(2);
+        document.getElementById('orderTotal').style.display = 'flex';
+      }
+
+      // Shipping
+      if (data.shipping) {
+        const parts = [data.shipping.name, data.shipping.postal_code, data.shipping.city, data.shipping.country].filter(Boolean);
+        if (parts.length > 0) {
+          document.getElementById('shippingText').textContent = 'Envío a: ' + parts.join(', ');
+          document.getElementById('orderShipping').style.display = 'flex';
+        }
+      }
+
+      summaryEl.classList.remove('loading');
+      summaryEl.style.display = 'block';
+
+      // Show share buttons
+      setupShareButtons(data);
+
+    } catch (err) {
+      console.error('[checkout-success] failed to load order', err);
+      document.getElementById('fallbackMsg').style.display = 'block';
+    }
+  }
+
+  function setupShareButtons(data) {
+    const shareSection = document.getElementById('shareSection');
+    shareSection.style.display = 'block';
+
+    const shareText = 'Acabo de diseñar mi prenda personalizada en genMyTee 🎨✨';
+    const shareUrl = 'https://genmytee.com';
+
+    // WhatsApp
+    const waUrl = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + shareUrl);
+    document.getElementById('shareWhatsApp').href = waUrl;
+
+    // Twitter/X
+    const twUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(shareUrl);
+    document.getElementById('shareTwitter').href = twUrl;
+
+    // Copy link
+    document.getElementById('shareCopy').addEventListener('click', () => {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        const btn = document.getElementById('shareCopy');
+        btn.innerHTML = '&#x2705; Copiado';
+        setTimeout(() => { btn.innerHTML = '&#x1F517; Copiar enlace'; }, 2000);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function escapeAttr(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Referral share section
   async function initReferralShare() {
     const shareSection = document.getElementById('referralShare');
     if (!shareSection) return;
-    // We don't have the email client-side, so show a simple email input
     shareSection.style.display = 'block';
-    shareSection.querySelector('#referralLink').value = window.location.origin + '/?ref=...';
-    shareSection.querySelector('#referralLink').placeholder = 'Introduce tu email para generar tu enlace';
     shareSection.innerHTML = `
       <p style="font-size:0.85rem;font-weight:500;margin-bottom:0.5rem">&#x1F381; Invita a un amigo</p>
       <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem">Comparte tu enlace personal. Tu amigo recibe un descuento en su primera compra.</p>
       <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center;flex-wrap:wrap">
-        <input id="referralEmail" type="email" placeholder="tu@email.com" style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:180px" />
-        <button id="referralGenBtn" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap">Generar enlace</button>
+        <input id="referralEmail" type="email" placeholder="tu@email.com" style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:180px;border-radius:6px" />
+        <button id="referralGenBtn" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--accent);color:#fff;border:none;cursor:pointer;white-space:nowrap;border-radius:6px">Generar enlace</button>
       </div>
       <div id="referralResult" style="display:none;margin-top:0.8rem">
         <div style="display:flex;gap:0.5rem;align-items:center;justify-content:center">
-          <input id="referralLink" type="text" readonly style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:0" />
-          <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--text);color:#fff;border:none;cursor:pointer;white-space:nowrap">Copiar</button>
+          <input id="referralLink" type="text" readonly style="flex:1;padding:0.4rem 0.8rem;font-size:0.72rem;border:1px solid var(--border);background:#fff;min-width:0;border-radius:6px" />
+          <button onclick="copyReferralLink()" style="padding:0.4rem 1rem;font-size:0.72rem;background:var(--text);color:#fff;border:none;cursor:pointer;white-space:nowrap;border-radius:6px">Copiar</button>
         </div>
       </div>
     `;
