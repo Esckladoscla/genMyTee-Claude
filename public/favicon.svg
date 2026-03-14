@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#B5603F"/>
+      <stop offset="100%" stop-color="#D4896A"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- Stylized "g" letter — brand initial -->
+  <text x="32" y="46" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="600" font-size="42" fill="#F7F4F0" font-style="italic">g</text>
+  <!-- Sparkle/star — creativity touch -->
+  <path d="M50 10 L51.5 14.5 L56 16 L51.5 17.5 L50 22 L48.5 17.5 L44 16 L48.5 14.5 Z" fill="#F7F4F0" opacity="0.9"/>
+  <path d="M42 6 L42.8 8.2 L45 9 L42.8 9.8 L42 12 L41.2 9.8 L39 9 L41.2 8.2 Z" fill="#F7F4F0" opacity="0.6"/>
+</svg>

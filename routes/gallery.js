@@ -109,6 +109,10 @@ function renderDesignPage(design, compatibleProducts, collections) {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
 <title>${escapeHtml(design.title)} — Diseño exclusivo | genMyTee</title>
 <meta name="description" content="${escapeHtml(design.description)}. Disponible en ${compatibleProducts.length} prendas desde €${priceRange}. Envío a toda Europa."/>
 <meta name="keywords" content="${design.tags.map(t => escapeHtml(t)).join(", ")}, camiseta personalizada, diseño exclusivo, genMyTee"/>
@@ -246,6 +250,10 @@ function renderCollectionPage(collection, designs, allCollections) {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
 <title>Colección ${escapeHtml(collection.name)} — genMyTee</title>
 <meta name="description" content="${escapeHtml(collection.description)} ${designs.length} diseños exclusivos disponibles."/>
 <link rel="canonical" href="https://genmytee.com/galeria/coleccion/${escapeHtml(collection.slug)}"/>
