@@ -1,12 +1,7 @@
 import { getBooleanEnv, getEnv } from "./env.js";
 import { createOrderSafe, normalizeMockupLayout, buildPositionFromLayout } from "./printful.js";
 import { getPrintfileDims } from "./layout-probe.js";
-import {
-  inferProductKey,
-  normalizeProperties,
-  parseVariantTitle,
-  resolveVariantId,
-} from "./variants.js";
+import { resolveVariantId } from "./variants.js";
 import { resolveProductionUrl } from "./watermark.js";
 
 const DEFAULT_PRODUCT_KEY = "all-over-print-mens-athletic-t-shirt";
@@ -33,122 +28,61 @@ function compactObject(obj) {
   );
 }
 
-function getFallbackImageUrl() {
-  const explicit = toNonEmptyString(getEnv("AI_FALLBACK_IMAGE_URL"));
-  if (explicit) return explicit;
-
-  const base = toNonEmptyString(getEnv("R2_PUBLIC_BASE_URL"));
-  if (!base) return null;
-  return `${base.replace(/\/+$/, "")}/printful/fallback.png`;
-}
-
 /**
  * Builds Printful line items from a generic order item list.
  *
- * Each item can be in one of two formats:
- *
- * 1. Generic (new standalone format):
- *    { product_key, color, size, quantity, image_url, placement? }
- *
- * 2. Shopify-compatible (line_items with properties):
- *    { variant_title, quantity, properties: [{name, value}] | {key: value} }
+ * Each item: { product_key, color, size, quantity, image_url, placement?, layout? }
  *
  * Returns an array of Printful-ready item objects.
  */
 export function buildPrintfulItems(
   items,
   {
-    normalizePropertiesFn = normalizeProperties,
-    parseVariantTitleFn = parseVariantTitle,
-    inferProductKeyFn = inferProductKey,
     resolveVariantIdFn = resolveVariantId,
     defaultPlacement = "front",
-    aiEnabled = true,
-    fallbackImageUrl = null,
   } = {}
 ) {
   const printfulItems = [];
 
   for (const item of items) {
-    // Generic format: direct color/size/image_url fields
-    if (item.image_url && item.product_key) {
-      const imageUrl = toNonEmptyString(item.image_url);
-      if (!imageUrl) continue;
-
-      const productKey = toNonEmptyString(item.product_key) || DEFAULT_PRODUCT_KEY;
-      const color = toNonEmptyString(item.color) || null;
-      const size = toNonEmptyString(item.size) || null;
-
-      const variantId = resolveVariantIdFn({
-        productKey,
-        color,
-        size,
-        variantTitle: item.variant_title,
-      });
-
-      const numericVariantId = Number(variantId);
-      if (!Number.isFinite(numericVariantId) || numericVariantId <= 0) continue;
-
-      const placement =
-        toNonEmptyString(item.placement) ||
-        placementByProduct[productKey] ||
-        defaultPlacement;
-
-      const quantity = Math.max(1, Number(item.quantity) || 1);
-
-      const fileEntry = { type: "default", placement, url: resolveProductionUrl(imageUrl) };
-      if (item.layout) {
-        const normalized = normalizeMockupLayout(item.layout);
-        if (normalized) {
-          const dims = getPrintfileDims(productKey);
-          const fileSpec = dims ? { width: dims.width, height: dims.height } : {};
-          fileEntry.position = buildPositionFromLayout(fileSpec, normalized);
-        }
-      }
-
-      printfulItems.push({
-        variant_id: numericVariantId,
-        quantity,
-        files: [fileEntry],
-      });
-      continue;
-    }
-
-    // Shopify-compatible format: properties-based
-    const properties = normalizePropertiesFn(item?.properties);
-    let imageUrl = toNonEmptyString(properties?.ai_image_url);
-    if (!imageUrl && !aiEnabled) {
-      imageUrl = fallbackImageUrl;
-    }
+    const imageUrl = toNonEmptyString(item.image_url);
     if (!imageUrl) continue;
 
-    const productKey =
-      toNonEmptyString(properties?.pf_product_key) ||
-      inferProductKeyFn(item, properties) ||
-      DEFAULT_PRODUCT_KEY;
+    const productKey = toNonEmptyString(item.product_key) || DEFAULT_PRODUCT_KEY;
+    const color = toNonEmptyString(item.color) || null;
+    const size = toNonEmptyString(item.size) || null;
 
-    const parsedVariant = parseVariantTitleFn(item?.variant_title);
     const variantId = resolveVariantIdFn({
       productKey,
-      color: parsedVariant.color,
-      size: parsedVariant.size,
-      variantTitle: item?.variant_title,
+      color,
+      size,
+      variantTitle: item.variant_title,
     });
 
     const numericVariantId = Number(variantId);
     if (!Number.isFinite(numericVariantId) || numericVariantId <= 0) continue;
 
     const placement =
-      toNonEmptyString(properties?.pf_placement) ||
+      toNonEmptyString(item.placement) ||
       placementByProduct[productKey] ||
       defaultPlacement;
 
-    const quantity = Math.max(1, Number(item?.quantity) || 1);
+    const quantity = Math.max(1, Number(item.quantity) || 1);
+
+    const fileEntry = { type: "default", placement, url: resolveProductionUrl(imageUrl) };
+    if (item.layout) {
+      const normalized = normalizeMockupLayout(item.layout);
+      if (normalized) {
+        const dims = getPrintfileDims(productKey);
+        const fileSpec = dims ? { width: dims.width, height: dims.height } : {};
+        fileEntry.position = buildPositionFromLayout(fileSpec, normalized);
+      }
+    }
 
     printfulItems.push({
       variant_id: numericVariantId,
       quantity,
-      files: [{ type: "default", placement, url: resolveProductionUrl(imageUrl) }],
+      files: [fileEntry],
     });
   }
 
@@ -163,7 +97,7 @@ export function buildPrintfulItems(
  *   order_id: string,
  *   external_id?: string,
  *   recipient: { name, address1, address2?, city, country_code, state_code, zip, email?, phone? },
- *   items: Array<GenericItem | ShopifyLineItem>
+ *   items: Array<{ product_key, color, size, quantity, image_url, placement?, layout? }>
  * }
  *
  * Returns { ok, skipped, reason, external_id, printful_order_id }
@@ -172,9 +106,6 @@ export async function processOrder(
   order,
   {
     resolveVariantIdFn = resolveVariantId,
-    normalizePropertiesFn = normalizeProperties,
-    parseVariantTitleFn = parseVariantTitle,
-    inferProductKeyFn = inferProductKey,
     createOrderSafeFn = createOrderSafe,
     idempotency,
     getConfirmFn = () => getBooleanEnv("PRINTFUL_CONFIRM", { defaultValue: false }),
@@ -207,17 +138,10 @@ export async function processOrder(
 
   const defaultPlacement =
     String(getDefaultPlacementFn() || "front").trim() || "front";
-  const aiEnabled = getBooleanEnv("AI_ENABLED", { defaultValue: true });
-  const fallbackImageUrl = getFallbackImageUrl();
 
   const printfulItems = buildPrintfulItems(order.items || [], {
     resolveVariantIdFn,
-    normalizePropertiesFn,
-    parseVariantTitleFn,
-    inferProductKeyFn,
     defaultPlacement,
-    aiEnabled,
-    fallbackImageUrl,
   });
 
   if (!printfulItems.length) {

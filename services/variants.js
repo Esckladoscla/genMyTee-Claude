@@ -14,14 +14,6 @@ function norm(value) {
     .toLowerCase();
 }
 
-function toSlug(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 function toCompactKey(value) {
   return String(value || "")
     .trim()
@@ -219,20 +211,6 @@ function extractFirstVariantId(node) {
   return null;
 }
 
-export function normalizeProperties(properties) {
-  if (!properties) return {};
-  if (Array.isArray(properties)) {
-    const mapped = {};
-    for (const prop of properties) {
-      if (!prop?.name) continue;
-      mapped[String(prop.name)] = prop?.value;
-    }
-    return mapped;
-  }
-  if (typeof properties === "object") return properties;
-  return {};
-}
-
 export function parseVariantTitle(variantTitle) {
   if (!variantTitle) return { color: null, size: null };
   const parts = String(variantTitle)
@@ -273,22 +251,6 @@ function tryResolveWithCandidates(entry, candidates) {
   return null;
 }
 
-export function inferProductKey(lineItem, properties = {}) {
-  const byProperty = properties?.pf_product_key;
-  if (byProperty) return String(byProperty).trim();
-
-  if (lineItem?.product_handle) {
-    return toSlug(lineItem.product_handle);
-  }
-
-  const titleSlug = toSlug(lineItem?.product_title || lineItem?.title || "");
-  if (titleSlug.includes("all-over-print-mens-athletic-t-shirt")) return "all-over-print-mens-athletic-t-shirt";
-  if (titleSlug.includes("adidas-a401") || titleSlug.includes("a401")) return "adidas-a401";
-  if (titleSlug.includes("polo")) return "adidas-premium-polo-shirt";
-  if (titleSlug.includes("cap")) return "adidas-performance-cap";
-  return titleSlug || null;
-}
-
 export function resolveVariantId({ productKey, color, size, variantTitle } = {}) {
   const map = loadVariantsMap();
   const key = String(productKey || "").trim();
@@ -321,8 +283,8 @@ export function resolveVariantId({ productKey, color, size, variantTitle } = {})
   ]);
   if (resolved) return resolved;
 
-  // Some Shopify products are configured as single-variant "Default Title".
-  // In that case we still pick a valid Printful variant to avoid skipping mockup generation.
+  // Fallback for "Default Title" single-variant products.
+  // Pick any valid Printful variant to avoid skipping mockup generation.
   const variantTitleNorm = norm(variantTitle);
   const allowGenericFallback =
     !variantTitleNorm || variantTitleNorm === "default title" || variantTitleNorm === "default";

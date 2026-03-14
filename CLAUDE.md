@@ -109,7 +109,7 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `openai.js` — prompt moderation (`omni-moderation-latest`) and image generation (`gpt-image-1`), with retry logic and in-memory usage tracking
 - `storage.js` — uploads image buffers to Cloudflare R2 via S3-compatible API
 - `printful.js` — creates Printful orders and generates mockups
-- `order-processing.js` — extracted order processing core: `buildPrintfulItems()` and `processOrder()`. Accepts generic `{product_key, color, size}` items. Used by `routes/orders.js` and `routes/checkout.js`.
+- `order-processing.js` — order processing core: `buildPrintfulItems()` and `processOrder()`. Accepts `{product_key, color, size, image_url}` items. Used by `routes/orders.js` and `routes/checkout.js`.
 - `variants.js` — resolves variant titles (e.g. "Black / M") to Printful variant IDs using `data/variants-map.json`
 - `idempotency.js` — SQLite-backed (`node:sqlite` `DatabaseSync`) deduplication for orders; falls back to in-memory if file DB unavailable
 - `stripe.js` — Stripe SDK wrapper: `createCheckoutSession()`, `verifyWebhookSignature()`, `extractOrderFromSession()`
@@ -127,6 +127,7 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `auth.js` — User authentication service: SQLite-backed users, sessions, email verification (scrypt hashing, timing-safe comparison, Google OAuth2, generation quota per user, purchase bonus via `grantUserGenerationBonus()`, configurable via `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`)
 - `design-history.js` — SQLite-backed design history per user/session (tracks prompts + preview URLs, supports linking anonymous sessions to users on registration)
 - `watermark.js` — Watermark overlay on preview images + URL mapping (preview→production) for independent filenames. `storeProductionMapping()` saves the mapping, `resolveProductionUrl()` resolves via DB lookup with legacy string-replacement fallback
+- `alerts.js` — External alert dispatcher for cost-control events (email via Resend + optional webhook). Fires on threshold/circuit-breaker/daily-cap triggers. 1-hour cooldown per alert type to avoid spam. Configurable via `ALERT_EMAIL`, `ALERT_WEBHOOK_URL`
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
@@ -168,16 +169,18 @@ Services expose `_reset*ForTests()` functions to clear cached singletons between
 - Order processing is idempotent: duplicate Stripe webhook deliveries are detected via SQLite and return `skipped: true`
 - The `PRINTFUL_CONFIRM` env var controls whether Printful orders are auto-confirmed (default `false` for safety)
 - `AI_ENABLED=false` disables OpenAI calls entirely; preview returns 503
+- Global rate limit returns 429 at 100 gen/hour (configurable via `GLOBAL_RATE_LIMIT_PER_HOUR`), soft limit before circuit breaker
 - Circuit breaker auto-disables AI at >200 gen/hour (configurable via `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR`), auto-re-enables next hour
 - Daily cap auto-disables AI at >500 gen/day (configurable via `DAILY_GENERATION_CAP`), resets at midnight UTC
 - Preview and production images use independent random filenames — production URL is not derivable from preview URL
 - Successful Stripe checkout grants +10 generation bonus (configurable via `PURCHASE_GENERATION_BONUS`)
+- Authenticated users get 15 generations/month (configurable via `AUTH_GENERATIONS_LIMIT`), lazy-reset on first access each month
 
 ## Environment variables
 
 See README.md for the full list. Key ones: `OPENAI_KEY`, `R2_*` (Cloudflare storage), `PRINTFUL_API_KEY`, `AI_ENABLED`, `ALLOWED_ORIGINS`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
 
-Cost control env vars: `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR` (default 200), `DAILY_GENERATION_CAP` (default 500), `PURCHASE_GENERATION_BONUS` (default 10), `GENERATION_ALERT_THRESHOLD_PER_HOUR` (default 50).
+Cost control env vars: `GLOBAL_RATE_LIMIT_PER_HOUR` (default 100), `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR` (default 200), `DAILY_GENERATION_CAP` (default 500), `PURCHASE_GENERATION_BONUS` (default 10), `GENERATION_ALERT_THRESHOLD_PER_HOUR` (default 50), `ALERT_EMAIL` (admin email for alerts), `ALERT_WEBHOOK_URL` (Slack/generic webhook URL for alerts).
 
 ## Product positioning
 

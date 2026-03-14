@@ -13,6 +13,9 @@ const WATERMARK_ANGLE = -30;
 
 // --- URL mapping (preview → production) ---
 
+const DEFAULT_TTL_DAYS = 30;
+const CLEANUP_PROBABILITY = 0.05; // 1 in 20 inserts triggers cleanup
+
 let db;
 let currentDbPath;
 
@@ -39,14 +42,56 @@ function ensureDb() {
       production_url TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+    CREATE INDEX IF NOT EXISTS idx_url_mappings_created_at ON url_mappings(created_at);
   `);
 
   return db;
 }
 
+function getTtlDays() {
+  const env = process.env.URL_MAPPING_TTL_DAYS;
+  if (env) {
+    const n = parseInt(env, 10);
+    if (n > 0) return n;
+  }
+  return DEFAULT_TTL_DAYS;
+}
+
+/**
+ * Delete url_mappings older than TTL days.
+ * Returns the number of rows deleted.
+ */
+export function cleanupExpiredMappings() {
+  try {
+    const database = ensureDb();
+    const ttlDays = getTtlDays();
+    const cutoff = new Date(Date.now() - ttlDays * 24 * 60 * 60 * 1000).toISOString();
+    const result = database
+      .prepare("DELETE FROM url_mappings WHERE created_at < ?")
+      .run(cutoff);
+    return result.changes;
+  } catch (_) {
+    return 0;
+  }
+}
+
+/**
+ * Return the current number of rows in url_mappings.
+ */
+export function getUrlMappingCount() {
+  try {
+    const database = ensureDb();
+    const row = database.prepare("SELECT COUNT(*) as count FROM url_mappings").get();
+    return row?.count ?? 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
 /**
  * Store the mapping between a preview URL and its production URL.
  * Called after uploading both versions with independent filenames.
+ * Probabilistically triggers cleanup of expired mappings.
  */
 export function storeProductionMapping(previewUrl, productionUrl) {
   if (!previewUrl || !productionUrl) return;
@@ -58,6 +103,11 @@ export function storeProductionMapping(previewUrl, productionUrl) {
         "INSERT OR REPLACE INTO url_mappings (preview_url, production_url, created_at) VALUES (?, ?, ?)"
       )
       .run(previewUrl, productionUrl, now);
+
+    // Probabilistic cleanup: ~1 in 20 inserts
+    if (Math.random() < CLEANUP_PROBABILITY) {
+      cleanupExpiredMappings();
+    }
   } catch (_) {
     // Best-effort — fallback resolution still works
   }
@@ -139,4 +189,12 @@ export function _resetWatermarkForTests() {
   }
   db = undefined;
   currentDbPath = undefined;
+}
+
+/** Insert a mapping with a custom created_at date (for testing TTL cleanup). */
+export function _insertMappingWithDateForTests(previewUrl, productionUrl, createdAt) {
+  const database = ensureDb();
+  database
+    .prepare("INSERT OR REPLACE INTO url_mappings (preview_url, production_url, created_at) VALUES (?, ?, ?)")
+    .run(previewUrl, productionUrl, createdAt);
 }

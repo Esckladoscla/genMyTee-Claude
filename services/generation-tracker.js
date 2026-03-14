@@ -2,10 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { getDbPath, getNumberEnv } from "./env.js";
+import { sendAlert } from "./alerts.js";
 
 const DEFAULT_ALERT_THRESHOLD = 50;
 const DEFAULT_CIRCUIT_BREAKER_THRESHOLD = 200;
 const DEFAULT_DAILY_CAP = 500;
+const DEFAULT_GLOBAL_RATE_LIMIT_PER_HOUR = 100;
 
 // In-memory cache (fast path for alerting within the current process)
 let currentHourBucket = null;
@@ -84,6 +86,12 @@ function getCircuitBreakerThreshold() {
 function getDailyCap() {
   return getNumberEnv("DAILY_GENERATION_CAP", {
     defaultValue: DEFAULT_DAILY_CAP,
+  });
+}
+
+function getGlobalRateLimitPerHour() {
+  return getNumberEnv("GLOBAL_RATE_LIMIT_PER_HOUR", {
+    defaultValue: DEFAULT_GLOBAL_RATE_LIMIT_PER_HOUR,
   });
 }
 
@@ -185,10 +193,9 @@ export function recordGeneration({ logger = console } = {}) {
   const threshold = getThreshold();
   if (currentHourCount >= threshold && !alertedThisHour) {
     alertedThisHour = true;
-    logger.warn(
-      `[generation-tracker] ALERT: ${currentHourCount} generations this hour (threshold: ${threshold}). ` +
-        "Consider disabling AI via POST /api/admin/ai if this is unexpected."
-    );
+    const alertMsg = `${currentHourCount} generations this hour (threshold: ${threshold}). Consider disabling AI via POST /api/admin/ai if this is unexpected.`;
+    logger.warn(`[generation-tracker] ALERT: ${alertMsg}`);
+    sendAlert("threshold", { count: currentHourCount, limit: threshold, message: alertMsg }, { logger });
   }
 
   // Circuit breaker: auto-disable AI when hourly threshold is exceeded
@@ -196,11 +203,9 @@ export function recordGeneration({ logger = console } = {}) {
   if (currentHourCount >= circuitBreakerThreshold && !circuitBrokenThisHour) {
     circuitBrokenThisHour = true;
     process.env.AI_ENABLED = "false";
-    logger.warn(
-      `[generation-tracker] CIRCUIT BREAKER: ${currentHourCount} generations this hour ` +
-        `(limit: ${circuitBreakerThreshold}). AI auto-disabled. ` +
-        "Will auto-re-enable next hour or manually via POST /api/admin/ai."
-    );
+    const cbMsg = `${currentHourCount} generations this hour (limit: ${circuitBreakerThreshold}). AI auto-disabled. Will auto-re-enable next hour or manually via POST /api/admin/ai.`;
+    logger.warn(`[generation-tracker] CIRCUIT BREAKER: ${cbMsg}`);
+    sendAlert("circuit_breaker", { count: currentHourCount, limit: circuitBreakerThreshold, message: cbMsg }, { logger });
   }
 
   // Daily cap: auto-disable AI when daily limit is exceeded
@@ -208,11 +213,9 @@ export function recordGeneration({ logger = console } = {}) {
   if (currentDayCount >= dailyCap && !dailyCapTriggered) {
     dailyCapTriggered = true;
     process.env.AI_ENABLED = "false";
-    logger.warn(
-      `[generation-tracker] DAILY CAP: ${currentDayCount} generations today ` +
-        `(limit: ${dailyCap}). AI auto-disabled until midnight UTC. ` +
-        "Override manually via POST /api/admin/ai."
-    );
+    const dcMsg = `${currentDayCount} generations today (limit: ${dailyCap}). AI auto-disabled until midnight UTC. Override manually via POST /api/admin/ai.`;
+    logger.warn(`[generation-tracker] DAILY CAP: ${dcMsg}`);
+    sendAlert("daily_cap", { count: currentDayCount, limit: dailyCap, message: dcMsg }, { logger });
   }
 
   persistToDb(hourKey);
@@ -264,6 +267,54 @@ export function checkGenerationAllowedByTracker() {
   }
 
   return { allowed: true };
+}
+
+/**
+ * Global server-wide rate limit. Checks hourly count against GLOBAL_RATE_LIMIT_PER_HOUR.
+ * Softer than the circuit breaker — returns 429 to individual requests instead of
+ * killing AI globally. Sits below the circuit breaker threshold (default 100 vs 200).
+ */
+export function consumeGlobalRateLimit() {
+  const hourKey = getCurrentHourKey();
+  const dayKey = getCurrentDayKey();
+
+  if (hourKey !== currentHourBucket) {
+    syncFromDb(hourKey);
+  }
+  if (dayKey !== currentDayBucket) {
+    syncDayFromDb(dayKey);
+  }
+
+  const globalLimit = getGlobalRateLimitPerHour();
+
+  if (currentHourCount >= globalLimit) {
+    return {
+      allowed: false,
+      reason: "global_rate_limit",
+      message: `Límite global de generaciones alcanzado (${globalLimit}/hora). Inténtalo en unos minutos.`,
+      count: currentHourCount,
+      limit: globalLimit,
+    };
+  }
+
+  // Daily cap check (softer than circuit breaker nuclear option)
+  const dailyCap = getDailyCap();
+  if (currentDayCount >= dailyCap) {
+    return {
+      allowed: false,
+      reason: "daily_cap",
+      message: `Límite diario de generaciones alcanzado (${dailyCap}/día). Se reinicia a medianoche UTC.`,
+      count: currentDayCount,
+      limit: dailyCap,
+    };
+  }
+
+  return {
+    allowed: true,
+    count: currentHourCount,
+    limit: globalLimit,
+    remaining: globalLimit - currentHourCount,
+  };
 }
 
 export function getHourlyStats() {

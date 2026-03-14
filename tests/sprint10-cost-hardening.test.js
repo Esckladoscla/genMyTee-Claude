@@ -7,6 +7,7 @@ import {
   getHourlyStats,
   getDailyStats,
   checkGenerationAllowedByTracker,
+  consumeGlobalRateLimit,
   _resetTrackerForTests,
 } from "../services/generation-tracker.js";
 
@@ -14,7 +15,10 @@ import {
 import {
   storeProductionMapping,
   resolveProductionUrl,
+  cleanupExpiredMappings,
+  getUrlMappingCount,
   _resetWatermarkForTests,
+  _insertMappingWithDateForTests,
 } from "../services/watermark.js";
 
 // --- Auth: purchase bonus ---
@@ -56,6 +60,7 @@ test.afterEach(() => {
   delete process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR;
   delete process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR;
   delete process.env.DAILY_GENERATION_CAP;
+  delete process.env.GLOBAL_RATE_LIMIT_PER_HOUR;
   delete process.env.PURCHASE_GENERATION_BONUS;
   delete process.env.AI_ENABLED;
 });
@@ -103,6 +108,79 @@ test("independent filenames mean preview URL does not reveal production URL", ()
   // DB lookup gives correct result
   const resolved = resolveProductionUrl(previewUrl);
   assert.equal(resolved, productionUrl);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// S11-01: URL mapping cleanup/TTL
+// ═══════════════════════════════════════════════════════════════
+
+test("cleanupExpiredMappings deletes rows older than TTL", () => {
+  process.env.URL_MAPPING_TTL_DAYS = "7";
+
+  // Insert a fresh row via normal API
+  storeProductionMapping("https://r2.example.com/previews/recent.png", "https://r2.example.com/production/recent.png");
+
+  // Insert an old row (10 days ago) via test helper
+  const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+  _insertMappingWithDateForTests("https://r2.example.com/previews/old.png", "https://r2.example.com/production/old.png", tenDaysAgo);
+
+  assert.equal(getUrlMappingCount(), 2);
+
+  // Cleanup should delete the old row but keep the fresh one
+  const deleted = cleanupExpiredMappings();
+  assert.equal(deleted, 1);
+  assert.equal(getUrlMappingCount(), 1);
+
+  // The fresh mapping should still resolve
+  assert.equal(resolveProductionUrl("https://r2.example.com/previews/recent.png"), "https://r2.example.com/production/recent.png");
+
+  // The old mapping should fall back to legacy resolution
+  assert.equal(resolveProductionUrl("https://r2.example.com/previews/old.png"), "https://r2.example.com/production/old.png");
+
+  delete process.env.URL_MAPPING_TTL_DAYS;
+});
+
+test("getUrlMappingCount returns correct count", () => {
+  assert.equal(getUrlMappingCount(), 0);
+
+  storeProductionMapping("https://r2.example.com/previews/a.png", "https://r2.example.com/production/a.png");
+  assert.equal(getUrlMappingCount(), 1);
+
+  storeProductionMapping("https://r2.example.com/previews/b.png", "https://r2.example.com/production/b.png");
+  assert.equal(getUrlMappingCount(), 2);
+});
+
+test("cleanupExpiredMappings respects URL_MAPPING_TTL_DAYS env var", () => {
+  process.env.URL_MAPPING_TTL_DAYS = "365";
+
+  storeProductionMapping("https://r2.example.com/previews/x.png", "https://r2.example.com/production/x.png");
+
+  // With 365-day TTL, fresh row should not be deleted
+  const deleted = cleanupExpiredMappings();
+  assert.equal(deleted, 0);
+  assert.equal(getUrlMappingCount(), 1);
+
+  delete process.env.URL_MAPPING_TTL_DAYS;
+});
+
+test("cleanupExpiredMappings defaults to 30 days when no env var", () => {
+  delete process.env.URL_MAPPING_TTL_DAYS;
+
+  storeProductionMapping("https://r2.example.com/previews/default.png", "https://r2.example.com/production/default.png");
+
+  // Fresh row with default 30-day TTL should not be deleted
+  const deleted = cleanupExpiredMappings();
+  assert.equal(deleted, 0);
+  assert.equal(getUrlMappingCount(), 1);
+});
+
+test("cleanupExpiredMappings handles empty table", () => {
+  const deleted = cleanupExpiredMappings();
+  assert.equal(deleted, 0);
+});
+
+test("getUrlMappingCount handles empty table", () => {
+  assert.equal(getUrlMappingCount(), 0);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -361,4 +439,93 @@ test("getHourlyStats includes circuit_broken field", () => {
   const stats = getHourlyStats();
   assert.equal(typeof stats.circuit_broken, "boolean");
   assert.equal(stats.circuit_broken, false);
+});
+
+// ═══════════════════════════════════════════════════════════════
+// S10-09: Global server-wide rate limit
+// ═══════════════════════════════════════════════════════════════
+
+test("consumeGlobalRateLimit allows when under limit", () => {
+  process.env.GLOBAL_RATE_LIMIT_PER_HOUR = "10";
+  process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR = "200";
+  process.env.DAILY_GENERATION_CAP = "500";
+  process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR = "100";
+  const logger = { warn: () => {} };
+
+  recordGeneration({ logger });
+
+  const check = consumeGlobalRateLimit();
+  assert.equal(check.allowed, true);
+  assert.equal(check.count, 1);
+  assert.equal(check.limit, 10);
+  assert.equal(check.remaining, 9);
+});
+
+test("consumeGlobalRateLimit blocks at hourly limit", () => {
+  process.env.GLOBAL_RATE_LIMIT_PER_HOUR = "3";
+  process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR = "200";
+  process.env.DAILY_GENERATION_CAP = "500";
+  process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR = "100";
+  const logger = { warn: () => {} };
+
+  for (let i = 0; i < 3; i++) {
+    recordGeneration({ logger });
+  }
+
+  const check = consumeGlobalRateLimit();
+  assert.equal(check.allowed, false);
+  assert.equal(check.reason, "global_rate_limit");
+  assert.ok(check.message.includes("3/hora"));
+});
+
+test("consumeGlobalRateLimit blocks at daily cap", () => {
+  process.env.GLOBAL_RATE_LIMIT_PER_HOUR = "100";
+  process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR = "200";
+  process.env.DAILY_GENERATION_CAP = "3";
+  process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR = "100";
+  const logger = { warn: () => {} };
+
+  for (let i = 0; i < 3; i++) {
+    recordGeneration({ logger });
+  }
+
+  const check = consumeGlobalRateLimit();
+  assert.equal(check.allowed, false);
+  assert.equal(check.reason, "daily_cap");
+  assert.ok(check.message.includes("3/día"));
+});
+
+test("consumeGlobalRateLimit uses default 100 when env not set", () => {
+  delete process.env.GLOBAL_RATE_LIMIT_PER_HOUR;
+  process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR = "200";
+  process.env.DAILY_GENERATION_CAP = "500";
+  process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR = "100";
+  const logger = { warn: () => {} };
+
+  recordGeneration({ logger });
+
+  const check = consumeGlobalRateLimit();
+  assert.equal(check.allowed, true);
+  assert.equal(check.limit, 100);
+});
+
+test("consumeGlobalRateLimit fires before circuit breaker", () => {
+  process.env.GLOBAL_RATE_LIMIT_PER_HOUR = "5";
+  process.env.CIRCUIT_BREAKER_THRESHOLD_PER_HOUR = "10";
+  process.env.DAILY_GENERATION_CAP = "500";
+  process.env.GENERATION_ALERT_THRESHOLD_PER_HOUR = "100";
+  const logger = { warn: () => {} };
+
+  for (let i = 0; i < 5; i++) {
+    recordGeneration({ logger });
+  }
+
+  // Global rate limit fires first
+  const globalCheck = consumeGlobalRateLimit();
+  assert.equal(globalCheck.allowed, false);
+  assert.equal(globalCheck.reason, "global_rate_limit");
+
+  // Circuit breaker hasn't fired yet (threshold is 10)
+  const cbCheck = checkGenerationAllowedByTracker();
+  assert.equal(cbCheck.allowed, true);
 });

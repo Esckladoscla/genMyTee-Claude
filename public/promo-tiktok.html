@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0A0908;
+    font-family: 'DM Sans', sans-serif;
+    color: #F7F4F0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Top accent gradient */
+  .top-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 400px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(181,96,63,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Brand header */
+  .header {
+    padding: 60px 60px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand {
+    font-size: 22px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #F7F4F0;
+  }
+
+  .tag {
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #B5603F;
+    border: 1px solid #B5603F;
+    padding: 8px 20px;
+    border-radius: 100px;
+  }
+
+  /* Hero section */
+  .hero {
+    padding: 60px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 88px;
+    line-height: 1.0;
+    color: #F7F4F0;
+    margin-bottom: 24px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: #B5603F;
+  }
+
+  .hero-sub {
+    font-size: 22px;
+    color: #8C8680;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+
+  /* Design showcase — vertical scroll of designs */
+  .showcase {
+    padding: 50px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .design-card {
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 1;
+  }
+
+  .design-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .design-card .name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Steps section */
+  .steps {
+    padding: 20px 60px 40px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .steps-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+    margin-bottom: 30px;
+    color: #F7F4F0;
+  }
+
+  .steps-title em { font-style: italic; color: #B5603F; }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .step {
+    text-align: center;
+  }
+
+  .step-num {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #B5603F;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 auto 14px;
+  }
+
+  .step-label {
+    font-size: 16px;
+    color: #F7F4F0;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: #8C8680;
+    line-height: 1.4;
+  }
+
+  /* CTA bottom */
+  .cta-section {
+    padding: 30px 60px 60px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: #B5603F;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 22px 60px;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 0 40px rgba(181,96,63,0.5);
+    margin-bottom: 16px;
+  }
+
+  .cta-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    color: #D4896A;
+    margin-bottom: 20px;
+  }
+
+  .cta-url {
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    color: #8C8680;
+  }
+
+  .cta-url strong {
+    color: #F7F4F0;
+  }
+
+  /* Bottom accent */
+  .bottom-glow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: radial-gradient(ellipse at 50% 100%, rgba(181,96,63,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Features row */
+  .features-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 10px 60px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .feat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #8C8680;
+  }
+
+  .feat .icon {
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+  <div class="top-glow"></div>
+  <div class="bottom-glow"></div>
+
+  <div class="header">
+    <div class="brand">G E N M Y T E E</div>
+    <div class="tag">Nuevo</div>
+  </div>
+
+  <div class="hero">
+    <h1>Imagina tu<br>diseño.<br><em>Nosotros lo<br>hacemos real.</em></h1>
+    <p class="hero-sub">Describe lo que imaginas con palabras y recibe una prenda única en tu puerta.</p>
+  </div>
+
+  <div class="showcase">
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/A%20retro%20geometric%20tiger%20in%20orange%20and%20blue.png" alt="Tigre">
+      <div class="name">Tigre Retro</div>
+    </div>
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/gallery-lobo-geometrico.png" alt="Lobo">
+      <div class="name">Lobo Geométrico</div>
+    </div>
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/gallery-fenix-fuego.png" alt="Fénix">
+      <div class="name">Fénix en Llamas</div>
+    </div>
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/Madrid%20art%C3%ADstica.png" alt="Madrid">
+      <div class="name">Madrid Artística</div>
+    </div>
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/un%20astronauta%20estilo%20gibi%20conquistando%20el%20mundo%20tras%20las%20estrellas%20y%20las%20galaxiaspng.png" alt="Astronauta">
+      <div class="name">Astronauta</div>
+    </div>
+    <div class="design-card">
+      <img src="https://assets.genmytee.com/images/gallery-ola-japonesa.png" alt="Ola Japonesa">
+      <div class="name">Ola Japonesa</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="steps-title">Así de <em>fácil</em></div>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-label">Elige prenda</div>
+        <div class="step-desc">Camiseta, hoodie, tote bag...</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-label">Describe</div>
+        <div class="step-desc">Tu idea en palabras</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-label">Previsualiza</div>
+        <div class="step-desc">Ve el resultado al instante</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-label">Recibe</div>
+        <div class="step-desc">En tu puerta en 10-15 días</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-row">
+    <div class="feat"><span class="icon">✨</span> Diseño único</div>
+    <div class="feat"><span class="icon">🛡️</span> Calidad premium</div>
+    <div class="feat"><span class="icon">📦</span> Envío Europa</div>
+  </div>
+
+  <div class="cta-section">
+    <div class="cta-btn">CREAR MI PRENDA →</div>
+    <div class="cta-price">Desde €29</div>
+    <div class="cta-url"><strong>genmytee.com</strong></div>
+  </div>
+</body>
+</html>

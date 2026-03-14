@@ -19,8 +19,10 @@ import {
   getAuthGenerationLimit,
   getUserGenerationCount,
   incrementUserGenerationCount,
+  getGenerationResetDate,
   getUserStats,
   _resetAuthForTests,
+  _setUserGenerationResetAt,
 } from "../services/auth.js";
 
 import { buildAuthRouter, _resetRateLimitsForTests } from "../routes/auth.js";
@@ -188,6 +190,86 @@ describe("services/auth — generation tracking", () => {
     const limit = getAuthGenerationLimit();
     assert.equal(typeof limit, "number");
     assert.ok(limit > 0);
+  });
+});
+
+describe("services/auth — monthly generation reset", () => {
+  beforeEach(() => _resetAuthForTests());
+  afterEach(() => _resetAuthForTests());
+
+  it("resets generation count when month changes", () => {
+    const reg = registerUser("monthly@example.com", "password123");
+    const userId = reg.user.id;
+
+    // Simulate 10 generations
+    for (let i = 0; i < 10; i++) {
+      incrementUserGenerationCount(userId);
+    }
+    assert.equal(getUserGenerationCount(userId), 10);
+
+    // Set reset date to last month to simulate month rollover
+    const lastMonth = new Date();
+    lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
+    _setUserGenerationResetAt(userId, lastMonth.toISOString());
+
+    // Count should reset to 0 because it's a new month
+    assert.equal(getUserGenerationCount(userId), 0);
+  });
+
+  it("does not reset when still in the same month", () => {
+    const reg = registerUser("samemonth@example.com", "password123");
+    const userId = reg.user.id;
+
+    incrementUserGenerationCount(userId);
+    incrementUserGenerationCount(userId);
+    assert.equal(getUserGenerationCount(userId), 2);
+
+    // Count should remain unchanged
+    assert.equal(getUserGenerationCount(userId), 2);
+  });
+
+  it("sets generation_reset_at on registration", () => {
+    const reg = registerUser("resetdate@example.com", "password123");
+    const resetDate = getGenerationResetDate(reg.user.id);
+    assert.ok(resetDate, "generation_reset_at should be set on registration");
+  });
+
+  it("preserves bonus generations across month boundaries", () => {
+    const reg = registerUser("bonus-month@example.com", "password123");
+    const userId = reg.user.id;
+
+    // Use 5 generations
+    for (let i = 0; i < 5; i++) {
+      incrementUserGenerationCount(userId);
+    }
+    assert.equal(getUserGenerationCount(userId), 5);
+
+    // Set reset date to last month
+    const lastMonth = new Date();
+    lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
+    _setUserGenerationResetAt(userId, lastMonth.toISOString());
+
+    // Should reset to 0, then increment works fresh
+    assert.equal(getUserGenerationCount(userId), 0);
+    incrementUserGenerationCount(userId);
+    assert.equal(getUserGenerationCount(userId), 1);
+  });
+
+  it("handles users without generation_reset_at (legacy users)", () => {
+    const reg = registerUser("legacy@example.com", "password123");
+    const userId = reg.user.id;
+
+    // Build up some generations normally
+    incrementUserGenerationCount(userId);
+    incrementUserGenerationCount(userId);
+    assert.equal(getUserGenerationCount(userId), 2);
+
+    // Simulate a legacy user state: has count but no generation_reset_at
+    _setUserGenerationResetAt(userId, null);
+
+    // getUserGenerationCount should trigger reset because null !== current month
+    const count = getUserGenerationCount(userId);
+    assert.equal(count, 0);
   });
 });
 

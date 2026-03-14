@@ -16,12 +16,7 @@ import { getUserByEmail, grantUserGenerationBonus, getPurchaseBonusAmount } from
 import { grantSessionBonus, getSessionByEmail } from "../services/session-limiter.js";
 import { markCompleted, markFailed, startProcessing, getTracking, updateTracking, recordOrderAmount } from "../services/idempotency.js";
 import { getOrder as getPrintfulOrder } from "../services/printful.js";
-import {
-  inferProductKey,
-  normalizeProperties,
-  parseVariantTitle,
-  resolveVariantId,
-} from "../services/variants.js";
+import { resolveVariantId } from "../services/variants.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -46,9 +41,6 @@ export function buildCheckoutRouter({
   retrieveSessionFn = retrieveSession,
   processOrderFn = processOrder,
   resolveVariantIdFn = resolveVariantId,
-  normalizePropertiesFn = normalizeProperties,
-  parseVariantTitleFn = parseVariantTitle,
-  inferProductKeyFn = inferProductKey,
   createOrderSafeFn = createOrderSafe,
   idempotency = { startProcessing, markCompleted, markFailed, getTracking, updateTracking, recordOrderAmount },
   getPrintfulOrderFn = getPrintfulOrder,
@@ -255,9 +247,6 @@ export function buildCheckoutRouter({
 
       const result = await processOrderFn(orderData, {
         resolveVariantIdFn,
-        normalizePropertiesFn,
-        parseVariantTitleFn,
-        inferProductKeyFn,
         createOrderSafeFn,
         idempotency,
         getConfirmFn,

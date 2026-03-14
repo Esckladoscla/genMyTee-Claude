@@ -97,6 +97,25 @@ const EMAIL_TEMPLATES = {
     `,
   },
 
+  admin_alert: {
+    subject: "[genMyTee] {alert_type}",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+        <h1 style="color:#dc2626;font-size:24px;">{alert_type}</h1>
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:16px 0;">
+          <p style="margin:0;color:#991b1b;font-size:16px;font-weight:600;">{message}</p>
+          <p style="margin:8px 0 0;color:#991b1b;">Generaciones: <strong>{count}</strong> / {limit}</p>
+          <p style="margin:8px 0 0;color:#991b1b;font-size:13px;">Timestamp: {timestamp}</p>
+        </div>
+        <p style="color:#475569;font-size:14px;">
+          Puedes gestionar el estado de la IA desde el panel de admin: POST /api/admin/ai
+        </p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+        <p style="color:#94a3b8;font-size:12px;">genMyTee - Alerta automatica del sistema</p>
+      </div>
+    `,
+  },
+
   review_request: {
     subject: "Como quedo tu prenda? - genMyTee",
     html: `
