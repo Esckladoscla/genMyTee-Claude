@@ -128,6 +128,7 @@ All route files export a `build*Router()` factory that accepts dependency inject
 - `design-history.js` — SQLite-backed design history per user/session (tracks prompts + preview URLs, supports linking anonymous sessions to users on registration)
 - `watermark.js` — Watermark overlay on preview images + URL mapping (preview→production) for independent filenames. `storeProductionMapping()` saves the mapping, `resolveProductionUrl()` resolves via DB lookup with legacy string-replacement fallback
 - `alerts.js` — External alert dispatcher for cost-control events (email via Resend + optional webhook). Fires on threshold/circuit-breaker/daily-cap triggers. 1-hour cooldown per alert type to avoid spam. Configurable via `ALERT_EMAIL`, `ALERT_WEBHOOK_URL`
+- `browser-fingerprint.js` — Server-side browser fingerprinting for botnet detection. Hashes User-Agent + Accept-Language + Accept-Encoding + Accept headers, tracks fingerprint↔IP mappings in SQLite. Detects: known bot UAs, botnet patterns (same fingerprint from many IPs), rotation patterns (same IP with many fingerprints). Configurable via `FINGERPRINT_ENABLED`, `FP_MAX_IPS_PER_FINGERPRINT`, `FP_MAX_FINGERPRINTS_PER_IP`, `FP_WINDOW_MS`
 
 ### Data files (`data/`)
 - `variants-map.json` — primary product→color→size→variant_id mapping (loaded once, cached)
@@ -181,6 +182,8 @@ Services expose `_reset*ForTests()` functions to clear cached singletons between
 See README.md for the full list. Key ones: `OPENAI_KEY`, `R2_*` (Cloudflare storage), `PRINTFUL_API_KEY`, `AI_ENABLED`, `ALLOWED_ORIGINS`, `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`.
 
 Cost control env vars: `GLOBAL_RATE_LIMIT_PER_HOUR` (default 100), `CIRCUIT_BREAKER_THRESHOLD_PER_HOUR` (default 200), `DAILY_GENERATION_CAP` (default 500), `PURCHASE_GENERATION_BONUS` (default 10), `GENERATION_ALERT_THRESHOLD_PER_HOUR` (default 50), `ALERT_EMAIL` (admin email for alerts), `ALERT_WEBHOOK_URL` (Slack/generic webhook URL for alerts).
+
+Fingerprint env vars: `FINGERPRINT_ENABLED` (default true), `FP_MAX_IPS_PER_FINGERPRINT` (default 5), `FP_MAX_FINGERPRINTS_PER_IP` (default 10), `FP_WINDOW_MS` (default 3600000 = 1 hour).
 
 ## Product positioning
 
