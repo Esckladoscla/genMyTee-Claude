@@ -63,7 +63,11 @@ function ensureDb() {
 
 function getCurrentHourKey() {
   const now = new Date();
-  return `${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}-${now.getUTCHours()}`;
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
+  const h = String(now.getUTCHours()).padStart(2, "0");
+  return `${y}-${m}-${d}-${h}`;
 }
 
 function getCurrentDayKey() {
