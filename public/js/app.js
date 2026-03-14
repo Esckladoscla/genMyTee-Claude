@@ -33,6 +33,7 @@ function removeFromCart(id) {
 
 function updateCartBadge() {
   const badge = document.getElementById('cartBadge');
+  if (!badge) return;
   const count = getCart().length;
   if (count > 0) {
     badge.textContent = count;
@@ -46,6 +47,7 @@ function renderCartItems() {
   const list = document.getElementById('cartItemsList');
   const footer = document.getElementById('cartFooter');
   const empty = document.getElementById('cartEmpty');
+  if (!list || !footer || !empty) return;
   const cart = getCart();
 
   if (cart.length === 0) {
@@ -174,15 +176,21 @@ function renderBundleBanner() {
 
 // ── Cart drawer ──
 function openCart() {
-  document.getElementById('cartDrawer').classList.add('open');
-  document.getElementById('mainOverlay').classList.add('open');
+  const drawer = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('mainOverlay');
+  if (!drawer || !overlay) return;
+  drawer.classList.add('open');
+  overlay.classList.add('open');
   renderCartItems();
   renderBundleBanner();
 }
 
 function closeCart() {
-  document.getElementById('cartDrawer').classList.remove('open');
-  document.getElementById('mainOverlay').classList.remove('open');
+  const drawer = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('mainOverlay');
+  if (!drawer || !overlay) return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
 }
 
 // ── Mobile menu ──
@@ -194,6 +202,7 @@ function toggleMobileMenu() {
 let toastTimeout;
 function showToast(message) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add('show');
   clearTimeout(toastTimeout);

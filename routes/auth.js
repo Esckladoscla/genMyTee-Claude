@@ -332,7 +332,12 @@ export function buildAuthRouter({
       return res.status(statusMap[result.error] || 400).json({ ok: false, error: result.error });
     }
 
-    return res.json({ ok: true });
+    // Sessions were revoked — clear the auth cookie so frontend knows to re-login
+    if (result.session_revoked) {
+      res.setHeader("Set-Cookie", buildClearAuthCookie());
+    }
+
+    return res.json({ ok: true, session_revoked: !!result.session_revoked });
   });
 
   // --- Delete account (GDPR) ---
